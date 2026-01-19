@@ -370,50 +370,55 @@ export default function DoughTempTracker() {
               </div>
             ) : (
               currentBakes.slice().reverse().map((bake) => (
-                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-apple-bg flex items-center justify-center text-apple-gray font-bold text-xs flex-shrink-0">
-                      {new Date(bake.date).getDate()}
-                    </div>
-                    <div className="flex-1">
+                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+                    {/* Date - Sticky Column */}
+                    <div className="flex-none w-32 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
+                      <label className="text-[10px] text-gray-400 block mb-1">Date</label>
                       <input
                         type="date"
                         value={bake.date}
                         onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
-                        className="font-bold text-black bg-transparent outline-none w-full"
+                        className="w-full text-sm font-bold text-black bg-apple-bg rounded-lg px-2 py-2 outline-none focus:ring-1 focus:ring-apple-red"
                       />
-                      <div className="text-xs text-apple-gray flex gap-2">
-                        <span>Target: {bake.finalTemp || '--'}°</span>
-                        <span>•</span>
-                        <span>Hydration: {bake.hydration || '--'}%</span>
+                    </div>
+
+                    {[
+                      { label: 'Room', key: 'roomTemp' },
+                      { label: 'Flour', key: 'flourTemp' },
+                      { label: 'Levain', key: 'levainTemp' },
+                      { label: 'Water', key: 'waterTemp' },
+                      { label: 'Final', key: 'finalTemp' },
+                      { label: 'Mix', key: 'mixTime' },
+                      { label: 'Hydr %', key: 'hydration' }
+                    ].map((field) => (
+                      <div key={field.key} className="flex-none w-16 text-center">
+                        <label className="text-[10px] text-gray-400 block mb-1 whitespace-nowrap">{field.label}</label>
+                        <input
+                          type="number"
+                          placeholder="--"
+                          className="w-full text-center text-sm font-medium bg-apple-bg rounded-lg py-2 outline-none focus:ring-1 focus:ring-apple-red"
+                          value={bake[field.key]}
+                          onChange={(e) => updateBake(bake.id, field.key, e.target.value)}
+                        />
+                      </div>
+                    ))}
+
+                    {/* Calculated Friction */}
+                    <div className="flex-none w-16 text-center">
+                      <label className="text-[10px] text-gray-400 block mb-1 text-apple-red font-bold">Friction</label>
+                      <div className="text-sm font-bold text-apple-red bg-apple-red/10 rounded-lg py-2">
+                        {calculateSimpleFriction(bake)}
                       </div>
                     </div>
-                    <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
 
-                  {/* Mini Input Grid for History Item */}
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="text-center">
-                      <label className="text-[10px] text-gray-400 block">Room</label>
-                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
-                        value={bake.roomTemp} onChange={(e) => updateBake(bake.id, 'roomTemp', e.target.value)} />
+                    {/* Delete Action */}
+                    <div className="flex-none w-10 flex items-center justify-center pt-4">
+                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors">
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                    <div className="text-center">
-                      <label className="text-[10px] text-gray-400 block">Flour</label>
-                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
-                        value={bake.flourTemp} onChange={(e) => updateBake(bake.id, 'flourTemp', e.target.value)} />
-                    </div>
-                    <div className="text-center">
-                      <label className="text-[10px] text-gray-400 block">Water</label>
-                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
-                        value={bake.waterTemp} onChange={(e) => updateBake(bake.id, 'waterTemp', e.target.value)} />
-                    </div>
-                    <div className="text-center">
-                      <label className="text-[10px] text-gray-400 block text-apple-red font-bold">Fri.</label>
-                      <div className="text-sm font-bold text-apple-red py-1">{calculateSimpleFriction(bake)}</div>
-                    </div>
+
                   </div>
                 </div>
               ))
