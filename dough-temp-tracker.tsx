@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity } from 'lucide-react';
 
 export default function DoughTempTracker() {
   const productTypes = ['Sourdough', 'Baguette', 'Croissant', 'Pizza Dough', 'Challah', 'Focaccia'];
@@ -217,16 +217,18 @@ export default function DoughTempTracker() {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-apple-bg pb-20 font-sans">
+      <div className="max-w-md mx-auto">
 
-        {/* Product Selector */}
-        <div className="bg-white rounded-xl shadow-lg p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Package size={24} className="text-indigo-600" />
-            <h2 className="text-xl font-bold text-gray-800">Select Baking Product</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Header - Apple Music 'Library' style */}
+        <div className="pt-14 pb-4 px-5">
+          <h1 className="text-4xl font-bold text-black tracking-tight mb-1">My Bakery</h1>
+          <p className="text-apple-gray text-lg font-medium">Temperature Tracker</p>
+        </div>
+
+        {/* Product Selector - Horizontal Scroll 'Albums' style */}
+        <div className="mb-8">
+          <div className="flex overflow-x-auto gap-3 px-5 pb-4 no-scrollbar snap-x">
             {productTypes.map((product) => {
               const productData = productCounts.find(p => p.name === product);
               const isActive = product === currentProduct;
@@ -234,19 +236,21 @@ export default function DoughTempTracker() {
                 <button
                   key={product}
                   onClick={() => setCurrentProduct(product)}
-                  className={`p-4 rounded-lg border-2 transition-all ${isActive
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg transform scale-105'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-400 hover:shadow-md'
+                  className={`flex-none snap-center group relative overflow-hidden rounded-xl p-4 w-32 h-32 transition-all duration-300 ${isActive
+                    ? 'bg-apple-red shadow-lg shadow-red-200 scale-100'
+                    : 'bg-white shadow-sm hover:shadow-md'
                     }`}
                 >
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <ChefHat size={20} className={isActive ? 'text-white' : 'text-indigo-600'} />
+                  <div className={`absolute top-3 left-3 p-2 rounded-full ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                    <ChefHat size={20} className={isActive ? 'text-white' : 'text-apple-gray'} />
                   </div>
-                  <div className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-900'}`}>
-                    {product}
-                  </div>
-                  <div className={`text-xs mt-1 ${isActive ? 'text-indigo-100' : 'text-gray-500'}`}>
-                    {productData?.count || 0} sessions
+                  <div className="absolute bottom-3 left-3 text-left">
+                    <div className={`font-bold text-lg leading-tight ${isActive ? 'text-white' : 'text-black'}`}>
+                      {product}
+                    </div>
+                    <div className={`text-xs font-medium mt-1 ${isActive ? 'text-white/80' : 'text-apple-gray'}`}>
+                      {productData?.count || 0} sessions
+                    </div>
                   </div>
                 </button>
               );
@@ -254,223 +258,192 @@ export default function DoughTempTracker() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-2xl p-6 text-white">\
-          <div className="flex items-center gap-3 mb-4">
-            <Calculator size={32} />
-            <div>
-              <h2 className="text-2xl font-bold">Water Temperature Calculator</h2>
-              <p className="text-blue-100">Enter today's conditions to get your recommended water temperature</p>
-            </div>
+        {/* Calculator - 'Now Playing' Card Style */}
+        <div className="px-5 mb-8">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-xl font-bold text-black">Calculator</h2>
+            {regressionModel && (
+              <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                Model Ready
+              </span>
+            )}
           </div>
 
-          {regressionModel ? (
-            <div className="bg-white/10 backdrop-blur rounded-lg p-5">
-              <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-5">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Room (°C)</label>
-                  <input type="number" step="0.1" value={currentConditions.roomTemp}
-                    onChange={(e) => updateCurrentCondition('roomTemp', e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Flour (°C)</label>
-                  <input type="number" step="0.1" value={currentConditions.flourTemp}
-                    onChange={(e) => updateCurrentCondition('flourTemp', e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Levain (°C)</label>
-                  <input type="number" step="0.1" value={currentConditions.levainTemp}
-                    onChange={(e) => updateCurrentCondition('levainTemp', e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Mix (min)</label>
-                  <input type="number" step="0.5" value={currentConditions.mixTime}
-                    onChange={(e) => updateCurrentCondition('mixTime', e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Hydration (%)</label>
-                  <input type="number" value={currentConditions.hydration}
-                    onChange={(e) => updateCurrentCondition('hydration', e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Target (°C)</label>
-                  <input type="number" step="0.1" value={targetTemp}
-                    onChange={(e) => setTargetTemp(parseFloat(e.target.value))}
-                    className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white font-semibold" />
-                </div>
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            {/* Display Area */}
+            <div className={`p-6 text-center border-b border-gray-100 ${regressionModel ? 'bg-gradient-to-b from-white to-gray-50' : 'bg-gray-50'
+              }`}>
+              <div className="text-xs font-bold text-apple-gray uppercase tracking-wider mb-2">TARGET WATER TEMP</div>
+              <div className={`text-5xl font-bold tracking-tighter mb-2 ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'
+                }`}>
+                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                <span className="text-2xl ml-1 text-gray-400">°C</span>
               </div>
-
-              <div className="bg-white rounded-xl p-6 text-center">
-                <div className="text-gray-600 text-sm font-medium mb-2">USE THIS WATER TEMPERATURE:</div>
-                <div className="text-6xl font-bold text-blue-600 mb-2">
-                  {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '-'}°C
-                </div>
-                <div className="text-gray-500 text-sm">
-                  Based on {regressionModel.nSamples} sessions (R² = {regressionModel.rSquared.toFixed(3)})
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white/10 backdrop-blur rounded-lg p-6 text-center">
-              <AlertCircle size={48} className="mx-auto mb-3 opacity-70" />
-              <p className="text-lg font-medium">Calculator Not Available Yet</p>
-              <p className="text-blue-100 mt-2">Add at least 3 complete baking sessions below to enable prediction</p>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold text-indigo-900 mb-2">Training Your Model</h1>
-          <p className="text-gray-600 mb-4">Record your baking sessions to train the prediction model</p>
-
-          <div className={`mb-4 p-3 rounded-lg border ${regressionModel ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
-            }`}>
-            <div className="flex items-start gap-2">
-              <AlertCircle className={`mt-0.5 ${regressionModel ? 'text-green-600' : 'text-blue-600'}`} size={18} />
-              <div className="text-sm">
-                <strong>Status:</strong> {debugInfo || 'Waiting for data...'}
-                <br />
-                <strong>Sessions:</strong> {validBakesCount}
-                {validBakesCount < 3 && <span className="text-orange-600"> (Need 3+ to enable calculator)</span>}
-              </div>
-            </div>
-          </div>
-
-          {regressionModel && (
-            <div className="mt-4">
-              <button onClick={() => setShowAnalysis(!showAnalysis)}
-                className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-md font-semibold">
-                <TrendingUp size={20} /> {showAnalysis ? 'Hide' : 'Show'} Model Details
-              </button>
-
-              {showAnalysis && (
-                <div className="mt-4 p-5 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-300">
-                  <h3 className="font-bold text-xl mb-4 text-purple-900">📊 Regression Equation</h3>
-                  <div className="font-mono text-sm bg-white p-4 rounded-lg border-2 border-purple-200 mb-5 overflow-x-auto">
-                    Water = {regressionModel.intercept.toFixed(2)}
-                    {regressionModel.roomCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×Room
-                    {regressionModel.flourCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×Flour
-                    {regressionModel.levainCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×Levain
-                    {regressionModel.targetCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×Target
-                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×Mix
-                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' − '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×Hydration
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div className="p-4 bg-white rounded-lg border-2 border-purple-200">
-                      <h4 className="font-bold mb-3 text-purple-900">🔢 Coefficients</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex justify-between py-1 bg-orange-50 px-2 rounded">
-                          <span className="font-bold">🔥 Friction/min:</span>
-                          <span className="font-mono font-bold text-orange-700">{regressionModel.mixTimeCoef.toFixed(3)}</span>
-                        </li>
-                        <li className="flex justify-between py-1 bg-blue-50 px-2 rounded">
-                          <span className="font-bold">💧 Hydration/%:</span>
-                          <span className="font-mono font-bold text-blue-700">{regressionModel.hydrationCoef.toFixed(3)}</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border-2 border-purple-200">
-                      <h4 className="font-bold mb-3 text-purple-900">📈 Quality</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li><strong>R²:</strong> <span className="font-mono text-lg">{regressionModel.rSquared.toFixed(3)}</span></li>
-                        <li><strong>Fit:</strong> {
-                          regressionModel.rSquared > 0.9 ? '✅ Excellent' :
-                            regressionModel.rSquared > 0.7 ? '✅ Good' : '⚠️ Fair'
-                        }</li>
-                        <li><strong>Samples:</strong> {regressionModel.nSamples}</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+              {!regressionModel && (
+                <p className="text-xs text-apple-gray mt-2 flex items-center justify-center gap-1">
+                  <AlertCircle size={12} />
+                  Need {Math.max(0, 3 - validBakesCount)} more sessions
+                </p>
               )}
             </div>
+
+            {/* Inputs Grid */}
+            <div className="p-2">
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Room Temp', key: 'roomTemp', icon: <Wind size={14} /> },
+                  { label: 'Flour Temp', key: 'flourTemp', icon: <Package size={14} /> },
+                  { label: 'Levain Temp', key: 'levainTemp', icon: <Activity size={14} /> },
+                  { label: 'Mix Time', key: 'mixTime', isTime: true },
+                  { label: 'Target Temp', key: 'target', value: targetTemp, setter: setTargetTemp },
+                  { label: 'Hydration', key: 'hydration', isPercent: true }
+                ].map((field) => (
+                  <div key={field.label} className="bg-apple-bg rounded-xl p-3">
+                    <label className="text-xs font-medium text-apple-gray mb-1 flex items-center gap-1">
+                      {field.label}
+                    </label>
+                    <input
+                      type="number"
+                      value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
+                      onChange={(e) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
+                      className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
+                      placeholder="--"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {regressionModel && (
+              <button onClick={() => setShowAnalysis(!showAnalysis)}
+                className="w-full py-4 text-sm font-medium text-apple-red hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
+                <BarChart3 size={16} />
+                {showAnalysis ? 'Hide' : 'Show'} Model Details
+              </button>
+            )}
+          </div>
+
+          {/* Analysis Drawer */}
+          {showAnalysis && regressionModel && (
+            <div className="mt-4 bg-white rounded-2xl p-5 shadow-sm animate-in slide-in-from-top-4 fade-in duration-300">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-bold text-apple-gray uppercase mb-2">Equation Coefficients</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="bg-apple-bg p-2 rounded-lg">
+                      <span className="text-gray-500 text-xs">Room</span>
+                      <div className="font-mono font-bold">{regressionModel.roomCoef.toFixed(2)}</div>
+                    </div>
+                    <div className="bg-apple-bg p-2 rounded-lg">
+                      <span className="text-gray-500 text-xs">Flour</span>
+                      <div className="font-mono font-bold">{regressionModel.flourCoef.toFixed(2)}</div>
+                    </div>
+                    <div className="bg-apple-bg p-2 rounded-lg">
+                      <span className="text-gray-500 text-xs">Friction/Min</span>
+                      <div className="font-mono font-bold text-orange-600">{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-gray-100 flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Model Accuracy (R²)</span>
+                  <span className="font-bold text-green-600">{regressionModel.rSquared.toFixed(3)}</span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Baking Sessions (Training Data)</h2>
-            <div className="flex gap-2">
-              <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                <Download size={18} /> Export
-              </button>
-              <button onClick={addBake} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                <Plus size={18} /> Add
-              </button>
-            </div>
+        {/* History List - 'Songs' style */}
+        <div className="px-5">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xl font-bold text-black">History</h2>
+            <button onClick={addBake} className="text-apple-red hover:bg-apple-red/10 p-2 rounded-full transition-colors">
+              <Plus size={24} />
+            </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-100 border-b-2">
-                  <th className="px-3 py-2 text-left text-sm">Date</th>
-                  <th className="px-3 py-2 text-left text-sm">Room</th>
-                  <th className="px-3 py-2 text-left text-sm">Flour</th>
-                  <th className="px-3 py-2 text-left text-sm">Water</th>
-                  <th className="px-3 py-2 text-left text-sm">Levain</th>
-                  <th className="px-3 py-2 text-left text-sm">Final</th>
-                  <th className="px-3 py-2 text-left text-sm">Mix</th>
-                  <th className="px-3 py-2 text-left text-sm">Hydration</th>
-                  <th className="px-3 py-2 text-left text-sm">Friction</th>
-                  <th className="px-3 py-2 text-left text-sm"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentBakes.map((bake) => (
-                  <tr key={bake.id} className="border-b hover:bg-gray-50">
-                    <td className="px-3 py-2">
-                      <input type="date" value={bake.date} onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
-                        className="w-full px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.1" value={bake.roomTemp} onChange={(e) => updateBake(bake.id, 'roomTemp', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.1" value={bake.flourTemp} onChange={(e) => updateBake(bake.id, 'flourTemp', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.1" value={bake.waterTemp} onChange={(e) => updateBake(bake.id, 'waterTemp', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.1" value={bake.levainTemp} onChange={(e) => updateBake(bake.id, 'levainTemp', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.1" value={bake.finalTemp} onChange={(e) => updateBake(bake.id, 'finalTemp', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" step="0.5" value={bake.mixTime} onChange={(e) => updateBake(bake.id, 'mixTime', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input type="number" value={bake.hydration} onChange={(e) => updateBake(bake.id, 'hydration', e.target.value)}
-                        className="w-16 px-2 py-1 border rounded text-sm" />
-                    </td>
-                    <td className="px-3 py-2">
-                      <span className="font-semibold text-amber-700">{calculateSimpleFriction(bake)}</span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <button onClick={() => deleteBake(bake.id)} className="text-red-600 hover:text-red-800">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
+            {currentBakes.length === 0 ? (
+              <div className="p-8 text-center text-apple-gray">
+                <p>No sessions recorded</p>
+                <button onClick={addBake} className="mt-2 text-apple-red font-medium text-sm">Start your first bake</button>
+              </div>
+            ) : (
+              currentBakes.slice().reverse().map((bake) => (
+                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors group">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-apple-bg flex items-center justify-center text-apple-gray font-bold text-xs flex-shrink-0">
+                      {new Date(bake.date).getDate()}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="date"
+                        value={bake.date}
+                        onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
+                        className="font-bold text-black bg-transparent outline-none w-full"
+                      />
+                      <div className="text-xs text-apple-gray flex gap-2">
+                        <span>Target: {bake.finalTemp || '--'}°</span>
+                        <span>•</span>
+                        <span>Hydration: {bake.hydration || '--'}%</span>
+                      </div>
+                    </div>
+                    <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  {/* Mini Input Grid for History Item */}
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="text-center">
+                      <label className="text-[10px] text-gray-400 block">Room</label>
+                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
+                        value={bake.roomTemp} onChange={(e) => updateBake(bake.id, 'roomTemp', e.target.value)} />
+                    </div>
+                    <div className="text-center">
+                      <label className="text-[10px] text-gray-400 block">Flour</label>
+                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
+                        value={bake.flourTemp} onChange={(e) => updateBake(bake.id, 'flourTemp', e.target.value)} />
+                    </div>
+                    <div className="text-center">
+                      <label className="text-[10px] text-gray-400 block">Water</label>
+                      <input type="number" placeholder="--" className="w-full text-center text-sm font-medium bg-apple-bg rounded py-1 outline-none focus:ring-1 focus:ring-apple-red"
+                        value={bake.waterTemp} onChange={(e) => updateBake(bake.id, 'waterTemp', e.target.value)} />
+                    </div>
+                    <div className="text-center">
+                      <label className="text-[10px] text-gray-400 block text-apple-red font-bold">Fri.</label>
+                      <div className="text-sm font-bold text-apple-red py-1">{calculateSimpleFriction(bake)}</div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
+
+          <button onClick={exportCSV} className="w-full mt-6 py-3 text-apple-gray text-sm font-medium flex items-center justify-center gap-2 hover:text-black transition-colors">
+            <Download size={16} /> Export Data as CSV
+          </button>
         </div>
+
       </div>
     </div>
   );
 }
+
+// Simple Activity Icon component since it was missing from Lucide import in previous step content
+const ActivityIcon = ({ size, className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+  </svg>
+);
