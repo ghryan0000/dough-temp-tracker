@@ -292,7 +292,7 @@ export default function DoughTempTracker() {
 
           {/* Left Column: Jukebox Selector (Tracker Item) */}
           <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full h-56 md:h-auto md:aspect-square relative perspective-1000 my-2 md:my-8">
+            <div className="w-full h-40 md:h-auto md:aspect-square relative perspective-1000 my-1 md:my-8">
               <JukeboxSelector
                 products={products}
                 currentProduct={currentProduct}
@@ -443,8 +443,8 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
   const [editingIndex, setEditingIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
 
-  // Reduced radius for mobile compactness (was 160)
-  const radius = 120;
+  // Reduced radius for mobile compactness (was 120)
+  const radius = 90;
 
   const handleMouseDown = (e) => {
     if (editingIndex !== null) return;
@@ -535,7 +535,7 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
           <div
             key={index}
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(index); }}
-            className={`absolute top-0 left-0 right-0 mx-auto w-24 h-32 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
+            className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
               ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
               : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
               }`}
