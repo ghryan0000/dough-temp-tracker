@@ -292,7 +292,7 @@ export default function DoughTempTracker() {
 
           {/* Left Column: Jukebox Selector (Tracker Item) */}
           <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full aspect-square relative perspective-1000 my-8">
+            <div className="w-full h-56 md:h-auto md:aspect-square relative perspective-1000 my-2 md:my-8">
               <JukeboxSelector
                 products={products}
                 currentProduct={currentProduct}
@@ -443,10 +443,11 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
   const [editingIndex, setEditingIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
 
-  const radius = 160; // Distance from center
+  // Reduced radius for mobile compactness (was 160)
+  const radius = 120;
 
   const handleMouseDown = (e) => {
-    if (editingIndex !== null) return; // Don't drag while editing
+    if (editingIndex !== null) return;
     setIsDragging(true);
     setStartX(e.clientX);
     setStartRotation(rotation);
@@ -461,6 +462,30 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
   const handleMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
+    snapRotation();
+  };
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e) => {
+    if (editingIndex !== null) return;
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setStartRotation(rotation);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - startX;
+    setRotation(startRotation + (deltaX * 0.5));
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    snapRotation();
+  };
+
+  const snapRotation = () => {
     const snappedRotation = Math.round(rotation / 60) * 60;
     setRotation(snappedRotation);
 
@@ -495,6 +520,9 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{ transform: `rotateY(${rotation}deg)` }}
     >
       {products.map((product, index) => {
@@ -505,26 +533,26 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
 
         return (
           <div
-            key={index} // Use index as key since product name changes
+            key={index}
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(index); }}
-            className={`absolute top-0 left-0 right-0 mx-auto w-32 h-44 rounded-xl p-4 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
-                ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
-                : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
+            className={`absolute top-0 left-0 right-0 mx-auto w-24 h-32 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
+              ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
+              : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
               }`}
             style={{
               transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
             }}
           >
             <div className="flex justify-between items-start">
-              <div className={`p-2 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                <ChefHat size={16} />
+              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                <ChefHat size={14} />
               </div>
               {isActive && !isEditing && (
                 <button
                   onClick={(e) => { e.stopPropagation(); startEditing(index, product); }}
                   className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
                 >
-                  <Pencil size={12} />
+                  <Pencil size={10} />
                 </button>
               )}
             </div>
@@ -537,18 +565,18 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
                     onChange={(e) => setEditValue(e.target.value)}
                     onBlur={() => saveEdit(index)}
                     onKeyDown={(e) => e.key === 'Enter' && saveEdit(index)}
-                    className="w-full text-sm font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
+                    className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
                   <button onClick={(e) => { e.stopPropagation(); saveEdit(index); }} className="text-white hover:text-green-200">
-                    <Check size={14} />
+                    <Check size={12} />
                   </button>
                 </div>
               ) : (
-                <div className="font-bold text-lg leading-tight mb-1 truncate" title={product}>{product}</div>
+                <div className="font-bold text-sm leading-tight mb-1 truncate" title={product}>{product}</div>
               )}
-              <div className={`text-[10px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
+              <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
                 {count} SESSIONS
               </div>
             </div>
