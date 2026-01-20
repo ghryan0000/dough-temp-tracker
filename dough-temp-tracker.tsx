@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check } from 'lucide-react';
 
 export default function DoughTempTracker() {
-  const productTypes = ['Sourdough', 'Baguette', 'Croissant', 'Pizza Dough', 'Challah', 'Focaccia'];
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem('productNames');
+    return saved ? JSON.parse(saved) : ['Sourdough', 'Baguette', 'Croissant', 'Pizza Dough', 'Challah', 'Focaccia'];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('productNames', JSON.stringify(products));
+  }, [products]);
 
   const [currentProduct, setCurrentProduct] = useState(() => {
     const saved = localStorage.getItem('currentProduct');
@@ -23,6 +30,29 @@ export default function DoughTempTracker() {
       { id: 3, productType: 'Sourdough', date: '2026-01-17', roomTemp: 21, flourTemp: 19, waterTemp: 32, levainTemp: 23, finalTemp: 25, mixTime: 5, hydration: 70 }
     ];
   });
+
+  const handleRenameProduct = (index, newName) => {
+    if (!newName.trim()) return;
+
+    const oldName = products[index];
+    if (oldName === newName) return;
+
+    // 1. Update product list
+    const newProducts = [...products];
+    newProducts[index] = newName;
+    setProducts(newProducts);
+
+    // 2. Update all bakes with old product name
+    const updatedBakes = bakes.map(bake =>
+      bake.productType === oldName ? { ...bake, productType: newName } : bake
+    );
+    setBakes(updatedBakes);
+
+    // 3. Update current selection if needed
+    if (currentProduct === oldName) {
+      setCurrentProduct(newName);
+    }
+  };
 
   const [regressionModel, setRegressionModel] = useState(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
@@ -211,97 +241,103 @@ export default function DoughTempTracker() {
   ).length;
 
   const currentBakes = bakes.filter(b => b.productType === currentProduct);
-  const productCounts = productTypes.map(product => ({
+  const productCounts = products.map(product => ({
     name: product,
     count: bakes.filter(b => b.productType === product && b.roomTemp !== '').length
   }));
 
+  // Jukebox rotation state
+  const [rotation, setRotation] = useState(0);
+
+  // Sync rotation with current product change (if clicked from outside or loaded)
+  useEffect(() => {
+    const index = products.indexOf(currentProduct);
+    if (index !== -1) {
+      setRotation(index * -60);
+    }
+  }, [currentProduct]);
+
+  const handleJukeboxRotate = (direction) => {
+    const newRotation = rotation + (direction === 'left' ? 60 : -60);
+    setRotation(newRotation);
+
+    // Determine closest product based on new rotation
+    // normalize rotation to positive 0-360 range equivalent
+    let normalized = Math.abs(newRotation / 60) % 6;
+    if (newRotation > 0) normalized = (6 - normalized) % 6;
+
+    const productIndex = Math.round(normalized) % 6;
+    setCurrentProduct(products[productIndex]);
+  };
+
   return (
-    <div className="min-h-screen bg-apple-bg pb-20 font-sans">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-apple-bg pt-6 pb-20 font-sans overflow-x-hidden">
+      <div className="max-w-4xl mx-auto px-4">
 
-        {/* Header - Apple Music 'Library' style */}
-        <div className="pt-14 pb-4 px-5">
-          <h1 className="text-4xl font-bold text-black tracking-tight mb-1">My Bakery</h1>
-          <p className="text-apple-gray text-lg font-medium">Temperature Tracker</p>
+        {/* Header - Compact */}
+        <div className="flex items-baseline justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-black tracking-tight">My Bakery</h1>
+            <p className="text-apple-gray text-xs font-medium">Temperature Tracker</p>
+          </div>
+          {regressionModel && (
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+              <Activity size={10} /> Model Ready
+            </span>
+          )}
         </div>
 
-        {/* Product Selector - Horizontal Scroll 'Albums' style */}
-        <div className="mb-8">
-          <div className="flex overflow-x-auto gap-3 px-5 pb-4 no-scrollbar snap-x">
-            {productTypes.map((product) => {
-              const productData = productCounts.find(p => p.name === product);
-              const isActive = product === currentProduct;
-              return (
-                <button
-                  key={product}
-                  onClick={() => setCurrentProduct(product)}
-                  className={`flex-none snap-center group relative overflow-hidden rounded-xl p-4 w-32 h-32 transition-all duration-300 ${isActive
-                    ? 'bg-apple-red shadow-lg shadow-red-200 scale-100'
-                    : 'bg-white shadow-sm hover:shadow-md'
-                    }`}
-                >
-                  <div className={`absolute top-3 left-3 p-2 rounded-full ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                    <ChefHat size={20} className={isActive ? 'text-white' : 'text-apple-gray'} />
-                  </div>
-                  <div className="absolute bottom-3 left-3 text-left">
-                    <div className={`font-bold text-lg leading-tight ${isActive ? 'text-white' : 'text-black'}`}>
-                      {product}
-                    </div>
-                    <div className={`text-xs font-medium mt-1 ${isActive ? 'text-white/80' : 'text-apple-gray'}`}>
-                      {productData?.count || 0} sessions
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
 
-        {/* Calculator - 'Now Playing' Card Style */}
-        <div className="px-5 mb-8">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-xl font-bold text-black">Calculator</h2>
-            {regressionModel && (
-              <span className="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                Model Ready
-              </span>
-            )}
+          {/* Left Column: Jukebox Selector (Tracker Item) */}
+          <div className="md:col-span-5 flex flex-col items-center">
+            <div className="w-full aspect-square relative perspective-1000 my-8">
+              <JukeboxSelector
+                products={products}
+                currentProduct={currentProduct}
+                rotation={rotation}
+                setRotation={setRotation}
+                setCurrentProduct={setCurrentProduct}
+                productCounts={productCounts}
+                onRename={handleRenameProduct}
+              />
+            </div>
+            <p className="text-xs text-apple-gray mt-8 text-center">
+              Drag or scroll to rotate • Click pencil to rename
+            </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            {/* Display Area */}
-            <div className={`p-6 text-center border-b border-gray-100 ${regressionModel ? 'bg-gradient-to-b from-white to-gray-50' : 'bg-gray-50'
-              }`}>
-              <div className="text-xs font-bold text-apple-gray uppercase tracking-wider mb-2">TARGET WATER TEMP</div>
-              <div className={`text-5xl font-bold tracking-tighter mb-2 ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'
-                }`}>
-                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                <span className="text-2xl ml-1 text-gray-400">°C</span>
-              </div>
-              {!regressionModel && (
-                <p className="text-xs text-apple-gray mt-2 flex items-center justify-center gap-1">
-                  <AlertCircle size={12} />
-                  Need {Math.max(0, 3 - validBakesCount)} more sessions
-                </p>
-              )}
+          {/* Right Column: Calculator */}
+          <div className="md:col-span-7 bg-white rounded-2xl shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-black flex items-center gap-2">
+                <Calculator size={18} className="text-apple-red" /> Calculator
+              </h2>
             </div>
 
-            {/* Inputs Grid */}
-            <div className="p-2">
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'Room Temp', key: 'roomTemp', icon: <Wind size={14} /> },
-                  { label: 'Flour Temp', key: 'flourTemp', icon: <Package size={14} /> },
-                  { label: 'Levain Temp', key: 'levainTemp', icon: <Activity size={14} /> },
-                  { label: 'Mix Time', key: 'mixTime', isTime: true },
-                  { label: 'Target Temp', key: 'target', value: targetTemp, setter: setTargetTemp },
-                  { label: 'Hydration', key: 'hydration', isPercent: true }
-                ].map((field) => (
-                  <div key={field.label} className="bg-apple-bg rounded-xl p-3">
-                    <label className="text-xs font-medium text-apple-gray mb-1 flex items-center gap-1">
-                      {field.label}
-                    </label>
+            {/* Result Display */}
+            <div className={`p-4 rounded-xl text-center mb-6 transition-all ${regressionModel ? 'bg-gradient-to-br from-apple-red/5 to-white border border-apple-red/10' : 'bg-gray-50'}`}>
+              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">TARGET WATER TEMP</div>
+              <div className={`text-4xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                <span className="text-lg ml-0.5 font-medium text-gray-400">°C</span>
+              </div>
+            </div>
+
+            {/* Inputs with Units */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Room Temp', key: 'roomTemp', unit: '°C' },
+                { label: 'Flour Temp', key: 'flourTemp', unit: '°C' },
+                { label: 'Levain Temp', key: 'levainTemp', unit: '°C' },
+                { label: 'Mix Time', key: 'mixTime', unit: 'min' },
+                { label: 'Target Temp', key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
+                { label: 'Hydration', key: 'hydration', unit: '%' }
+              ].map((field) => (
+                <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-2 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+                  <label className="text-[10px] font-semibold text-apple-gray absolute top-1.5 left-3">{field.label}</label>
+                  <div className="flex items-baseline mt-4">
                     <input
                       type="number"
                       value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
@@ -309,77 +345,45 @@ export default function DoughTempTracker() {
                       className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
                       placeholder="--"
                     />
+                    <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-
-            {regressionModel && (
-              <button onClick={() => setShowAnalysis(!showAnalysis)}
-                className="w-full py-4 text-sm font-medium text-apple-red hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
-                <BarChart3 size={16} />
-                {showAnalysis ? 'Hide' : 'Show'} Model Details
-              </button>
-            )}
           </div>
-
-          {/* Analysis Drawer */}
-          {showAnalysis && regressionModel && (
-            <div className="mt-4 bg-white rounded-2xl p-5 shadow-sm animate-in slide-in-from-top-4 fade-in duration-300">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-xs font-bold text-apple-gray uppercase mb-2">Equation Coefficients</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="bg-apple-bg p-2 rounded-lg">
-                      <span className="text-gray-500 text-xs">Room</span>
-                      <div className="font-mono font-bold">{regressionModel.roomCoef.toFixed(2)}</div>
-                    </div>
-                    <div className="bg-apple-bg p-2 rounded-lg">
-                      <span className="text-gray-500 text-xs">Flour</span>
-                      <div className="font-mono font-bold">{regressionModel.flourCoef.toFixed(2)}</div>
-                    </div>
-                    <div className="bg-apple-bg p-2 rounded-lg">
-                      <span className="text-gray-500 text-xs">Friction/Min</span>
-                      <div className="font-mono font-bold text-orange-600">{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-gray-100 flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Model Accuracy (R²)</span>
-                  <span className="font-bold text-green-600">{regressionModel.rSquared.toFixed(3)}</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* History List - 'Songs' style */}
-        <div className="px-5">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xl font-bold text-black">History</h2>
-            <button onClick={addBake} className="text-apple-red hover:bg-apple-red/10 p-2 rounded-full transition-colors">
-              <Plus size={24} />
-            </button>
+        {/* History List */}
+        <div className="px-1">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-black">History ({currentProduct})</h2>
+            <div className="flex gap-2">
+              <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
+                <Download size={12} /> Export CSV
+              </button>
+              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1">
+                <Plus size={14} /> Add Session
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
             {currentBakes.length === 0 ? (
               <div className="p-8 text-center text-apple-gray">
-                <p>No sessions recorded</p>
-                <button onClick={addBake} className="mt-2 text-apple-red font-medium text-sm">Start your first bake</button>
+                <p className="text-sm">No sessions recorded for {currentProduct}</p>
               </div>
             ) : (
               currentBakes.slice().reverse().map((bake) => (
                 <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {/* Date - Sticky Column */}
-                    <div className="flex-none w-32 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
-                      <label className="text-[10px] text-gray-400 block mb-1">Date</label>
+                    {/* Date */}
+                    <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
+                      <label className="text-[9px] text-gray-400 block mb-0.5">Date</label>
                       <input
                         type="date"
                         value={bake.date}
                         onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
-                        className="w-full text-sm font-bold text-black bg-apple-bg rounded-lg px-2 py-2 outline-none focus:ring-1 focus:ring-apple-red"
+                        className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
                       />
                     </div>
 
@@ -392,30 +396,30 @@ export default function DoughTempTracker() {
                       { label: 'Mix', key: 'mixTime' },
                       { label: 'Hydr %', key: 'hydration' }
                     ].map((field) => (
-                      <div key={field.key} className="flex-none w-16 text-center">
-                        <label className="text-[10px] text-gray-400 block mb-1 whitespace-nowrap">{field.label}</label>
+                      <div key={field.key} className="flex-none w-14 text-center">
+                        <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
                         <input
                           type="number"
                           placeholder="--"
-                          className="w-full text-center text-sm font-medium bg-apple-bg rounded-lg py-2 outline-none focus:ring-1 focus:ring-apple-red"
+                          className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
                           value={bake[field.key]}
                           onChange={(e) => updateBake(bake.id, field.key, e.target.value)}
                         />
                       </div>
                     ))}
 
-                    {/* Calculated Friction */}
-                    <div className="flex-none w-16 text-center">
-                      <label className="text-[10px] text-gray-400 block mb-1 text-apple-red font-bold">Friction</label>
-                      <div className="text-sm font-bold text-apple-red bg-apple-red/10 rounded-lg py-2">
+                    {/* Friction */}
+                    <div className="flex-none w-14 text-center">
+                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">Friction</label>
+                      <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
                         {calculateSimpleFriction(bake)}
                       </div>
                     </div>
 
-                    {/* Delete Action */}
-                    <div className="flex-none w-10 flex items-center justify-center pt-4">
+                    {/* Delete */}
+                    <div className="flex-none w-8 flex items-center justify-center pt-3">
                       <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors">
-                        <Trash2 size={18} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
 
@@ -424,13 +428,133 @@ export default function DoughTempTracker() {
               ))
             )}
           </div>
-
-          <button onClick={exportCSV} className="w-full mt-6 py-3 text-apple-gray text-sm font-medium flex items-center justify-center gap-2 hover:text-black transition-colors">
-            <Download size={16} /> Export Data as CSV
-          </button>
         </div>
 
       </div>
+    </div>
+  );
+}
+
+// Jukebox Carousel Component
+function JukeboxSelector({ products, currentProduct, rotation, setRotation, setCurrentProduct, productCounts, onRename }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startRotation, setStartRotation] = useState(0);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editValue, setEditValue] = useState('');
+
+  const radius = 160; // Distance from center
+
+  const handleMouseDown = (e) => {
+    if (editingIndex !== null) return; // Don't drag while editing
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setStartRotation(rotation);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - startX;
+    setRotation(startRotation + (deltaX * 0.5));
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const snappedRotation = Math.round(rotation / 60) * 60;
+    setRotation(snappedRotation);
+
+    let normalizedIndex = Math.round(-snappedRotation / 60) % 6;
+    if (normalizedIndex < 0) normalizedIndex += 6;
+    setCurrentProduct(products[normalizedIndex]);
+  };
+
+  const handleFaceClick = (index) => {
+    if (editingIndex !== null) return;
+    const targetRotation = index * -60;
+    setRotation(targetRotation);
+    setCurrentProduct(products[index]);
+  };
+
+  const startEditing = (index, currentName) => {
+    setEditingIndex(index);
+    setEditValue(currentName);
+  };
+
+  const saveEdit = (index) => {
+    if (editValue.trim() && editValue !== products[index]) {
+      onRename(index, editValue);
+    }
+    setEditingIndex(null);
+  };
+
+  return (
+    <div
+      className="relative w-full h-full preserve-3d transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing select-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      style={{ transform: `rotateY(${rotation}deg)` }}
+    >
+      {products.map((product, index) => {
+        const angle = index * 60;
+        const isActive = product === currentProduct;
+        const count = productCounts.find(p => p.name === product)?.count || 0;
+        const isEditing = editingIndex === index;
+
+        return (
+          <div
+            key={index} // Use index as key since product name changes
+            onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(index); }}
+            className={`absolute top-0 left-0 right-0 mx-auto w-32 h-44 rounded-xl p-4 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
+                ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
+                : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
+              }`}
+            style={{
+              transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
+            }}
+          >
+            <div className="flex justify-between items-start">
+              <div className={`p-2 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                <ChefHat size={16} />
+              </div>
+              {isActive && !isEditing && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); startEditing(index, product); }}
+                  className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
+                >
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
+
+            <div>
+              {isEditing ? (
+                <div className="flex items-center gap-1 mb-1">
+                  <input
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => saveEdit(index)}
+                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(index)}
+                    className="w-full text-sm font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <button onClick={(e) => { e.stopPropagation(); saveEdit(index); }} className="text-white hover:text-green-200">
+                    <Check size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="font-bold text-lg leading-tight mb-1 truncate" title={product}>{product}</div>
+              )}
+              <div className={`text-[10px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
+                {count} SESSIONS
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

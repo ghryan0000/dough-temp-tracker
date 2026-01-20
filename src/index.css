@@ -27,3 +27,40 @@ body {
   scrollbar-width: none;
   /* Firefox */
 }
+
+/* 3D Utilities for Jukebox */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg) translateZ(150px);
+}
+
+.rotate-y-60 {
+  transform: rotateY(60deg) translateZ(150px);
+}
+
+.rotate-y-120 {
+  transform: rotateY(120deg) translateZ(150px);
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg) translateZ(150px);
+}
+
+.rotate-y-240 {
+  transform: rotateY(240deg) translateZ(150px);
+}
+
+.rotate-y-300 {
+  transform: rotateY(300deg) translateZ(150px);
+}
