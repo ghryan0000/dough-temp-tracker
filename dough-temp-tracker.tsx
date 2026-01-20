@@ -316,17 +316,8 @@ export default function DoughTempTracker() {
               </h2>
             </div>
 
-            {/* Result Display */}
-            <div className={`p-4 rounded-xl text-center mb-6 transition-all ${regressionModel ? 'bg-gradient-to-br from-apple-red/5 to-white border border-apple-red/10' : 'bg-gray-50'}`}>
-              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">TARGET WATER TEMP</div>
-              <div className={`text-4xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
-                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                <span className="text-lg ml-0.5 font-medium text-gray-400">°C</span>
-              </div>
-            </div>
-
             {/* Inputs with Units */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {[
                 { label: 'Room Temp', key: 'roomTemp', unit: '°C' },
                 { label: 'Flour Temp', key: 'flourTemp', unit: '°C' },
@@ -349,6 +340,15 @@ export default function DoughTempTracker() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Result Display */}
+            <div className={`p-4 rounded-xl text-center transition-all ${regressionModel ? 'bg-gradient-to-br from-apple-red/5 to-white border border-apple-red/10' : 'bg-gray-50'}`}>
+              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">TARGET WATER TEMP</div>
+              <div className={`text-4xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                <span className="text-lg ml-0.5 font-medium text-gray-400">°C</span>
+              </div>
             </div>
           </div>
         </div>
