@@ -303,7 +303,7 @@ export default function DoughTempTracker() {
                 onRename={handleRenameProduct}
               />
             </div>
-            <p className="text-xs text-apple-gray mt-8 text-center">
+            <p className="text-xs text-apple-gray mt-2 text-center">
               Drag or scroll to rotate • Click pencil to rename
             </p>
           </div>
