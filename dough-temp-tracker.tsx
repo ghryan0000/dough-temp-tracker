@@ -337,8 +337,8 @@ export default function DoughTempTracker() {
         {/* Header - Compact */}
         <div className="flex items-baseline justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-black tracking-tight">My Bakery</h1>
-            <p className="text-apple-gray text-xs font-medium">Temperature Tracker</p>
+            <h1 className="text-2xl font-bold text-black tracking-tight">Ryan's Bakery</h1>
+            <p className="text-apple-gray text-xs font-medium">Water Temperature Tracker</p>
           </div>
           {regressionModel && (
             <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
@@ -435,7 +435,7 @@ export default function DoughTempTracker() {
           <div className="md:col-span-7 bg-white rounded-2xl shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-black flex items-center gap-2">
-                <Calculator size={18} className="text-apple-red" /> Calculator
+                <Calculator size={18} className="text-apple-red" /> Target Water Temp Calculator
               </h2>
             </div>
 
@@ -480,7 +480,7 @@ export default function DoughTempTracker() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <BarChart3 size={16} className="text-purple-600" />
-                    <span className="text-sm font-bold text-purple-900">Training: {currentProduct?.name}</span>
+                    <span className="text-sm font-bold text-purple-900">MLR Training: {currentProduct?.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
@@ -565,7 +565,7 @@ export default function DoughTempTracker() {
         {/* History List */}
         <div className="px-1">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-black">History ({currentProduct?.name})</h2>
+            <h2 className="text-lg font-bold text-black">MLR Training History ({currentProduct?.name})</h2>
             <div className="flex gap-2">
               <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
                 <Download size={12} /> Export CSV
