@@ -1,57 +1,130 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown } from 'lucide-react';
 
 export default function DoughTempTracker() {
+  // Product colors for dynamic assignment
+  const productColors = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
+
+  // Data migration and initialization
   const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('productNames');
-    return saved ? JSON.parse(saved) : ['Sourdough', 'Baguette', 'Croissant', 'Pizza Dough', 'Challah', 'Focaccia'];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('productNames', JSON.stringify(products));
-  }, [products]);
-
-  const [currentProduct, setCurrentProduct] = useState(() => {
-    const saved = localStorage.getItem('currentProduct');
-    return saved || 'Sourdough';
-  });
-
-  const [targetTemp, setTargetTemp] = useState(25);
-  const [bakes, setBakes] = useState(() => {
-    const saved = localStorage.getItem('bakesData');
-    if (saved) {
-      const parsedBakes = JSON.parse(saved);
-      // Data migration: add productType to existing bakes
-      return parsedBakes.map(bake => ({ ...bake, productType: bake.productType || 'Sourdough' }));
+    // Check for new format first
+    const newFormat = localStorage.getItem('products-v2');
+    if (newFormat) {
+      return JSON.parse(newFormat);
     }
+
+    // Migrate from old format
+    const oldFormat = localStorage.getItem('productNames');
+    if (oldFormat) {
+      const productNames = JSON.parse(oldFormat);
+      const migratedProducts = productNames.map((name, index) => ({
+        id: index + 1,
+        name: name,
+        color: productColors[index % productColors.length]
+      }));
+      localStorage.setItem('products-v2', JSON.stringify(migratedProducts));
+      return migratedProducts;
+    }
+
+    // Default products
     return [
-      { id: 1, productType: 'Sourdough', date: '2026-01-15', roomTemp: 22, flourTemp: 20, waterTemp: 30, levainTemp: 24, finalTemp: 25, mixTime: 5, hydration: 70 },
-      { id: 2, productType: 'Sourdough', date: '2026-01-16', roomTemp: 23, flourTemp: 21, waterTemp: 28, levainTemp: 25, finalTemp: 24.5, mixTime: 6, hydration: 75 },
-      { id: 3, productType: 'Sourdough', date: '2026-01-17', roomTemp: 21, flourTemp: 19, waterTemp: 32, levainTemp: 23, finalTemp: 25, mixTime: 5, hydration: 70 }
+      { id: 1, name: 'Sourdough', color: 'bg-amber-500' },
+      { id: 2, name: 'Baguette', color: 'bg-orange-500' },
+      { id: 3, name: 'Croissant', color: 'bg-red-500' },
+      { id: 4, name: 'Pizza Dough', color: 'bg-pink-500' },
+      { id: 5, name: 'Challah', color: 'bg-purple-500' },
+      { id: 6, name: 'Focaccia', color: 'bg-indigo-500' }
     ];
   });
 
-  const handleRenameProduct = (index, newName) => {
-    if (!newName.trim()) return;
+  useEffect(() => {
+    localStorage.setItem('products-v2', JSON.stringify(products));
+  }, [products]);
 
-    const oldName = products[index];
-    if (oldName === newName) return;
+  const [selectedProductId, setSelectedProductId] = useState(() => {
+    const saved = localStorage.getItem('selectedProductId-v2');
+    if (saved) return parseInt(saved);
 
-    // 1. Update product list
-    const newProducts = [...products];
-    newProducts[index] = newName;
-    setProducts(newProducts);
-
-    // 2. Update all bakes with old product name
-    const updatedBakes = bakes.map(bake =>
-      bake.productType === oldName ? { ...bake, productType: newName } : bake
-    );
-    setBakes(updatedBakes);
-
-    // 3. Update current selection if needed
-    if (currentProduct === oldName) {
-      setCurrentProduct(newName);
+    // Migrate from old format
+    const oldProduct = localStorage.getItem('currentProduct');
+    if (oldProduct && products.length > 0) {
+      const found = products.find(p => p.name === oldProduct);
+      return found ? found.id : products[0].id;
     }
+    return products[0]?.id || 1;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('selectedProductId-v2', selectedProductId.toString());
+  }, [selectedProductId]);
+
+  const [targetTemp, setTargetTemp] = useState(25);
+  const [bakes, setBakes] = useState(() => {
+    // Check for new format first
+    const newFormat = localStorage.getItem('bakes-v2');
+    if (newFormat) {
+      return JSON.parse(newFormat);
+    }
+
+    // Migrate from old format
+    const oldFormat = localStorage.getItem('bakesData');
+    if (oldFormat) {
+      const oldBakes = JSON.parse(oldFormat);
+      const migratedBakes = oldBakes.map(bake => {
+        const product = products.find(p => p.name === bake.productType);
+        const { productType, ...rest } = bake;
+        return { ...rest, productId: product ? product.id : 1 };
+      });
+      localStorage.setItem('bakes-v2', JSON.stringify(migratedBakes));
+      return migratedBakes;
+    }
+
+    // Default bakes
+    return [
+      { id: 1, productId: 1, date: '2026-01-15', roomTemp: 22, flourTemp: 20, waterTemp: 30, levainTemp: 24, finalTemp: 25, mixTime: 5, hydration: 70 },
+      { id: 2, productId: 1, date: '2026-01-16', roomTemp: 23, flourTemp: 21, waterTemp: 28, levainTemp: 25, finalTemp: 24.5, mixTime: 6, hydration: 75 },
+      { id: 3, productId: 1, date: '2026-01-17', roomTemp: 21, flourTemp: 19, waterTemp: 32, levainTemp: 23, finalTemp: 25, mixTime: 5, hydration: 70 }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bakes-v2', JSON.stringify(bakes));
+  }, [bakes]);
+
+  // Product management
+  const [showProductManager, setShowProductManager] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
+
+  const addProduct = () => {
+    if (!newProductName.trim()) return;
+    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    const newProduct = {
+      id: newId,
+      name: newProductName.trim(),
+      color: productColors[products.length % productColors.length]
+    };
+    setProducts([...products, newProduct]);
+    setNewProductName('');
+  };
+
+  const deleteProduct = (id) => {
+    if (products.length === 1) {
+      alert('Cannot delete the last product!');
+      return;
+    }
+    setProducts(products.filter(p => p.id !== id));
+    setBakes(bakes.filter(b => b.productId !== id));
+    if (selectedProductId === id) {
+      setSelectedProductId(products.filter(p => p.id !== id)[0].id);
+    }
+  };
+
+  const handleRenameProduct = (id, newName) => {
+    if (!newName.trim()) return;
+    const product = products.find(p => p.id === id);
+    if (!product || product.name === newName) return;
+
+    setProducts(products.map(p => p.id === id ? { ...p, name: newName } : p));
   };
 
   const [regressionModel, setRegressionModel] = useState(null);
@@ -65,18 +138,9 @@ export default function DoughTempTracker() {
     hydration: 70
   });
 
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem('bakesData', JSON.stringify(bakes));
-  }, [bakes]);
-
-  useEffect(() => {
-    localStorage.setItem('currentProduct', currentProduct);
-  }, [currentProduct]);
-
   const calculateRegression = () => {
     const validBakes = bakes.filter(b =>
-      b.productType === currentProduct &&
+      b.productId === selectedProductId &&
       b.roomTemp !== '' && b.flourTemp !== '' && b.waterTemp !== '' &&
       b.levainTemp !== '' && b.finalTemp !== '' && b.mixTime !== '' && b.hydration !== ''
     );
@@ -188,12 +252,12 @@ export default function DoughTempTracker() {
   useEffect(() => {
     const model = calculateRegression();
     setRegressionModel(model);
-  }, [bakes]);
+  }, [bakes, selectedProductId]);
 
   const addBake = () => {
     const newId = bakes.length > 0 ? Math.max(...bakes.map(b => b.id)) + 1 : 1;
     setBakes([...bakes, {
-      id: newId, productType: currentProduct, date: new Date().toISOString().split('T')[0], roomTemp: '', flourTemp: '',
+      id: newId, productId: selectedProductId, date: new Date().toISOString().split('T')[0], roomTemp: '', flourTemp: '',
       waterTemp: '', levainTemp: '', finalTemp: '', mixTime: '', hydration: ''
     }]);
   };
@@ -222,52 +286,48 @@ export default function DoughTempTracker() {
   );
 
   const exportCSV = () => {
-    const currentBakes = bakes.filter(b => b.productType === currentProduct);
+    const product = products.find(p => p.id === selectedProductId);
+    const productBakes = bakes.filter(b => b.productId === selectedProductId);
     const headers = ['Date', 'Product', 'Room', 'Flour', 'Water', 'Levain', 'Final', 'Mix', 'Hydration', 'Friction'];
-    const rows = currentBakes.map(b => [b.date, b.productType, b.roomTemp, b.flourTemp, b.waterTemp, b.levainTemp, b.finalTemp, b.mixTime, b.hydration, calculateSimpleFriction(b)]);
+    const rows = productBakes.map(b => [b.date, product?.name, b.roomTemp, b.flourTemp, b.waterTemp, b.levainTemp, b.finalTemp, b.mixTime, b.hydration, calculateSimpleFriction(b)]);
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dough-data-${currentProduct}.csv`;
+    a.download = `${product?.name.replace(/\s+/g, '_')}_data.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
-  const validBakesCount = bakes.filter(b =>
-    b.productType === currentProduct &&
-    b.roomTemp !== '' && b.flourTemp !== '' && b.waterTemp !== '' &&
-    b.levainTemp !== '' && b.finalTemp !== '' && b.mixTime !== '' && b.hydration !== ''
-  ).length;
-
-  const currentBakes = bakes.filter(b => b.productType === currentProduct);
+  const currentProduct = products.find(p => p.id === selectedProductId);
+  const currentBakes = bakes.filter(b => b.productId === selectedProductId);
   const productCounts = products.map(product => ({
-    name: product,
-    count: bakes.filter(b => b.productType === product && b.roomTemp !== '').length
+    id: product.id,
+    name: product.name,
+    count: bakes.filter(b => b.productId === product.id && b.roomTemp !== '').length
   }));
 
   // Jukebox rotation state
   const [rotation, setRotation] = useState(0);
 
-  // Sync rotation with current product change (if clicked from outside or loaded)
+  // Sync rotation with current product change
   useEffect(() => {
-    const index = products.indexOf(currentProduct);
+    const index = products.findIndex(p => p.id === selectedProductId);
     if (index !== -1) {
       setRotation(index * -60);
     }
-  }, [currentProduct]);
+  }, [selectedProductId, products]);
 
   const handleJukeboxRotate = (direction) => {
     const newRotation = rotation + (direction === 'left' ? 60 : -60);
     setRotation(newRotation);
 
-    // Determine closest product based on new rotation
-    // normalize rotation to positive 0-360 range equivalent
-    let normalized = Math.abs(newRotation / 60) % 6;
-    if (newRotation > 0) normalized = (6 - normalized) % 6;
+    let normalized = Math.abs(newRotation / 60) % products.length;
+    if (newRotation > 0) normalized = (products.length - normalized) % products.length;
 
-    const productIndex = Math.round(normalized) % 6;
-    setCurrentProduct(products[productIndex]);
+    const productIndex = Math.round(normalized) % products.length;
+    setSelectedProductId(products[productIndex].id);
   };
 
   return (
@@ -287,6 +347,69 @@ export default function DoughTempTracker() {
           )}
         </div>
 
+        {/* Product Manager - Collapsible */}
+        <div className="mb-4">
+          <button
+            onClick={() => setShowProductManager(!showProductManager)}
+            className="w-full flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+          >
+            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Package size={16} className="text-purple-600" />
+              Manage Products
+            </span>
+            <ChevronDown className={`transform transition-transform text-gray-400 ${showProductManager ? 'rotate-180' : ''}`} size={18} />
+          </button>
+
+          {showProductManager && (
+            <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+              {/* Add Product */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newProductName}
+                    onChange={(e) => setNewProductName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addProduct()}
+                    placeholder="e.g., Croissant"
+                    className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
+                  />
+                  <button
+                    onClick={addProduct}
+                    className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Product List */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-600 block">Your Products</label>
+                {products.map(product => (
+                  <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${product.color}`}></div>
+                      <span className="text-sm font-medium">{product.name}</span>
+                      <span className="text-xs text-gray-400">
+                        ({bakes.filter(b => b.productId === product.id).length} sessions)
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      disabled={products.length === 1}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
 
@@ -295,10 +418,10 @@ export default function DoughTempTracker() {
             <div className="w-full h-32 md:h-auto md:aspect-square relative perspective-1000 mb-0 md:my-8">
               <JukeboxSelector
                 products={products}
-                currentProduct={currentProduct}
+                selectedProductId={selectedProductId}
                 rotation={rotation}
                 setRotation={setRotation}
-                setCurrentProduct={setCurrentProduct}
+                setSelectedProductId={setSelectedProductId}
                 productCounts={productCounts}
                 onRename={handleRenameProduct}
               />
@@ -357,7 +480,7 @@ export default function DoughTempTracker() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <BarChart3 size={16} className="text-purple-600" />
-                    <span className="text-sm font-bold text-purple-900">Training: {currentProduct}</span>
+                    <span className="text-sm font-bold text-purple-900">Training: {currentProduct?.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
@@ -442,7 +565,7 @@ export default function DoughTempTracker() {
         {/* History List */}
         <div className="px-1">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-black">History ({currentProduct})</h2>
+            <h2 className="text-lg font-bold text-black">History ({currentProduct?.name})</h2>
             <div className="flex gap-2">
               <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
                 <Download size={12} /> Export CSV
@@ -456,7 +579,7 @@ export default function DoughTempTracker() {
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
             {currentBakes.length === 0 ? (
               <div className="p-8 text-center text-apple-gray">
-                <p className="text-sm">No sessions recorded for {currentProduct}</p>
+                <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
               </div>
             ) : (
               currentBakes.slice().reverse().map((bake) => (
@@ -522,18 +645,17 @@ export default function DoughTempTracker() {
 }
 
 // Jukebox Carousel Component
-function JukeboxSelector({ products, currentProduct, rotation, setRotation, setCurrentProduct, productCounts, onRename }) {
+function JukeboxSelector({ products, selectedProductId, rotation, setRotation, setSelectedProductId, productCounts, onRename }) {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startRotation, setStartRotation] = useState(0);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
 
-  // Reduced radius for mobile compactness (was 120)
   const radius = 90;
 
   const handleMouseDown = (e) => {
-    if (editingIndex !== null) return;
+    if (editingId !== null) return;
     setIsDragging(true);
     setStartX(e.clientX);
     setStartRotation(rotation);
@@ -551,9 +673,8 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
     snapRotation();
   };
 
-  // Touch handlers for mobile
   const handleTouchStart = (e) => {
-    if (editingIndex !== null) return;
+    if (editingId !== null) return;
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
     setStartRotation(rotation);
@@ -575,28 +696,30 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
     const snappedRotation = Math.round(rotation / 60) * 60;
     setRotation(snappedRotation);
 
-    let normalizedIndex = Math.round(-snappedRotation / 60) % 6;
-    if (normalizedIndex < 0) normalizedIndex += 6;
-    setCurrentProduct(products[normalizedIndex]);
+    let normalizedIndex = Math.round(-snappedRotation / 60) % products.length;
+    if (normalizedIndex < 0) normalizedIndex += products.length;
+    setSelectedProductId(products[normalizedIndex].id);
   };
 
-  const handleFaceClick = (index) => {
-    if (editingIndex !== null) return;
+  const handleFaceClick = (productId) => {
+    if (editingId !== null) return;
+    const index = products.findIndex(p => p.id === productId);
     const targetRotation = index * -60;
     setRotation(targetRotation);
-    setCurrentProduct(products[index]);
+    setSelectedProductId(productId);
   };
 
-  const startEditing = (index, currentName) => {
-    setEditingIndex(index);
+  const startEditing = (productId, currentName) => {
+    setEditingId(productId);
     setEditValue(currentName);
   };
 
-  const saveEdit = (index) => {
-    if (editValue.trim() && editValue !== products[index]) {
-      onRename(index, editValue);
+  const saveEdit = (productId) => {
+    const product = products.find(p => p.id === productId);
+    if (editValue.trim() && editValue !== product?.name) {
+      onRename(productId, editValue);
     }
-    setEditingIndex(null);
+    setEditingId(null);
   };
 
   return (
@@ -613,14 +736,14 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
     >
       {products.map((product, index) => {
         const angle = index * 60;
-        const isActive = product === currentProduct;
-        const count = productCounts.find(p => p.name === product)?.count || 0;
-        const isEditing = editingIndex === index;
+        const isActive = product.id === selectedProductId;
+        const count = productCounts.find(p => p.id === product.id)?.count || 0;
+        const isEditing = editingId === product.id;
 
         return (
           <div
-            key={index}
-            onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(index); }}
+            key={product.id}
+            onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
             className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
               ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
               : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
@@ -635,7 +758,7 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
               </div>
               {isActive && !isEditing && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); startEditing(index, product); }}
+                  onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
                   className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
                 >
                   <Pencil size={10} />
@@ -649,18 +772,18 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
                   <input
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => saveEdit(index)}
-                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(index)}
+                    onBlur={() => saveEdit(product.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
                     className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <button onClick={(e) => { e.stopPropagation(); saveEdit(index); }} className="text-white hover:text-green-200">
+                  <button onClick={(e) => { e.stopPropagation(); saveEdit(product.id); }} className="text-white hover:text-green-200">
                     <Check size={12} />
                   </button>
                 </div>
               ) : (
-                <AutoFitText text={product} maxWidth={56} className="font-bold text-[10px] leading-tight mb-0.5 text-black/90" />
+                <AutoFitText text={product.name} maxWidth={56} className="font-bold text-[10px] leading-tight mb-0.5 text-black/90" />
               )}
               <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
                 {count} SESSIONS
@@ -673,24 +796,6 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
   );
 }
 
-// Simple Activity Icon component since it was missing from Lucide import in previous step content
-const ActivityIcon = ({ size, className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-  </svg>
-);
-
 // Auto-Fit Text Component
 const AutoFitText = ({ text, maxWidth, className = "" }) => {
   const textRef = useRef(null);
@@ -698,7 +803,6 @@ const AutoFitText = ({ text, maxWidth, className = "" }) => {
 
   useLayoutEffect(() => {
     if (textRef.current) {
-      // Reset scale to 1 to measure natural width
       textRef.current.style.transform = 'scale(1)';
       const width = textRef.current.scrollWidth;
 
