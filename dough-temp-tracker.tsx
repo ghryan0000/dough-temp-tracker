@@ -738,6 +738,7 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
         const isActive = product.id === selectedProductId;
         const count = productCounts.find(p => p.id === product.id)?.count || 0;
         const isEditing = editingId === product.id;
+        const isLastProduct = index === products.length - 1;
 
         return (
           <div
@@ -745,14 +746,16 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
             className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
               ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
-              : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
+              : isLastProduct
+                ? 'bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100'
+                : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
               }`}
             style={{
               transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
             }}
           >
             <div className="flex justify-between items-start">
-              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : index === 5 ? 'bg-gray-300' : 'bg-gray-100'}`}>
+              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
                 <ChefHat size={14} />
               </div>
               {isActive && !isEditing && (
