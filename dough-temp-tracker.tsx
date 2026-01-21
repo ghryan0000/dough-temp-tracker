@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check } from 'lucide-react';
 
 export default function DoughTempTracker() {
@@ -574,7 +574,7 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
                   </button>
                 </div>
               ) : (
-                <div className="font-bold text-[10px] leading-tight mb-0.5 whitespace-nowrap overflow-x-hidden text-ellipsis" title={product}>{product}</div>
+                <AutoFitText text={product} maxWidth={56} className="font-bold text-[10px] leading-tight mb-0.5 text-black/90" />
               )}
               <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
                 {count} SESSIONS
@@ -604,3 +604,35 @@ const ActivityIcon = ({ size, className }) => (
     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
   </svg>
 );
+
+// Auto-Fit Text Component
+const AutoFitText = ({ text, maxWidth, className = "" }) => {
+  const textRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    if (textRef.current) {
+      // Reset scale to 1 to measure natural width
+      textRef.current.style.transform = 'scale(1)';
+      const width = textRef.current.scrollWidth;
+
+      if (width > maxWidth) {
+        setScale(maxWidth / width);
+      } else {
+        setScale(1);
+      }
+    }
+  }, [text, maxWidth]);
+
+  return (
+    <div className={`w-full overflow-visible flex justify-center ${className}`} style={{ width: maxWidth }}>
+      <div
+        ref={textRef}
+        className="whitespace-nowrap origin-center transition-transform duration-200"
+        style={{ transform: `scale(${scale})` }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+};
