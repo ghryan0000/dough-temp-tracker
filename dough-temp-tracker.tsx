@@ -752,7 +752,7 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
             }}
           >
             <div className="flex justify-between items-start">
-              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : index === 5 ? 'bg-gray-300' : 'bg-gray-100'}`}>
                 <ChefHat size={14} />
               </div>
               {isActive && !isEditing && (
