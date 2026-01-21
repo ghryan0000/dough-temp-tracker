@@ -347,69 +347,6 @@ export default function DoughTempTracker() {
           )}
         </div>
 
-        {/* Product Manager - Collapsible */}
-        <div className="mb-4">
-          <button
-            onClick={() => setShowProductManager(!showProductManager)}
-            className="w-full flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Package size={16} className="text-purple-600" />
-              Manage Products
-            </span>
-            <ChevronDown className={`transform transition-transform text-gray-400 ${showProductManager ? 'rotate-180' : ''}`} size={18} />
-          </button>
-
-          {showProductManager && (
-            <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-              {/* Add Product */}
-              <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newProductName}
-                    onChange={(e) => setNewProductName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addProduct()}
-                    placeholder="e.g., Croissant"
-                    className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
-                  />
-                  <button
-                    onClick={addProduct}
-                    className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Product List */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600 block">Your Products</label>
-                {products.map(product => (
-                  <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${product.color}`}></div>
-                      <span className="text-sm font-medium">{product.name}</span>
-                      <span className="text-xs text-gray-400">
-                        ({bakes.filter(b => b.productId === product.id).length} sessions)
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      disabled={products.length === 1}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
 
@@ -637,6 +574,68 @@ export default function DoughTempTracker() {
               ))
             )}
           </div>
+        </div>
+        {/* Product Manager - Collapsible */}
+        <div className="mb-4">
+          <button
+            onClick={() => setShowProductManager(!showProductManager)}
+            className="w-full flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+          >
+            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Package size={16} className="text-purple-600" />
+              Manage Products
+            </span>
+            <ChevronDown className={`transform transition-transform text-gray-400 ${showProductManager ? 'rotate-180' : ''}`} size={18} />
+          </button>
+
+          {showProductManager && (
+            <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+              {/* Add Product */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newProductName}
+                    onChange={(e) => setNewProductName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addProduct()}
+                    placeholder="e.g., Croissant"
+                    className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
+                  />
+                  <button
+                    onClick={addProduct}
+                    className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Product List */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-600 block">Your Products</label>
+                {products.map(product => (
+                  <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${product.color}`}></div>
+                      <span className="text-sm font-medium">{product.name}</span>
+                      <span className="text-xs text-gray-400">
+                        ({bakes.filter(b => b.productId === product.id).length} sessions)
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      disabled={products.length === 1}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
