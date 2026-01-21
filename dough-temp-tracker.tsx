@@ -350,6 +350,38 @@ export default function DoughTempTracker() {
                 <span className="text-lg ml-0.5 font-medium text-gray-400">°C</span>
               </div>
             </div>
+
+            {/* Model Training Status */}
+            {regressionModel && (
+              <div className="mt-3 p-3 bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Activity size={14} className="text-green-600" />
+                    <span className="text-xs font-bold text-green-800">Model Trained</span>
+                  </div>
+                  <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                    Auto-Saved ✓
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-white rounded-lg p-2 border border-green-100">
+                    <div className="text-[9px] text-gray-500 font-medium mb-0.5">Accuracy (R²)</div>
+                    <div className="text-lg font-black text-green-700">
+                      {(regressionModel.rSquared * 100).toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-2 border border-green-100">
+                    <div className="text-[9px] text-gray-500 font-medium mb-0.5">Training Data</div>
+                    <div className="text-lg font-black text-green-700">
+                      {regressionModel.nSamples} sessions
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 text-[9px] text-gray-500 text-center">
+                  Data persists across sessions • Model updates automatically
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
