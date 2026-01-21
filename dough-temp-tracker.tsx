@@ -351,34 +351,88 @@ export default function DoughTempTracker() {
               </div>
             </div>
 
-            {/* Model Training Status */}
+            {/* Model Training Status - Detailed View */}
             {regressionModel && (
-              <div className="mt-3 p-3 bg-gradient-to-br from-green-50 to-white border border-green-100 rounded-xl">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Activity size={14} className="text-green-600" />
-                    <span className="text-xs font-bold text-green-800">Model Trained</span>
+              <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 size={16} className="text-purple-600" />
+                    <span className="text-sm font-bold text-purple-900">Training: {currentProduct}</span>
                   </div>
-                  <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                    Auto-Saved ✓
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                      ✓ Trained! R²={regressionModel.rSquared.toFixed(3)}
+                    </span>
+                    <span className="text-[10px] font-medium text-gray-500">
+                      Sessions: {regressionModel.nSamples}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Regression Formula */}
+                <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <BarChart3 size={12} className="text-purple-600" />
+                    <span className="text-[10px] font-bold text-purple-900">Model</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
+                    Water = {regressionModel.intercept.toFixed(2)}
+                    {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×Room
+                    {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×Flour
+                    {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×Levain
+                    {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×Target
+                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×Mix
+                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×Hydration
+                  </div>
+                </div>
+
+                {/* Coefficients and Quality Grid */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-white rounded-lg p-2 border border-green-100">
-                    <div className="text-[9px] text-gray-500 font-medium mb-0.5">Accuracy (R²)</div>
-                    <div className="text-lg font-black text-green-700">
-                      {(regressionModel.rSquared * 100).toFixed(1)}%
+                  {/* Coefficients */}
+                  <div className="bg-white rounded-lg p-2.5 border border-orange-100">
+                    <div className="flex items-center gap-1 mb-2">
+                      <Activity size={11} className="text-orange-600" />
+                      <span className="text-[9px] font-bold text-orange-900">Coefficients</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">🔥 Friction/min:</span>
+                        <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">💧 Hydration/%:</span>
+                        <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg p-2 border border-green-100">
-                    <div className="text-[9px] text-gray-500 font-medium mb-0.5">Training Data</div>
-                    <div className="text-lg font-black text-green-700">
-                      {regressionModel.nSamples} sessions
+
+                  {/* Quality */}
+                  <div className="bg-white rounded-lg p-2.5 border border-pink-100">
+                    <div className="flex items-center gap-1 mb-2">
+                      <TrendingUp size={11} className="text-pink-600" />
+                      <span className="text-[9px] font-bold text-pink-900">Quality</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">R²:</span>
+                        <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">Fit:</span>
+                        <span className="text-[9px] font-medium text-green-600">
+                          {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">Samples:</span>
+                        <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-2 text-[9px] text-gray-500 text-center">
-                  Data persists across sessions • Model updates automatically
+
+                <div className="mt-2 text-[8px] text-gray-400 text-center">
+                  Auto-saved • Updates with each new session
                 </div>
               </div>
             )}
