@@ -292,7 +292,7 @@ export default function DoughTempTracker() {
 
           {/* Left Column: Jukebox Selector (Tracker Item) */}
           <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full h-40 md:h-auto md:aspect-square relative perspective-1000 my-1 md:my-8">
+            <div className="w-full h-32 md:h-auto md:aspect-square relative perspective-1000 mb-0 md:my-8">
               <JukeboxSelector
                 products={products}
                 currentProduct={currentProduct}
@@ -303,7 +303,7 @@ export default function DoughTempTracker() {
                 onRename={handleRenameProduct}
               />
             </div>
-            <p className="text-xs text-apple-gray mt-2 text-center">
+            <p className="text-xs text-apple-gray mt-0 text-center">
               Drag or scroll to rotate • Click pencil to rename
             </p>
           </div>
@@ -317,7 +317,7 @@ export default function DoughTempTracker() {
             </div>
 
             {/* Inputs with Units */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-2 gap-2 mb-4">
               {[
                 { label: 'Room Temp', key: 'roomTemp', unit: '°C' },
                 { label: 'Flour Temp', key: 'flourTemp', unit: '°C' },
@@ -326,9 +326,9 @@ export default function DoughTempTracker() {
                 { label: 'Target Temp', key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
                 { label: 'Hydration', key: 'hydration', unit: '%' }
               ].map((field) => (
-                <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-2 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
-                  <label className="text-[10px] font-semibold text-apple-gray absolute top-1.5 left-3">{field.label}</label>
-                  <div className="flex items-baseline mt-4">
+                <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-1.5 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+                  <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
+                  <div className="flex items-baseline mt-3.5">
                     <input
                       type="number"
                       value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
@@ -574,7 +574,7 @@ function JukeboxSelector({ products, currentProduct, rotation, setRotation, setC
                   </button>
                 </div>
               ) : (
-                <div className="font-bold text-sm leading-tight mb-1 truncate" title={product}>{product}</div>
+                <div className="font-bold text-[10px] leading-tight mb-0.5 whitespace-nowrap overflow-x-hidden text-ellipsis" title={product}>{product}</div>
               )}
               <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
                 {count} SESSIONS
