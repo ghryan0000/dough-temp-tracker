@@ -502,7 +502,9 @@ export default function DoughTempTracker() {
         {/* History List */}
         <div className="px-1">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-black">MLR Training History ({currentProduct?.name})</h2>
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+              <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
+            </h2>
             <div className="flex gap-2">
               <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
                 <Download size={12} /> Export CSV
@@ -575,23 +577,25 @@ export default function DoughTempTracker() {
             )}
           </div>
         </div>
-        {/* Product Manager - Collapsible */}
-        <div className="mb-4">
-          <button
-            onClick={() => setShowProductManager(!showProductManager)}
-            className="w-full flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Package size={16} className="text-purple-600" />
-              Manage Products
-            </span>
-            <ChevronDown className={`transform transition-transform text-gray-400 ${showProductManager ? 'rotate-180' : ''}`} size={18} />
-          </button>
+
+        {/* Product Manager Section */}
+        <div className="mt-8 bg-white rounded-2xl shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+              <Package size={18} className="text-purple-600" /> Manage Products
+            </h2>
+            <button
+              onClick={() => setShowProductManager(!showProductManager)}
+              className="text-apple-gray hover:text-black transition-colors"
+            >
+              <ChevronDown className={`transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={18} />
+            </button>
+          </div>
 
           {showProductManager && (
-            <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+            <div>
               {/* Add Product */}
-              <div className="mb-4">
+              <div className="mb-4 mt-4">
                 <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
                 <div className="flex gap-2">
                   <input
@@ -744,13 +748,11 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
           <div
             key={product.id}
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
-            className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive && isLastProduct
-                ? 'bg-gray-400 text-white shadow-xl shadow-gray-300 border-transparent z-10'
-                : isActive
-                  ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
-                  : isLastProduct
-                    ? 'bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100'
-                    : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
+            className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
+              ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
+              : isLastProduct
+                ? 'bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100'
+                : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
               }`}
             style={{
               transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
