@@ -762,7 +762,8 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
   const handleFaceClick = (productId) => {
     if (editingId !== null) return;
     const index = products.findIndex(p => p.id === productId);
-    const targetRotation = index * -60;
+    const anglePerProduct = 360 / products.length;
+    const targetRotation = index * -anglePerProduct;
     setRotation(targetRotation);
     setSelectedProductId(productId);
   };
