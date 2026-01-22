@@ -706,7 +706,7 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
   const [editValue, setEditValue] = useState('');
 
   // Dynamic radius based on number of products to prevent card overlap
-  const radius = Math.max(90, products.length * 15);
+  const radius = Math.max(90, products.length * 25);
 
   const handleMouseDown = (e) => {
     if (editingId !== null) return;
