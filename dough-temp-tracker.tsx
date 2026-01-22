@@ -817,7 +817,7 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
             className={cardClassName}
             style={{
-              transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
+              transform: `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`,
             }}
           >
             <div className="flex justify-between items-start">
