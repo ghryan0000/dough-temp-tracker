@@ -403,7 +403,7 @@ export default function DoughTempTracker() {
             </div>
 
             {/* Result Display */}
-            <div className={`p-4 rounded-xl text-center transition-all ${regressionModel ? 'bg-gradient-to-br from-apple-red/5 to-white border border-apple-red/10' : 'bg-gray-50'}`}>
+            <div className={`p-4 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
               <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">TARGET WATER TEMP</div>
               <div className={`text-4xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                 {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
