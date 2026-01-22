@@ -794,16 +794,22 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
         const isEditing = editingId === product.id;
         const isLastProduct = index === products.length - 1;
 
+        // Build className explicitly for better cross-platform compatibility
+        let cardClassName = 'absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300';
+
+        if (isActive) {
+          cardClassName += ' bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10';
+        } else if (isLastProduct) {
+          cardClassName += ' bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100';
+        } else {
+          cardClassName += ' bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100';
+        }
+
         return (
           <div
             key={product.id}
             onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
-            className={`absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300 ${isActive
-              ? 'bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10'
-              : isLastProduct
-                ? 'bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100'
-                : 'bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100'
-              }`}
+            className={cardClassName}
             style={{
               transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
             }}
