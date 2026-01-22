@@ -642,6 +642,56 @@ export default function DoughTempTracker() {
           )}
         </div>
 
+        {/* App Information Footer */}
+        <div className="mt-8 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
+              <Activity size={16} className="text-apple-red" /> About This App
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Ryan's Bakery Water Temperature Tracker helps you achieve consistent dough temperatures by calculating the ideal water temperature for your recipes. Using Multiple Linear Regression (MLR), the app learns from your baking sessions to predict optimal water temperatures based on environmental conditions.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
+              <ChevronRight size={16} className="text-purple-600" /> How to Use
+            </h3>
+            <div className="space-y-3 text-sm text-gray-600">
+              <div className="flex gap-2">
+                <span className="font-semibold text-purple-600 min-w-[20px]">1.</span>
+                <div>
+                  <strong>Select Your Product:</strong> Rotate the jukebox carousel or click a product card to switch between different dough types.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-purple-600 min-w-[20px]">2.</span>
+                <div>
+                  <strong>Use the Calculator:</strong> Enter room temp, flour temp, levain temp, target dough temp, mix time, and hydration to get the recommended water temperature.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-purple-600 min-w-[20px]">3.</span>
+                <div>
+                  <strong>Train the Model:</strong> Click "Add Session" to record actual baking data. The more sessions you add, the more accurate the predictions become.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-purple-600 min-w-[20px]">4.</span>
+                <div>
+                  <strong>Export Data:</strong> Use the "Export CSV" button to download your baking history for analysis or backup.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-purple-600 min-w-[20px]">5.</span>
+                <div>
+                  <strong>Manage Products:</strong> Add, rename, or delete product types to customize the app for your bakery's needs.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
