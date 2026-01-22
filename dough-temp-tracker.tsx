@@ -746,10 +746,11 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
   };
 
   const snapRotation = () => {
-    const snappedRotation = Math.round(rotation / 60) * 60;
+    const anglePerProduct = 360 / products.length;
+    const snappedRotation = Math.round(rotation / anglePerProduct) * anglePerProduct;
     setRotation(snappedRotation);
 
-    let normalizedIndex = Math.round(-snappedRotation / 60) % products.length;
+    let normalizedIndex = Math.round(-snappedRotation / anglePerProduct) % products.length;
     if (normalizedIndex < 0) normalizedIndex += products.length;
     setSelectedProductId(products[normalizedIndex].id);
   };
@@ -788,7 +789,7 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
       style={{ transform: `rotateY(${rotation}deg)` }}
     >
       {products.map((product, index) => {
-        const angle = index * 60;
+        const angle = index * (360 / products.length);
         const isActive = product.id === selectedProductId;
         const count = productCounts.find(p => p.id === product.id)?.count || 0;
         const isEditing = editingId === product.id;
