@@ -362,8 +362,8 @@ export default function DoughTempTracker() {
                 onRename={handleRenameProduct}
               />
             </div>
-            <p className="text-xs text-apple-gray mt-0 text-center">
-              Drag or scroll to rotate • Click pencil to rename
+            <p className="text-xs text-apple-gray mt-4 md:mt-0 text-center">
+              Swipe to browse • Tap to select • Click pencil to rename
             </p>
           </div>
 
@@ -772,6 +772,9 @@ function JukeboxSelector({ products, selectedProductId, setRotation, setSelected
         onScroll={onScrollEnd}
         style={{ scrollSnapType: 'x mandatory' }}
       >
+        {/* Spacer to allow first item to center */}
+        <div className="flex-none" style={{ width: 'calc(50% - 44px)' }} />
+
         {products.map((product, index) => {
           const isActive = product.id === selectedProductId;
           const count = productCounts.find(p => p.id === product.id)?.count || 0;
@@ -834,6 +837,9 @@ function JukeboxSelector({ products, selectedProductId, setRotation, setSelected
             </div>
           );
         })}
+
+        {/* Spacer to allow last item to center */}
+        <div className="flex-none" style={{ width: 'calc(50% - 44px)' }} />
       </div>
 
       {/* Center indicator line */}
