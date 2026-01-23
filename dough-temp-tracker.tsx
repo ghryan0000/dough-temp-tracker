@@ -765,7 +765,9 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-12 mb-4 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-90' : 'opacity-40 scale-100'
+              className={`h-12 mb-4 flex items-center justify-between px-6 mx-2 snap-center transition-all duration-500 ease-out ${isSelected
+                ? 'opacity-100 scale-100 bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] rounded-xl border border-gray-100 z-10'
+                : 'opacity-40 scale-90 grayscale'
                 }`}
               onClick={() => {
                 if (!isEditing) {
