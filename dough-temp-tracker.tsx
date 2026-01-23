@@ -694,8 +694,9 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     if (containerRef.current && !editingId) {
       const index = products.findIndex(p => p.id === selectedProductId);
       if (index !== -1) {
+        // +1 to account for top spacer div
         containerRef.current.scrollTo({
-          top: index * itemHeight,
+          top: (index + 1) * itemHeight,
           behavior: 'smooth'
         });
       }
@@ -707,7 +708,9 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     if (!containerRef.current || editingId) return;
 
     const scrollTop = containerRef.current.scrollTop;
-    const index = Math.round(scrollTop / itemHeight);
+    const offset = 64; // top padding in pixels
+    // Calculate index accounting for offset and centering
+    const index = Math.round((scrollTop - offset + 32) / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
 
     if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
@@ -736,20 +739,22 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-64 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
+    <div className="relative h-48 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
       {/* Center Highlight Zone */}
       <div className="absolute top-1/2 left-0 right-0 h-16 -mt-8 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
 
       {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-[calc(50%-32px)] no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-16 no-scrollbar relative z-20"
         onScroll={onScroll}
       >
+        {/* Top spacer - allows first item to center */}
+        <div className="h-16" />
         {products.map((product) => {
           const isSelected = product.id === selectedProductId;
           const isEditing = editingId === product.id;
@@ -808,6 +813,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             </div>
           );
         })}
+        {/* Bottom spacer - allows last item to center */}
+        <div className="h-16" />
       </div>
     </div>
   );
