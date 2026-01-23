@@ -308,6 +308,11 @@ export default function DoughTempTracker() {
     count: bakes.filter(b => b.productId === product.id && b.roomTemp !== '').length
   }));
 
+  // Update regression model when product changes or bakes update
+  useEffect(() => {
+    setRegressionModel(calculateRegression(bakes, selectedProductId));
+  }, [bakes, selectedProductId]);
+
 
 
   return (
