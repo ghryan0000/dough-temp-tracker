@@ -336,7 +336,7 @@ export default function DoughTempTracker() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
 
           {/* Left Column: Product Selector (Card Grid) */}
-          <div className="md:col-span-5 flex flex-col">
+          <div className="md:col-span-4 flex flex-col">
             <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-1 px-1">
               <Package size={18} className="text-apple-red" /> Select Product
             </h2>
@@ -353,7 +353,7 @@ export default function DoughTempTracker() {
           </div>
 
           {/* Right Column: Calculator */}
-          <div className="md:col-span-7 bg-white rounded-2xl shadow-sm p-5">
+          <div className="md:col-span-8 bg-white rounded-2xl shadow-sm p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-black flex items-center gap-2">
                 <Calculator size={18} className="text-apple-red" /> Target Water Temp Calculator
