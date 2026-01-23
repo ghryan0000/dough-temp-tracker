@@ -356,7 +356,6 @@ export default function DoughTempTracker() {
               <JukeboxSelector
                 products={products}
                 selectedProductId={selectedProductId}
-                rotation={rotation}
                 setRotation={setRotation}
                 setSelectedProductId={setSelectedProductId}
                 productCounts={productCounts}
@@ -697,75 +696,54 @@ export default function DoughTempTracker() {
   );
 }
 
-// Jukebox Carousel Component
-function JukeboxSelector({ products, selectedProductId, rotation, setRotation, setSelectedProductId, productCounts, onRename }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startRotation, setStartRotation] = useState(0);
+// Carousel Component - Horizontal Scroll Snap Design
+function JukeboxSelector({ products, selectedProductId, setRotation, setSelectedProductId, productCounts, onRename }) {
+  const scrollRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const cardWidth = 88; // w-22 = 88px
+  const gap = 12;
 
-  // Dynamic radius based on number of products and screen size
-  // Mobile devices use smaller spacing to prevent icons from being too spread out
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const multiplier = isMobile ? 12 : 20;
-  const radius = Math.max(90, products.length * multiplier);
+  // Scroll to selected product on mount and when selection changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      const index = products.findIndex(p => p.id === selectedProductId);
+      if (index !== -1) {
+        const containerWidth = scrollRef.current.offsetWidth;
+        const scrollPosition = index * (cardWidth + gap) - (containerWidth / 2) + (cardWidth / 2);
+        scrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+      }
+    }
+  }, [selectedProductId, products]);
 
-  const handleMouseDown = (e) => {
+  // Handle scroll snap end to update selection
+  const handleScroll = () => {
+    if (!scrollRef.current || editingId !== null) return;
+
+    const containerWidth = scrollRef.current.offsetWidth;
+    const scrollLeft = scrollRef.current.scrollLeft;
+    const centerOffset = scrollLeft + (containerWidth / 2);
+    const index = Math.round((centerOffset - cardWidth / 2) / (cardWidth + gap));
+    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
+
+    if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
+      setSelectedProductId(products[clampedIndex].id);
+      setRotation(clampedIndex * -60); // Keep rotation in sync for compatibility
+    }
+  };
+
+  // Debounce scroll handler
+  const scrollTimeout = useRef(null);
+  const onScrollEnd = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(handleScroll, 100);
+  };
+
+  const handleCardClick = (productId) => {
     if (editingId !== null) return;
-    setIsDragging(true);
-    setStartX(e.clientX);
-    setStartRotation(rotation);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const deltaX = e.clientX - startX;
-    setRotation(startRotation + (deltaX * 0.5));
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    snapRotation();
-  };
-
-  const handleTouchStart = (e) => {
-    if (editingId !== null) return;
-    setIsDragging(true);
-    setStartX(e.touches[0].clientX);
-    setStartRotation(rotation);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    const deltaX = e.touches[0].clientX - startX;
-    setRotation(startRotation + (deltaX * 0.5));
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    snapRotation();
-  };
-
-  const snapRotation = () => {
-    const anglePerProduct = 360 / products.length;
-    const snappedRotation = Math.round(rotation / anglePerProduct) * anglePerProduct;
-    setRotation(snappedRotation);
-
-    let normalizedIndex = Math.round(-snappedRotation / anglePerProduct) % products.length;
-    if (normalizedIndex < 0) normalizedIndex += products.length;
-    setSelectedProductId(products[normalizedIndex].id);
-  };
-
-  const handleFaceClick = (productId) => {
-    if (editingId !== null) return;
-    const index = products.findIndex(p => p.id === productId);
-    const anglePerProduct = 360 / products.length;
-    const targetRotation = index * -anglePerProduct;
-    setRotation(targetRotation);
     setSelectedProductId(productId);
+    const index = products.findIndex(p => p.id === productId);
+    setRotation(index * -60);
   };
 
   const startEditing = (productId, currentName) => {
@@ -782,84 +760,84 @@ function JukeboxSelector({ products, selectedProductId, rotation, setRotation, s
   };
 
   return (
-    <div
-      className="relative w-full h-full preserve-3d transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      style={{ transform: `rotateY(${rotation}deg)` }}
-    >
-      {products.map((product, index) => {
-        const angle = index * (360 / products.length);
-        const isActive = product.id === selectedProductId;
-        const count = productCounts.find(p => p.id === product.id)?.count || 0;
-        const isEditing = editingId === product.id;
-        const isLastProduct = index === products.length - 1;
+    <div className="relative w-full">
+      {/* Gradient overlays for edge fade effect */}
+      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-apple-bg to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-apple-bg to-transparent z-10 pointer-events-none" />
 
-        // Build className explicitly for better cross-platform compatibility
-        let cardClassName = 'absolute top-0 left-0 right-0 mx-auto w-20 h-28 rounded-xl p-3 flex flex-col justify-between backface-hidden border transition-all duration-300';
+      {/* Scrollable container */}
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar py-4 px-8"
+        onScroll={onScrollEnd}
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        {products.map((product, index) => {
+          const isActive = product.id === selectedProductId;
+          const count = productCounts.find(p => p.id === product.id)?.count || 0;
+          const isEditing = editingId === product.id;
 
-        if (isActive) {
-          cardClassName += ' bg-apple-red text-white shadow-xl shadow-red-200 border-transparent z-10';
-        } else if (isLastProduct) {
-          cardClassName += ' bg-gray-200 text-gray-500 border-gray-200 shadow-sm opacity-90 hover:opacity-100';
-        } else {
-          cardClassName += ' bg-white text-gray-400 border-gray-100 shadow-sm opacity-90 hover:opacity-100';
-        }
-
-        return (
-          <div
-            key={product.id}
-            onClick={(e) => { e.stopPropagation(); !isEditing && handleFaceClick(product.id); }}
-            className={cardClassName}
-            style={{
-              transform: `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`,
-            }}
-          >
-            <div className="flex justify-between items-start">
-              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                <ChefHat size={14} />
-              </div>
-              {isActive && !isEditing && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                  className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
-                >
-                  <Pencil size={10} />
-                </button>
-              )}
-            </div>
-
-            <div>
-              {isEditing ? (
-                <div className="flex items-center gap-1 mb-1">
-                  <input
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => saveEdit(product.id)}
-                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
-                    className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <button onClick={(e) => { e.stopPropagation(); saveEdit(product.id); }} className="text-white hover:text-green-200">
-                    <Check size={12} />
-                  </button>
+          return (
+            <div
+              key={product.id}
+              onClick={() => !isEditing && handleCardClick(product.id)}
+              className={`
+                flex-none w-22 h-28 rounded-xl p-3 flex flex-col justify-between
+                border cursor-pointer select-none snap-center
+                transition-all duration-300 ease-out
+                ${isActive
+                  ? 'bg-apple-red text-white shadow-lg shadow-red-200/50 border-transparent scale-105'
+                  : 'bg-white text-gray-500 border-gray-200 shadow-sm hover:shadow-md hover:scale-[1.02]'
+                }
+              `}
+              style={{ width: cardWidth, minWidth: cardWidth }}
+            >
+              <div className="flex justify-between items-start">
+                <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                  <ChefHat size={14} />
                 </div>
-              ) : (
-                <AutoFitText text={product.name} maxWidth={56} className="font-bold text-[10px] leading-tight mb-0.5 text-black/90" />
-              )}
-              <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-300'}`}>
-                {count} SESSIONS
+                {isActive && !isEditing && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
+                    className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
+                  >
+                    <Pencil size={10} />
+                  </button>
+                )}
+              </div>
+
+              <div>
+                {isEditing ? (
+                  <div className="flex items-center gap-1 mb-1">
+                    <input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => saveEdit(product.id)}
+                      onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
+                      className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <button onClick={(e) => { e.stopPropagation(); saveEdit(product.id); }} className="text-white hover:text-green-200">
+                      <Check size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className={`font-bold text-[10px] leading-tight mb-0.5 truncate ${isActive ? 'text-white' : 'text-gray-700'}`}>
+                    {product.name}
+                  </div>
+                )}
+                <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                  {count} SESSIONS
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+
+      {/* Center indicator line */}
+      <div className="absolute left-1/2 bottom-0 w-8 h-1 bg-apple-red/30 rounded-full -translate-x-1/2" />
     </div>
   );
 }
