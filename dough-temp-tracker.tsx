@@ -340,15 +340,15 @@ export default function DoughTempTracker() {
             <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-4 px-1">
               <Package size={18} className="text-apple-red" /> Select Product
             </h2>
-            <ProductCardSelector
+            <ProductWheelSelector
               products={products}
               selectedProductId={selectedProductId}
               setSelectedProductId={setSelectedProductId}
               productCounts={productCounts}
               onRename={handleRenameProduct}
             />
-            <p className="text-xs text-apple-gray mt-4 px-1 text-center md:text-left">
-              Tap a card to select • Click pencil to rename
+            <p className="text-xs text-apple-gray mt-4 px-1 text-center font-medium">
+              Scroll to select • Click pencil to rename
             </p>
           </div>
 
@@ -682,9 +682,45 @@ export default function DoughTempTracker() {
 }
 
 // Product Card Selector - Clean Grid Design
-function ProductCardSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }) {
+// Product Wheel Selector Component (iOS Style)
+function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }) {
+  const containerRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const itemHeight = 64; // Height of each item in the wheel
+
+  // Scroll to selected product on mount or when selection changes externally
+  useEffect(() => {
+    if (containerRef.current && !editingId) {
+      const index = products.findIndex(p => p.id === selectedProductId);
+      if (index !== -1) {
+        containerRef.current.scrollTo({
+          top: index * itemHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [selectedProductId, products, editingId]);
+
+  // Handle scroll snap to update selection
+  const handleScroll = () => {
+    if (!containerRef.current || editingId) return;
+
+    const scrollTop = containerRef.current.scrollTop;
+    const index = Math.round(scrollTop / itemHeight);
+    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
+
+    if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
+      setSelectedProductId(products[clampedIndex].id);
+    }
+  };
+
+  // Debounce scroll handler
+  const scrollTimeout = useRef(null);
+  const onScroll = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(handleScroll, 50);
+  };
 
   const startEditing = (productId, currentName) => {
     setEditingId(productId);
@@ -700,66 +736,79 @@ function ProductCardSelector({ products, selectedProductId, setSelectedProductId
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
-      {products.map((product) => {
-        const isActive = product.id === selectedProductId;
-        const count = productCounts.find(p => p.id === product.id)?.count || 0;
-        const isEditing = editingId === product.id;
+    <div className="relative h-64 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
+      {/* Center Highlight Zone */}
+      <div className="absolute top-1/2 left-0 right-0 h-16 -mt-8 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
 
-        return (
-          <div
-            key={product.id}
-            onClick={() => !isEditing && setSelectedProductId(product.id)}
-            className={`
-              relative p-3 rounded-xl border transition-all duration-200 cursor-pointer
-              flex flex-col justify-between h-24
-              ${isActive
-                ? 'bg-apple-red text-white border-apple-red shadow-md transform scale-[1.02]'
-                : 'bg-white text-gray-600 border-gray-200 hover:border-apple-red/30 hover:shadow-sm'
-              }
-            `}
-          >
-            <div className="flex justify-between items-start">
-              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                <ChefHat size={14} className={isActive ? 'text-white' : 'text-gray-500'} />
+      {/* Gradient Masks */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
+
+      {/* Scroll Container */}
+      <div
+        ref={containerRef}
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[calc(50%-32px)] no-scrollbar relative z-20"
+        onScroll={onScroll}
+      >
+        {products.map((product) => {
+          const isSelected = product.id === selectedProductId;
+          const isEditing = editingId === product.id;
+          const count = productCounts.find(p => p.id === product.id)?.count || 0;
+
+          return (
+            <div
+              key={product.id}
+              className={`h-16 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-40 scale-90'
+                }`}
+              onClick={() => {
+                if (!isEditing) {
+                  setSelectedProductId(product.id);
+                }
+              }}
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <div className={`p-2 rounded-full ${isSelected ? 'bg-apple-red text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>
+                  <ChefHat size={18} />
+                </div>
+
+                <div className="flex-1">
+                  {isEditing ? (
+                    <input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => saveEdit(product.id)}
+                      onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
+                      className="w-full text-lg font-bold bg-white border border-apple-red rounded px-2 py-0.5 outline-none shadow-sm"
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <div className={`flex flex-col ${isSelected ? 'items-start' : 'items-center md:items-start'}`}>
+                      <span className={`text-lg font-bold leading-tight ${isSelected ? 'text-black' : 'text-gray-600'}`}>
+                        {product.name}
+                      </span>
+                      {isSelected && (
+                        <span className="text-[10px] font-bold text-apple-red uppercase tracking-wider">
+                          {count} Sessions
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              {isActive && !isEditing && (
+
+              {isSelected && !isEditing && (
                 <button
                   onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                  className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
+                  className="p-2 text-gray-400 hover:text-apple-red hover:bg-red-50 rounded-full transition-colors"
                 >
-                  <Pencil size={12} />
+                  <Pencil size={14} />
                 </button>
               )}
             </div>
-
-            <div className="mt-2">
-              {isEditing ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => saveEdit(product.id)}
-                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
-                    className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              ) : (
-                <>
-                  <div className={`font-bold text-xs leading-tight mb-0.5 truncate ${isActive ? 'text-white' : 'text-gray-800'}`}>
-                    {product.name}
-                  </div>
-                  <div className={`text-[9px] font-medium uppercase tracking-wider ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
-                    {count} Sessions
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
