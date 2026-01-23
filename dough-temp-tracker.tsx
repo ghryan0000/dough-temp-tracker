@@ -688,7 +688,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
   const isScrollingRef = useRef(false); // Prevents feedback loop
-  const itemHeight = 64; // Height of each item in the wheel (48px + 16px margin)
+  const itemHeight = 48; // Height of each item in the wheel
 
   // Scroll to selected product on mount or when selection changes externally
   useEffect(() => {
@@ -765,9 +765,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-12 mb-4 flex items-center justify-between px-6 mx-2 snap-center transition-all duration-500 ease-out rounded-xl border ${isSelected
-                ? 'opacity-100 scale-100 bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] border-gray-100 z-10'
-                : 'opacity-60 scale-95 bg-white/60 border-transparent shadow-none grayscale-0'
+              className={`h-12 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-90' : 'opacity-40 scale-100'
                 }`}
               onClick={() => {
                 if (!isEditing) {
