@@ -687,6 +687,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const containerRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const isScrollingRef = useRef(false); // Prevents feedback loop
   const itemHeight = 64; // Height of each item in the wheel
 
   // Scroll to selected product on mount or when selection changes externally
@@ -694,21 +695,25 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     if (containerRef.current && !editingId) {
       const index = products.findIndex(p => p.id === selectedProductId);
       if (index !== -1) {
-        // +1 to account for top spacer div
+        // Set flag to ignore scroll events during programmatic scroll
+        isScrollingRef.current = true;
         containerRef.current.scrollTo({
-          top: (index + 1) * itemHeight,
+          top: index * itemHeight,
           behavior: 'smooth'
         });
+        // Reset flag after animation completes
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 300);
       }
     }
   }, [selectedProductId, products, editingId]);
 
   // Handle scroll snap to update selection
   const handleScroll = () => {
-    if (!containerRef.current || editingId) return;
+    if (!containerRef.current || editingId || isScrollingRef.current) return;
 
     const scrollTop = containerRef.current.scrollTop;
-    // Calculate which item is centered (accounting for top spacer)
     const index = Math.round(scrollTop / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
 
@@ -721,7 +726,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const scrollTimeout = useRef(null);
   const onScroll = () => {
     if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    scrollTimeout.current = setTimeout(handleScroll, 50);
+    scrollTimeout.current = setTimeout(handleScroll, 100);
   };
 
   const startEditing = (productId, currentName) => {
@@ -752,8 +757,6 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
         className="h-full overflow-y-auto snap-y snap-mandatory py-16 no-scrollbar relative z-20"
         onScroll={onScroll}
       >
-        {/* Top spacer - allows first item to center */}
-        <div className="h-16" />
         {products.map((product) => {
           const isSelected = product.id === selectedProductId;
           const isEditing = editingId === product.id;
@@ -812,8 +815,6 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             </div>
           );
         })}
-        {/* Bottom spacer - allows last item to center */}
-        <div className="h-16" />
       </div>
     </div>
   );
