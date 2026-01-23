@@ -308,27 +308,7 @@ export default function DoughTempTracker() {
     count: bakes.filter(b => b.productId === product.id && b.roomTemp !== '').length
   }));
 
-  // Jukebox rotation state
-  const [rotation, setRotation] = useState(0);
 
-  // Sync rotation with current product change
-  useEffect(() => {
-    const index = products.findIndex(p => p.id === selectedProductId);
-    if (index !== -1) {
-      setRotation(index * -60);
-    }
-  }, [selectedProductId, products]);
-
-  const handleJukeboxRotate = (direction) => {
-    const newRotation = rotation + (direction === 'left' ? 60 : -60);
-    setRotation(newRotation);
-
-    let normalized = Math.abs(newRotation / 60) % products.length;
-    if (newRotation > 0) normalized = (products.length - normalized) % products.length;
-
-    const productIndex = Math.round(normalized) % products.length;
-    setSelectedProductId(products[productIndex].id);
-  };
 
   return (
     <div className="min-h-screen bg-apple-bg pt-6 pb-20 font-sans overflow-x-hidden">
@@ -350,20 +330,20 @@ export default function DoughTempTracker() {
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
 
-          {/* Left Column: Jukebox Selector (Tracker Item) */}
-          <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full h-32 md:h-auto md:aspect-square relative perspective-1000 mb-0 md:my-8">
-              <JukeboxSelector
-                products={products}
-                selectedProductId={selectedProductId}
-                setRotation={setRotation}
-                setSelectedProductId={setSelectedProductId}
-                productCounts={productCounts}
-                onRename={handleRenameProduct}
-              />
-            </div>
-            <p className="text-xs text-apple-gray mt-4 md:mt-0 text-center">
-              Swipe to browse • Tap to select • Click pencil to rename
+          {/* Left Column: Product Selector (Card Grid) */}
+          <div className="md:col-span-5 flex flex-col">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-4 px-1">
+              <Package size={18} className="text-apple-red" /> Select Product
+            </h2>
+            <ProductCardSelector
+              products={products}
+              selectedProductId={selectedProductId}
+              setSelectedProductId={setSelectedProductId}
+              productCounts={productCounts}
+              onRename={handleRenameProduct}
+            />
+            <p className="text-xs text-apple-gray mt-4 px-1 text-center md:text-left">
+              Tap a card to select • Click pencil to rename
             </p>
           </div>
 
@@ -696,55 +676,10 @@ export default function DoughTempTracker() {
   );
 }
 
-// Carousel Component - Horizontal Scroll Snap Design
-function JukeboxSelector({ products, selectedProductId, setRotation, setSelectedProductId, productCounts, onRename }) {
-  const scrollRef = useRef(null);
+// Product Card Selector - Clean Grid Design
+function ProductCardSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const cardWidth = 88; // w-22 = 88px
-  const gap = 12;
-
-  // Scroll to selected product on mount and when selection changes
-  useEffect(() => {
-    if (scrollRef.current) {
-      const index = products.findIndex(p => p.id === selectedProductId);
-      if (index !== -1) {
-        const containerWidth = scrollRef.current.offsetWidth;
-        const scrollPosition = index * (cardWidth + gap) - (containerWidth / 2) + (cardWidth / 2);
-        scrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-      }
-    }
-  }, [selectedProductId, products]);
-
-  // Handle scroll snap end to update selection
-  const handleScroll = () => {
-    if (!scrollRef.current || editingId !== null) return;
-
-    const containerWidth = scrollRef.current.offsetWidth;
-    const scrollLeft = scrollRef.current.scrollLeft;
-    const centerOffset = scrollLeft + (containerWidth / 2);
-    const index = Math.round((centerOffset - cardWidth / 2) / (cardWidth + gap));
-    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
-
-    if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
-      setSelectedProductId(products[clampedIndex].id);
-      setRotation(clampedIndex * -60); // Keep rotation in sync for compatibility
-    }
-  };
-
-  // Debounce scroll handler
-  const scrollTimeout = useRef(null);
-  const onScrollEnd = () => {
-    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    scrollTimeout.current = setTimeout(handleScroll, 100);
-  };
-
-  const handleCardClick = (productId) => {
-    if (editingId !== null) return;
-    setSelectedProductId(productId);
-    const index = products.findIndex(p => p.id === productId);
-    setRotation(index * -60);
-  };
 
   const startEditing = (productId, currentName) => {
     setEditingId(productId);
@@ -760,121 +695,66 @@ function JukeboxSelector({ products, selectedProductId, setRotation, setSelected
   };
 
   return (
-    <div className="relative w-full">
-      {/* Gradient overlays for edge fade effect */}
-      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-apple-bg to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-apple-bg to-transparent z-10 pointer-events-none" />
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
+      {products.map((product) => {
+        const isActive = product.id === selectedProductId;
+        const count = productCounts.find(p => p.id === product.id)?.count || 0;
+        const isEditing = editingId === product.id;
 
-      {/* Scrollable container */}
-      <div
-        ref={scrollRef}
-        className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar py-4 px-8"
-        onScroll={onScrollEnd}
-        style={{ scrollSnapType: 'x mandatory' }}
-      >
-        {/* Spacer to allow first item to center */}
-        <div className="flex-none" style={{ width: 'calc(50% - 44px)' }} />
-
-        {products.map((product, index) => {
-          const isActive = product.id === selectedProductId;
-          const count = productCounts.find(p => p.id === product.id)?.count || 0;
-          const isEditing = editingId === product.id;
-
-          return (
-            <div
-              key={product.id}
-              onClick={() => !isEditing && handleCardClick(product.id)}
-              className={`
-                flex-none w-22 h-28 rounded-xl p-3 flex flex-col justify-between
-                border cursor-pointer select-none snap-center
-                transition-all duration-300 ease-out
-                ${isActive
-                  ? 'bg-apple-red text-white shadow-lg shadow-red-200/50 border-transparent scale-105'
-                  : 'bg-white text-gray-500 border-gray-200 shadow-sm hover:shadow-md hover:scale-[1.02]'
-                }
-              `}
-              style={{ width: cardWidth, minWidth: cardWidth }}
-            >
-              <div className="flex justify-between items-start">
-                <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                  <ChefHat size={14} />
-                </div>
-                {isActive && !isEditing && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                    className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
-                  >
-                    <Pencil size={10} />
-                  </button>
-                )}
+        return (
+          <div
+            key={product.id}
+            onClick={() => !isEditing && setSelectedProductId(product.id)}
+            className={`
+              relative p-3 rounded-xl border transition-all duration-200 cursor-pointer
+              flex flex-col justify-between h-24
+              ${isActive
+                ? 'bg-apple-red text-white border-apple-red shadow-md transform scale-[1.02]'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-apple-red/30 hover:shadow-sm'
+              }
+            `}
+          >
+            <div className="flex justify-between items-start">
+              <div className={`p-1.5 rounded-full w-fit ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
+                <ChefHat size={14} className={isActive ? 'text-white' : 'text-gray-500'} />
               </div>
+              {isActive && !isEditing && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
+                  className="p-1 hover:bg-white/20 rounded text-white/80 hover:text-white transition-colors"
+                >
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
 
-              <div>
-                {isEditing ? (
-                  <div className="flex items-center gap-1 mb-1">
-                    <input
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => saveEdit(product.id)}
-                      onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
-                      className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <button onClick={(e) => { e.stopPropagation(); saveEdit(product.id); }} className="text-white hover:text-green-200">
-                      <Check size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className={`font-bold text-[10px] leading-tight mb-0.5 truncate ${isActive ? 'text-white' : 'text-gray-700'}`}>
+            <div className="mt-2">
+              {isEditing ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => saveEdit(product.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
+                    className="w-full text-xs font-bold bg-white text-black rounded px-1 py-0.5 outline-none"
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className={`font-bold text-xs leading-tight mb-0.5 truncate ${isActive ? 'text-white' : 'text-gray-800'}`}>
                     {product.name}
                   </div>
-                )}
-                <div className={`text-[8px] font-medium ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
-                  {count} SESSIONS
-                </div>
-              </div>
+                  <div className={`text-[9px] font-medium uppercase tracking-wider ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                    {count} Sessions
+                  </div>
+                </>
+              )}
             </div>
-          );
-        })}
-
-        {/* Spacer to allow last item to center */}
-        <div className="flex-none" style={{ width: 'calc(50% - 44px)' }} />
-      </div>
-
-      {/* Center indicator line */}
-      <div className="absolute left-1/2 bottom-0 w-8 h-1 bg-apple-red/30 rounded-full -translate-x-1/2" />
+          </div>
+        );
+      })}
     </div>
   );
 }
-
-// Auto-Fit Text Component
-const AutoFitText = ({ text, maxWidth, className = "" }) => {
-  const textRef = useRef(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    if (textRef.current) {
-      textRef.current.style.transform = 'scale(1)';
-      const width = textRef.current.scrollWidth;
-
-      if (width > maxWidth) {
-        setScale(maxWidth / width);
-      } else {
-        setScale(1);
-      }
-    }
-  }, [text, maxWidth]);
-
-  return (
-    <div className={`w-full overflow-visible flex justify-center ${className}`} style={{ width: maxWidth }}>
-      <div
-        ref={textRef}
-        className="whitespace-nowrap origin-center transition-transform duration-200"
-        style={{ transform: `scale(${scale})` }}
-      >
-        {text}
-      </div>
-    </div>
-  );
-};
