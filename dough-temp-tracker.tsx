@@ -337,9 +337,12 @@ export default function DoughTempTracker() {
 
           {/* Left Column: Product Selector (Card Grid) */}
           <div className="md:col-span-5 flex flex-col">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-4 px-1">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-1 px-1">
               <Package size={18} className="text-apple-red" /> Select Product
             </h2>
+            <p className="text-xs text-apple-gray mb-4 px-1 text-center font-medium">
+              Scroll to select • Click pencil to rename
+            </p>
             <ProductWheelSelector
               products={products}
               selectedProductId={selectedProductId}
@@ -347,9 +350,6 @@ export default function DoughTempTracker() {
               productCounts={productCounts}
               onRename={handleRenameProduct}
             />
-            <p className="text-xs text-apple-gray mt-4 px-1 text-center font-medium">
-              Scroll to select • Click pencil to rename
-            </p>
           </div>
 
           {/* Right Column: Calculator */}
