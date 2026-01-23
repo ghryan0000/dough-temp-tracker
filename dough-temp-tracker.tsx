@@ -765,9 +765,9 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-12 mb-4 flex items-center justify-between px-6 mx-2 snap-center transition-all duration-500 ease-out ${isSelected
-                ? 'opacity-100 scale-100 bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] rounded-xl border border-gray-100 z-10'
-                : 'opacity-40 scale-90 grayscale'
+              className={`h-12 mb-4 flex items-center justify-between px-6 mx-2 snap-center transition-all duration-500 ease-out rounded-xl border ${isSelected
+                ? 'opacity-100 scale-100 bg-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.15)] border-gray-100 z-10'
+                : 'opacity-60 scale-95 bg-white/60 border-transparent shadow-none grayscale-0'
                 }`}
               onClick={() => {
                 if (!isEditing) {
