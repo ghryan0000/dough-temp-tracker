@@ -697,10 +697,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
       if (index !== -1) {
         // Set flag to ignore scroll events during programmatic scroll
         isScrollingRef.current = true;
-        // Account for py-16 (64px) top padding
-        const paddingTop = 64;
         containerRef.current.scrollTo({
-          top: index * itemHeight + paddingTop,
+          top: index * itemHeight,
           behavior: 'smooth'
         });
         // Reset flag after animation completes
@@ -716,10 +714,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     if (!containerRef.current || editingId || isScrollingRef.current) return;
 
     const scrollTop = containerRef.current.scrollTop;
-    // Account for py-16 (64px) top padding
-    const paddingTop = 64;
-    const adjustedScroll = Math.max(0, scrollTop - paddingTop);
-    const index = Math.round(adjustedScroll / itemHeight);
+    const index = Math.round(scrollTop / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
 
     if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
