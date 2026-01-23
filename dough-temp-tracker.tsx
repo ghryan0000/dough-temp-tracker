@@ -708,9 +708,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     if (!containerRef.current || editingId) return;
 
     const scrollTop = containerRef.current.scrollTop;
-    const offset = 64; // top padding in pixels
-    // Calculate index accounting for offset and centering
-    const index = Math.round((scrollTop - offset + 32) / itemHeight);
+    // Calculate which item is centered (accounting for top spacer)
+    const index = Math.round(scrollTop / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
 
     if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
