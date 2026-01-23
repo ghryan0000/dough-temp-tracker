@@ -815,6 +815,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             </div>
           );
         })}
+        {/* Bottom spacer - allows last item to center */}
+        <div style={{ height: '80px' }} />
       </div>
     </div>
   );
