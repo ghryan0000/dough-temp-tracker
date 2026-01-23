@@ -688,7 +688,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
   const isScrollingRef = useRef(false); // Prevents feedback loop
-  const itemHeight = 64; // Height of each item in the wheel
+  const itemHeight = 48; // Height of each item in the wheel
 
   // Scroll to selected product on mount or when selection changes externally
   useEffect(() => {
@@ -743,18 +743,18 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-48 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
+    <div className="relative h-36 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
       {/* Center Highlight Zone */}
-      <div className="absolute top-1/2 left-0 right-0 h-16 -mt-8 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
+      <div className="absolute top-1/2 left-0 right-0 h-12 -mt-6 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
 
       {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-16 no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-12 no-scrollbar relative z-20"
         onScroll={onScroll}
       >
         {products.map((product) => {
@@ -765,7 +765,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-16 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-95' : 'opacity-40 scale-100'
+              className={`h-12 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-90' : 'opacity-40 scale-100'
                 }`}
               onClick={() => {
                 if (!isEditing) {
@@ -816,7 +816,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           );
         })}
         {/* Bottom spacer - allows last item to center */}
-        <div style={{ height: '128px' }} />
+        <div style={{ height: '96px' }} />
       </div>
     </div>
   );
