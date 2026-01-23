@@ -765,7 +765,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-16 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-40 scale-90'
+              className={`h-16 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-95' : 'opacity-40 scale-100'
                 }`}
               onClick={() => {
                 if (!isEditing) {
