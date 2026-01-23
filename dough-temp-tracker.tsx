@@ -485,8 +485,8 @@ export default function DoughTempTracker() {
 
         {/* History List */}
         <div className="px-1">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+          <div className="mb-3">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
               <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
             </h2>
             <div className="flex gap-2">
