@@ -682,26 +682,65 @@ export default function DoughTempTracker() {
 }
 
 // Product Card Selector - Clean Grid Design
-// Product Wheel Selector Component (iOS Style)
+// Product Wheel Selector Component (iOS Style 3D)
 function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }) {
   const containerRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const isScrollingRef = useRef(false); // Prevents feedback loop
+  const isScrollingRef = useRef(false);
   const itemHeight = 48; // Height of each item in the wheel
+  const audioContextRef = useRef(null);
+
+  // Initialize Audio Context for "tick" sound
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContext) {
+      audioContextRef.current = new AudioContext();
+    }
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  const playTickSound = () => {
+    if (!audioContextRef.current) return;
+
+    // Resume context if suspended (browser autoplay policy)
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+
+    const osc = audioContextRef.current.createOscillator();
+    const gain = audioContextRef.current.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioContextRef.current.destination);
+
+    // Very short, high-pitch tick
+    osc.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+    osc.type = 'sine';
+
+    // Quick decay for a percussive sound
+    gain.gain.setValueAtTime(0.05, audioContextRef.current.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.03);
+
+    osc.start(audioContextRef.current.currentTime);
+    osc.stop(audioContextRef.current.currentTime + 0.05);
+  };
 
   // Scroll to selected product on mount or when selection changes externally
   useEffect(() => {
     if (containerRef.current && !editingId) {
       const index = products.findIndex(p => p.id === selectedProductId);
       if (index !== -1) {
-        // Set flag to ignore scroll events during programmatic scroll
         isScrollingRef.current = true;
         containerRef.current.scrollTo({
           top: index * itemHeight,
           behavior: 'smooth'
         });
-        // Reset flag after animation completes
         setTimeout(() => {
           isScrollingRef.current = false;
         }, 300);
@@ -710,6 +749,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   }, [selectedProductId, products, editingId]);
 
   // Handle scroll snap to update selection
+  const lastIndexRef = useRef(-1);
   const handleScroll = () => {
     if (!containerRef.current || editingId || isScrollingRef.current) return;
 
@@ -717,16 +757,24 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     const index = Math.round(scrollTop / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
 
-    if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
-      setSelectedProductId(products[clampedIndex].id);
+    if (clampedIndex !== lastIndexRef.current) {
+      // Only trigger update if index actually changed
+      lastIndexRef.current = clampedIndex;
+      if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
+        playTickSound();
+        setSelectedProductId(products[clampedIndex].id);
+      }
     }
   };
 
-  // Debounce scroll handler
+  // Debounce scroll handler for smoother sound triggering
   const scrollTimeout = useRef(null);
   const onScroll = () => {
     if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    scrollTimeout.current = setTimeout(handleScroll, 100);
+    // Use a very short timeout or throttle to catch rapid scrolling ticks
+    // For smoother ticking, we might want to run logic immediately if enough time passed, 
+    // but for now let's just debounce slightly to avoid excessive state updates
+    scrollTimeout.current = setTimeout(handleScroll, 10);
   };
 
   const startEditing = (productId, currentName) => {
@@ -743,21 +791,32 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-36 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
-      {/* Center Highlight Zone */}
-      <div className="absolute top-1/2 left-0 right-0 h-12 -mt-6 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
+    <div className="relative h-48 w-full select-none overflow-hidden"
+      style={{ perspective: '1000px' }}> {/* Perspective for 3D effect */}
 
-      {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
+      {/* Center Highlight Zone (No grid, just subtle selection indicator if needed) */}
+      <div className="absolute top-1/2 left-0 right-0 h-12 -mt-6 z-0 pointer-events-none 
+                    border-y border-transparent md:border-gray-200/50" />
+
+      {/* Gradient Masks for fade effect */}
+      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-apple-bg via-apple-bg/80 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-apple-bg via-apple-bg/80 to-transparent z-10 pointer-events-none" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-12 no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[calc(50%-24px)] no-scrollbar relative z-20"
         onScroll={onScroll}
+        style={{ scrollBehavior: 'smooth' }}
       >
         {products.map((product) => {
+          // We need to calculate transform based on scroll position ideally, 
+          // but CSS-only scroll-driven animations are bleeding edge.
+          // For a simpler "Apple Clock" feel without complex JS-based render loops:
+          // We rely on the container's perspective and opacity changes in JS-driven selection or simple CSS.
+          // However, for true "wheel" rotation, we need to know the offset from center.
+          // Let's use a simplified approach: The item is static in DOM flow, but visual style adapts.
+
           const isSelected = product.id === selectedProductId;
           const isEditing = editingId === product.id;
           const count = productCounts.find(p => p.id === product.id)?.count || 0;
@@ -765,58 +824,65 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           return (
             <div
               key={product.id}
-              className={`h-12 flex items-center justify-between px-8 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-90' : 'opacity-40 scale-100'
-                }`}
+              className={`h-12 flex items-center justify-between px-4 snap-center transition-all duration-200 origin-center
+                ${isSelected ? 'opacity-100 scale-100 translate-z-0' : 'opacity-30 scale-90'}`}
+              style={{
+                // Subtle rotation could be applied if we tracked precise scroll pos, 
+                // but simple opacity/scale is often enough for the "feel" if the physics are right.
+                transform: isSelected ? 'scale(1.05)' : 'scale(0.95) rotateX(20deg)',
+              }}
               onClick={() => {
                 if (!isEditing) {
                   setSelectedProductId(product.id);
+                  playTickSound();
                 }
               }}
             >
-              <div className="flex items-center gap-4 flex-1">
-                <div className={`p-2 rounded-full ${isSelected ? 'bg-apple-red text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>
-                  <ChefHat size={18} />
+              <div className="flex items-center gap-3 flex-1 justify-center md:justify-start">
+                {/* Icon */}
+                <div className={`transition-colors duration-200 ${isSelected ? 'text-black' : 'text-gray-400'}`}>
+                  <ChefHat size={20} />
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   {isEditing ? (
                     <input
+                      title="Rename Product"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={() => saveEdit(product.id)}
                       onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
-                      className="w-full text-lg font-bold bg-white border border-apple-red rounded px-2 py-0.5 outline-none shadow-sm"
+                      className="w-full text-lg font-bold bg-white/50 border-b border-apple-red outline-none text-center md:text-left"
                       autoFocus
-                      onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
-                    <div className={`flex flex-col ${isSelected ? 'items-start' : 'items-center md:items-start'}`}>
-                      <span className={`text-lg font-bold leading-tight ${isSelected ? 'text-black' : 'text-gray-600'}`}>
+                    <div className="flex flex-col items-center md:items-start">
+                      <span className={`text-xl font-medium tracking-tight truncate w-full text-center md:text-left
+                        ${isSelected ? 'text-black' : 'text-gray-400 font-normal'}`}>
                         {product.name}
                       </span>
-                      {isSelected && (
-                        <span className="text-[10px] font-bold text-apple-red uppercase tracking-wider">
-                          {count} Sessions
-                        </span>
-                      )}
                     </div>
                   )}
                 </div>
-              </div>
 
-              {isSelected && !isEditing && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                  className="p-2 text-gray-400 hover:text-apple-red hover:bg-red-50 rounded-full transition-colors"
-                >
-                  <Pencil size={14} />
-                </button>
-              )}
+                {/* Edit Button - Only visible when selected */}
+                <div className={`w-8 flex justify-center ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
+                  {!isEditing && (
+                    <button
+                      title="Edit product name"
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      onClick={(e: any) => { e.stopPropagation(); startEditing(product.id, product.name); }}
+                      className="text-apple-gray hover:text-apple-red transition-colors"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
-        {/* Bottom spacer - allows last item to center */}
-        <div style={{ height: '96px' }} />
+        {/* Helper padding is handled by container py-[calc] */}
       </div>
     </div>
   );
