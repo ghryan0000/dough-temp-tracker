@@ -682,16 +682,38 @@ export default function DoughTempTracker() {
 }
 
 // Product Card Selector - Clean Grid Design
-// Product Wheel Selector Component (iOS Style 3D)
-function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }) {
-  const containerRef = useRef(null);
-  const [editingId, setEditingId] = useState(null);
+// Product Wheel Selector Component (Apple Clock Style - Red Palette)
+interface Product {
+  id: string;
+  name: string;
+}
+
+interface ProductCount {
+  id: string;
+  count: number;
+}
+
+interface ProductWheelSelectorProps {
+  products: Product[];
+  selectedProductId: string;
+  setSelectedProductId: (id: string) => void;
+  productCounts: ProductCount[];
+  onRename: (id: string, newName: string) => void;
+}
+
+function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }: ProductWheelSelectorProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const isScrollingRef = useRef(false);
-  const itemHeight = 48; // Height of each item in the wheel
-  const audioContextRef = useRef(null);
 
-  // Initialize Audio Context for "tick" sound
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  const ITEM_HEIGHT = 44; // Reduced from 56 for iOS Clock compact spacing
+  const RADIUS = 120;
+
+  // Initialize Audio
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -699,90 +721,124 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
       audioContextRef.current = new AudioContext();
     }
     return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+      if (audioContextRef.current) audioContextRef.current.close();
     };
   }, []);
 
+  // Apple Clock realistic mechanical click
   const playTickSound = () => {
     if (!audioContextRef.current) return;
+    if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
 
-    // Resume context if suspended (browser autoplay policy)
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+    const bufferSize = audioContextRef.current.sampleRate * 0.015;
+    const buffer = audioContextRef.current.createBuffer(1, bufferSize, audioContextRef.current.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
     }
 
-    const osc = audioContextRef.current.createOscillator();
-    const gain = audioContextRef.current.createGain();
+    const noise = audioContextRef.current.createBufferSource();
+    noise.buffer = buffer;
 
-    osc.connect(gain);
+    const filter = audioContextRef.current.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 2;
+
+    const gain = audioContextRef.current.createGain();
+    gain.gain.value = 0.08;
+
+    noise.connect(filter);
+    filter.connect(gain);
     gain.connect(audioContextRef.current.destination);
 
-    // Very short, high-pitch tick
-    osc.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
-    osc.type = 'sine';
-
-    // Quick decay for a percussive sound
-    gain.gain.setValueAtTime(0.05, audioContextRef.current.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.03);
-
-    osc.start(audioContextRef.current.currentTime);
-    osc.stop(audioContextRef.current.currentTime + 0.05);
+    noise.start(audioContextRef.current.currentTime);
   };
 
-  // Scroll to selected product on mount or when selection changes externally
-  useEffect(() => {
-    if (containerRef.current && !editingId) {
+  // 3D Transform Logic - NO OPACITY OVERRIDE
+  const updateTransforms = () => {
+    if (!containerRef.current) return;
+
+    const scrollTop = containerRef.current.scrollTop;
+    const containerCenter = scrollTop + (containerRef.current.clientHeight / 2);
+
+    itemsRef.current.forEach((item, index) => {
+      if (!item) return;
+
+      const itemCenter = (index * ITEM_HEIGHT) + (ITEM_HEIGHT / 2);
+      const distanceFromCenter = containerCenter - itemCenter;
+      const angle = (distanceFromCenter / ITEM_HEIGHT) * 8; // Reduced from 20 for flatter iOS look
+      const absDistance = Math.abs(distanceFromCenter);
+
+      // iOS Clock shows 5-7 cards - much wider visibility
+      const isVisible = absDistance <= ITEM_HEIGHT * 4; // Increased to show more cards
+
+      item.style.transform = `rotateX(${angle}deg) translateZ(${RADIUS}px)`;
+      item.style.zIndex = Math.round(100 - absDistance);
+      item.style.visibility = isVisible ? 'visible' : 'hidden';
+
+      // CRITICAL: Don't touch opacity - let isSelected styling show through
+    });
+  };
+
+  // Main Scroll Loop
+  const lastSelectedRef = useRef(selectedProductId);
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    requestAnimationFrame(updateTransforms);
+    if (isScrollingRef.current) return;
+
+    const scrollTop = containerRef.current.scrollTop;
+    const index = Math.round(scrollTop / ITEM_HEIGHT);
+    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
+    const targetProduct = products[clampedIndex];
+
+    if (targetProduct && targetProduct.id !== lastSelectedRef.current) {
+      if (!editingId) {
+        lastSelectedRef.current = targetProduct.id;
+        setSelectedProductId(targetProduct.id);
+        playTickSound();
+      }
+    }
+  };
+
+  // Initial Setup
+  useLayoutEffect(() => {
+    updateTransforms();
+    if (containerRef.current) {
       const index = products.findIndex(p => p.id === selectedProductId);
       if (index !== -1) {
         isScrollingRef.current = true;
-        containerRef.current.scrollTo({
-          top: index * itemHeight,
-          behavior: 'smooth'
-        });
-        setTimeout(() => {
-          isScrollingRef.current = false;
-        }, 300);
+        containerRef.current.scrollTop = index * ITEM_HEIGHT;
+        setTimeout(() => isScrollingRef.current = false, 100);
+        updateTransforms();
       }
+    }
+  }, []);
+
+  // Sync external selection changes
+  useEffect(() => {
+    if (isScrollingRef.current || !containerRef.current || editingId) return;
+
+    const index = products.findIndex(p => p.id === selectedProductId);
+    if (index !== -1 && selectedProductId !== lastSelectedRef.current) {
+      lastSelectedRef.current = selectedProductId;
+      isScrollingRef.current = true;
+      containerRef.current.scrollTo({
+        top: index * ITEM_HEIGHT,
+        behavior: 'smooth'
+      });
+      setTimeout(() => { isScrollingRef.current = false; }, 500);
     }
   }, [selectedProductId, products, editingId]);
 
-  // Handle scroll snap to update selection
-  const lastIndexRef = useRef(-1);
-  const handleScroll = () => {
-    if (!containerRef.current || editingId || isScrollingRef.current) return;
-
-    const scrollTop = containerRef.current.scrollTop;
-    const index = Math.round(scrollTop / itemHeight);
-    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
-
-    if (clampedIndex !== lastIndexRef.current) {
-      // Only trigger update if index actually changed
-      lastIndexRef.current = clampedIndex;
-      if (products[clampedIndex] && products[clampedIndex].id !== selectedProductId) {
-        playTickSound();
-        setSelectedProductId(products[clampedIndex].id);
-      }
-    }
-  };
-
-  // Debounce scroll handler for smoother sound triggering
-  const scrollTimeout = useRef(null);
-  const onScroll = () => {
-    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    // Use a very short timeout or throttle to catch rapid scrolling ticks
-    // For smoother ticking, we might want to run logic immediately if enough time passed, 
-    // but for now let's just debounce slightly to avoid excessive state updates
-    scrollTimeout.current = setTimeout(handleScroll, 10);
-  };
-
-  const startEditing = (productId, currentName) => {
+  const startEditing = (productId: string, currentName: string) => {
     setEditingId(productId);
     setEditValue(currentName);
   };
 
-  const saveEdit = (productId) => {
+  const saveEdit = (productId: string) => {
     const product = products.find(p => p.id === productId);
     if (editValue.trim() && editValue !== product?.name) {
       onRename(productId, editValue);
@@ -791,99 +847,115 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-48 w-full select-none overflow-hidden"
-      style={{ perspective: '1000px' }}> {/* Perspective for 3D effect */}
+    <div className="relative h-48 w-full select-none overflow-hidden bg-transparent"
+      style={{ perspective: '1000px' }}>
 
-      {/* Center Highlight Zone (No grid, just subtle selection indicator if needed) */}
-      <div className="absolute top-1/2 left-0 right-0 h-12 -mt-6 z-0 pointer-events-none 
-                    border-y border-transparent md:border-gray-200/50" />
-
-      {/* Gradient Masks for fade effect */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-apple-bg via-apple-bg/80 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-apple-bg via-apple-bg/80 to-transparent z-10 pointer-events-none" />
+      {/* Apple Clock Style Highlight Bar */}
+      <div className="absolute top-1/2 left-0 right-0 h-[44px] -mt-[22px] z-10 pointer-events-none rounded-lg bg-gray-200/10 backdrop-blur-[0.5px]" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-[calc(50%-24px)] no-scrollbar relative z-20"
-        onScroll={onScroll}
-        style={{ scrollBehavior: 'smooth' }}
+        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative z-20"
+        onScroll={handleScroll}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+          if (!containerRef.current || editingId) return;
+
+          const rect = containerRef.current.getBoundingClientRect();
+          const clickY = e.clientY - rect.top;
+          const centerY = rect.height / 2;
+          const currentIndex = products.findIndex(p => p.id === selectedProductId);
+
+          // Click above center - go to previous card
+          if (clickY < centerY - ITEM_HEIGHT / 2 && currentIndex > 0) {
+            const targetIndex = currentIndex - 1;
+            playTickSound();
+            containerRef.current.scrollTo({
+              top: targetIndex * ITEM_HEIGHT,
+              behavior: 'smooth'
+            });
+          }
+          // Click below center - go to next card
+          else if (clickY > centerY + ITEM_HEIGHT / 2 && currentIndex < products.length - 1) {
+            const targetIndex = currentIndex + 1;
+            playTickSound();
+            containerRef.current.scrollTo({
+              top: targetIndex * ITEM_HEIGHT,
+              behavior: 'smooth'
+            });
+          }
+        }}
+        style={{
+          scrollBehavior: isScrollingRef.current ? 'smooth' : 'auto',
+          paddingTop: `calc(50% - ${ITEM_HEIGHT / 2}px)`,
+          paddingBottom: `calc(50% - ${ITEM_HEIGHT / 2}px)`,
+          transformStyle: 'preserve-3d'
+        }}
       >
-        {products.map((product) => {
-          // We need to calculate transform based on scroll position ideally, 
-          // but CSS-only scroll-driven animations are bleeding edge.
-          // For a simpler "Apple Clock" feel without complex JS-based render loops:
-          // We rely on the container's perspective and opacity changes in JS-driven selection or simple CSS.
-          // However, for true "wheel" rotation, we need to know the offset from center.
-          // Let's use a simplified approach: The item is static in DOM flow, but visual style adapts.
+        <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+          {products.map((product, i) => {
+            const isSelected = product.id === selectedProductId;
+            const isEditing = editingId === product.id;
 
-          const isSelected = product.id === selectedProductId;
-          const isEditing = editingId === product.id;
-          const count = productCounts.find(p => p.id === product.id)?.count || 0;
+            return (
+              <div
+                key={product.id}
+                ref={el => itemsRef.current[i] = el}
+                className="h-[44px] flex items-center justify-center snap-center absolute top-0 left-0 right-0 will-change-transform backface-visibility-hidden"
+                style={{ top: `${i * ITEM_HEIGHT}px` }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation(); // Prevent container onClick from interfering
+                  if (!isEditing) {
+                    setSelectedProductId(product.id);
+                    playTickSound();
+                  }
+                }}
+              >
+                {/* Compact iOS Clock style cards */}
+                <div className={`w-64 mx-3 px-5 py-2 rounded-full transition-all duration-200 flex items-center justify-start gap-3
+                    ${isSelected
+                    ? 'bg-apple-red hover:bg-red-600 text-white shadow-sm'
+                    : 'bg-white border border-gray-200 text-apple-gray hover:text-black'
+                  }`}>
 
-          return (
-            <div
-              key={product.id}
-              className={`h-12 flex items-center justify-between px-4 snap-center transition-all duration-200 origin-center
-                ${isSelected ? 'opacity-100 scale-100 translate-z-0' : 'opacity-30 scale-90'}`}
-              style={{
-                // Subtle rotation could be applied if we tracked precise scroll pos, 
-                // but simple opacity/scale is often enough for the "feel" if the physics are right.
-                transform: isSelected ? 'scale(1.05)' : 'scale(0.95) rotateX(20deg)',
-              }}
-              onClick={() => {
-                if (!isEditing) {
-                  setSelectedProductId(product.id);
-                  playTickSound();
-                }
-              }}
-            >
-              <div className="flex items-center gap-3 flex-1 justify-center md:justify-start">
-                {/* Icon */}
-                <div className={`transition-colors duration-200 ${isSelected ? 'text-black' : 'text-gray-400'}`}>
-                  <ChefHat size={20} />
-                </div>
+                  <ChefHat size={20} className={isSelected ? 'text-white' : 'text-apple-gray'} />
 
-                <div className="flex-1 min-w-0">
                   {isEditing ? (
                     <input
-                      title="Rename Product"
                       value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
                       onBlur={() => saveEdit(product.id)}
-                      onKeyDown={(e) => e.key === 'Enter' && saveEdit(product.id)}
-                      className="w-full text-lg font-bold bg-white/50 border-b border-apple-red outline-none text-center md:text-left"
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && saveEdit(product.id)}
+                      className="bg-transparent border-b border-white text-center w-40 outline-none text-base font-bold text-white"
                       autoFocus
                     />
                   ) : (
-                    <div className="flex flex-col items-center md:items-start">
-                      <span className={`text-xl font-medium tracking-tight truncate w-full text-center md:text-left
-                        ${isSelected ? 'text-black' : 'text-gray-400 font-normal'}`}>
-                        {product.name}
-                      </span>
-                    </div>
+                    <span className={`text-base tracking-tight cursor-pointer transition-all duration-200 
+                            ${isSelected ? 'font-bold' : 'font-medium'}`}>
+                      {product.name}
+                    </span>
                   )}
-                </div>
 
-                {/* Edit Button - Only visible when selected */}
-                <div className={`w-8 flex justify-center ${isSelected ? 'opacity-100' : 'opacity-0'}`}>
-                  {!isEditing && (
+                  {isSelected && !isEditing && (
                     <button
-                      title="Edit product name"
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onClick={(e: any) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                      className="text-apple-gray hover:text-apple-red transition-colors"
+                      onClick={(e: React.MouseEvent) => { e.stopPropagation(); startEditing(product.id, product.name); }}
+                      className="p-1 text-white/80 hover:text-white transition-colors"
                     >
-                      <Pencil size={14} />
+                      <Pencil size={12} />
                     </button>
                   )}
                 </div>
               </div>
-            </div>
-          );
-        })}
-        {/* Helper padding is handled by container py-[calc] */}
+            );
+          })}
+
+          <div style={{ height: `${products.length * ITEM_HEIGHT}px` }} />
+        </div>
       </div>
+
+      {/* Gradient Masks */}
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-apple-bg to-transparent pointer-events-none z-30" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-apple-bg to-transparent pointer-events-none z-30" />
     </div>
   );
 }
