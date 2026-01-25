@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function DoughTempTracker() {
   // Product colors for dynamic assignment
@@ -707,10 +707,11 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const isScrollingRef = useRef(false);
+  const animationFrameId = useRef<number | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const ITEM_HEIGHT = 44; // Reduced from 56 for iOS Clock compact spacing
+  const ITEM_HEIGHT = 36; // Reduced to minimize spacing
   const RADIUS = 120;
 
   // Initialize Audio
@@ -782,6 +783,53 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     });
   };
 
+  // Scroll Animation Helpers
+  const cancelScrollAnimation = () => {
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = null;
+    }
+    // Don't set isScrollingRef to false here immediately if we want to separate concerns,
+    // but typically if we cancel, we are done scrolling programmatically.
+    // However, user might be scrolling.
+    isScrollingRef.current = false;
+    if (containerRef.current) {
+      containerRef.current.style.scrollSnapType = '';
+    }
+  };
+
+  const smoothScrollTo = (container: HTMLElement, target: number, duration: number) => {
+    cancelScrollAnimation();
+
+    const start = container.scrollTop;
+    const change = target - start;
+    const startTime = performance.now();
+
+    isScrollingRef.current = true;
+    container.style.scrollSnapType = 'none';
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+
+      if (elapsed > duration) {
+        container.scrollTop = target;
+        isScrollingRef.current = false;
+        container.style.scrollSnapType = '';
+        animationFrameId.current = null;
+        return;
+      }
+
+      // easeInOutCubic
+      let t = elapsed / duration;
+      t = t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+
+      container.scrollTop = start + change * t;
+      animationFrameId.current = requestAnimationFrame(animateScroll);
+    };
+
+    animationFrameId.current = requestAnimationFrame(animateScroll);
+  };
+
   // Main Scroll Loop
   const lastSelectedRef = useRef(selectedProductId);
   const handleScroll = () => {
@@ -824,12 +872,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     const index = products.findIndex(p => p.id === selectedProductId);
     if (index !== -1 && selectedProductId !== lastSelectedRef.current) {
       lastSelectedRef.current = selectedProductId;
-      isScrollingRef.current = true;
-      containerRef.current.scrollTo({
-        top: index * ITEM_HEIGHT,
-        behavior: 'smooth'
-      });
-      setTimeout(() => { isScrollingRef.current = false; }, 500);
+      smoothScrollTo(containerRef.current, index * ITEM_HEIGHT, 50000);
     }
   }, [selectedProductId, products, editingId]);
 
@@ -847,19 +890,22 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-80 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
+    <div className="relative h-[144px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
       {/* Center Highlight Zone */}
-      <div className="absolute top-32 left-0 right-0 h-16 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
+      <div className="absolute top-[54px] left-0 right-14 h-[36px] z-0 pointer-events-none" />
 
       {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-14 h-4 bg-gradient-to-b from-apple-bg to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-14 h-4 bg-gradient-to-t from-apple-bg to-transparent z-10 pointer-events-none" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-32 no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20"
         onScroll={handleScroll}
+        onTouchStart={() => cancelScrollAnimation()}
+        onMouseDown={() => cancelScrollAnimation()}
+        onWheel={() => cancelScrollAnimation()}
         onClick={(e: React.MouseEvent<HTMLDivElement>) => {
           if (!containerRef.current || editingId) return;
 
@@ -872,23 +918,17 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           if (clickY < centerY - ITEM_HEIGHT / 2 && currentIndex > 0) {
             const targetIndex = currentIndex - 1;
             playTickSound();
-            containerRef.current.scrollTo({
-              top: targetIndex * ITEM_HEIGHT,
-              behavior: 'smooth'
-            });
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 50000);
           }
           // Click below center - go to next card
           else if (clickY > centerY + ITEM_HEIGHT / 2 && currentIndex < products.length - 1) {
             const targetIndex = currentIndex + 1;
             playTickSound();
-            containerRef.current.scrollTo({
-              top: targetIndex * ITEM_HEIGHT,
-              behavior: 'smooth'
-            });
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 50000);
           }
         }}
         style={{
-          scrollBehavior: isScrollingRef.current ? 'smooth' : 'auto',
+          scrollBehavior: 'auto',
           transformStyle: 'preserve-3d'
         }}
       >
@@ -901,7 +941,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
               <div
                 key={product.id}
                 ref={el => itemsRef.current[i] = el}
-                className="h-[44px] flex items-center justify-center snap-center absolute top-0 left-0 right-0 will-change-transform backface-visibility-hidden"
+                className="h-[36px] flex items-center justify-center snap-center absolute top-0 left-0 right-14 will-change-transform backface-visibility-hidden"
                 style={{ top: `${i * ITEM_HEIGHT}px` }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation(); // Prevent container onClick from interfering
@@ -912,7 +952,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
                 }}
               >
                 {/* Compact iOS Clock style cards */}
-                <div className={`w-64 mx-3 px-5 py-2 rounded-full transition-all duration-200 flex items-center justify-start gap-3
+                <div className={`w-64 mx-3 px-5 py-2 rounded-full transition-all duration-200 flex items-center gap-3
+                    ${isSelected ? 'justify-start' : 'justify-center'}
                     ${isSelected
                     ? 'bg-apple-red hover:bg-red-600 text-white shadow-sm'
                     : 'bg-white border border-gray-200 text-apple-gray hover:text-black'
@@ -930,8 +971,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
                       autoFocus
                     />
                   ) : (
-                    <span className={`text-base tracking-tight cursor-pointer transition-all duration-200 
-                            ${isSelected ? 'font-bold' : 'font-medium'}`}>
+                    <span className={`tracking-tight cursor-pointer transition-all duration-200 
+                            ${isSelected ? 'font-black text-lg' : 'font-medium text-base'}`}>
                       {product.name}
                     </span>
                   )}
@@ -939,7 +980,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
                   {isSelected && !isEditing && (
                     <button
                       onClick={(e: React.MouseEvent) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                      className="p-1 text-white/80 hover:text-white transition-colors"
+                      className="p-1 text-white/80 hover:text-white transition-colors ml-auto"
                     >
                       <Pencil size={12} />
                     </button>
@@ -954,8 +995,44 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
       </div>
 
       {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-apple-bg to-transparent pointer-events-none z-30" />
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-apple-bg to-transparent pointer-events-none z-30" />
+      <div className="absolute top-0 left-0 right-14 h-16 bg-gradient-to-b from-apple-bg to-transparent pointer-events-none z-30" />
+      <div className="absolute bottom-0 left-0 right-14 h-16 bg-gradient-to-t from-apple-bg to-transparent pointer-events-none z-30" />
+      {/* Navigation Buttons */}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-40">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+
+            if (!containerRef.current || editingId) return;
+            const currentIndex = products.findIndex(p => p.id === selectedProductId);
+            if (currentIndex > 0) {
+              const targetIndex = currentIndex - 1;
+              playTickSound();
+              smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
+            }
+          }}
+          className="p-2 rounded-full bg-[#ffb3ae] hover:bg-[#ff9a94] text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          disabled={products.findIndex(p => p.id === selectedProductId) <= 0}
+        >
+          <ChevronUp size={20} strokeWidth={3} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!containerRef.current || editingId) return;
+            const currentIndex = products.findIndex(p => p.id === selectedProductId);
+            if (currentIndex < products.length - 1) {
+              const targetIndex = currentIndex + 1;
+              playTickSound();
+              smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
+            }
+          }}
+          className="p-2 rounded-full bg-[#ffb3ae] hover:bg-[#ff9a94] text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          disabled={products.findIndex(p => p.id === selectedProductId) >= products.length - 1}
+        >
+          <ChevronDown size={20} strokeWidth={3} />
+        </button>
+      </div>
     </div>
   );
 }
