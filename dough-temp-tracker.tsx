@@ -1,12 +1,50 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X } from 'lucide-react';
 
+
+// Interfaces
+interface Product {
+  id: number;
+  name: string;
+  color: string;
+}
+
+interface Bake {
+  id: number;
+  productId: number;
+  date: string;
+  roomTemp: number | string;
+  flourTemp: number | string;
+  waterTemp: number | string;
+  levainTemp: number | string;
+  finalTemp: number | string;
+  mixTime: number | string;
+  hydration: number | string;
+}
+
+interface ProductCount {
+  id: number;
+  name: string;
+  count: number;
+}
+
+interface RegressionModel {
+  intercept: number;
+  roomCoef: number;
+  flourCoef: number;
+  levainCoef: number;
+  targetCoef: number;
+  mixTimeCoef: number;
+  hydrationCoef: number;
+  rSquared: number;
+  nSamples: number;
+}
 export default function DoughTempTracker() {
   // Product colors for dynamic assignment
-  const productColors = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
+  const productColors: string[] = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
 
   // Data migration and initialization
-  const [products, setProducts] = useState(() => {
+  const [products, setProducts] = useState<Product[]>(() => {
     // Check for new format first
     const newFormat = localStorage.getItem('products-v2');
     if (newFormat) {
@@ -41,7 +79,7 @@ export default function DoughTempTracker() {
     localStorage.setItem('products-v2', JSON.stringify(products));
   }, [products]);
 
-  const [selectedProductId, setSelectedProductId] = useState(() => {
+  const [selectedProductId, setSelectedProductId] = useState<number>(() => {
     const saved = localStorage.getItem('selectedProductId-v2');
     if (saved) return parseInt(saved);
 
@@ -58,8 +96,8 @@ export default function DoughTempTracker() {
     localStorage.setItem('selectedProductId-v2', selectedProductId.toString());
   }, [selectedProductId]);
 
-  const [targetTemp, setTargetTemp] = useState(25);
-  const [bakes, setBakes] = useState(() => {
+  const [targetTemp, setTargetTemp] = useState<number | string>(25);
+  const [bakes, setBakes] = useState<Bake[]>(() => {
     // Check for new format first
     const newFormat = localStorage.getItem('bakes-v2');
     if (newFormat) {
@@ -94,6 +132,8 @@ export default function DoughTempTracker() {
   // Product management
   const [showProductManager, setShowProductManager] = useState(false);
   const [newProductName, setNewProductName] = useState('');
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
 
   const addProduct = () => {
     if (!newProductName.trim()) return;
@@ -107,7 +147,7 @@ export default function DoughTempTracker() {
     setNewProductName('');
   };
 
-  const deleteProduct = (id) => {
+  const deleteProduct = (id: number) => {
     if (products.length === 1) {
       alert('Cannot delete the last product!');
       return;
@@ -119,7 +159,7 @@ export default function DoughTempTracker() {
     }
   };
 
-  const handleRenameProduct = (id, newName) => {
+  const handleRenameProduct = (id: number, newName: string) => {
     if (!newName.trim()) return;
     const product = products.find(p => p.id === id);
     if (!product || product.name === newName) return;
@@ -127,10 +167,20 @@ export default function DoughTempTracker() {
     setProducts(products.map(p => p.id === id ? { ...p, name: newName } : p));
   };
 
-  const [regressionModel, setRegressionModel] = useState(null);
+  const moveProduct = (index: number, direction: 'up' | 'down') => {
+    const newProducts = [...products];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (targetIndex >= 0 && targetIndex < newProducts.length) {
+      [newProducts[index], newProducts[targetIndex]] = [newProducts[targetIndex], newProducts[index]];
+      setProducts(newProducts);
+    }
+  };
+
+  const [regressionModel, setRegressionModel] = useState<RegressionModel | null>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [debugInfo, setDebugInfo] = useState('');
-  const [currentConditions, setCurrentConditions] = useState({
+  const [currentConditions, setCurrentConditions] = useState<Record<string, string | number>>({
     roomTemp: 22,
     flourTemp: 20,
     levainTemp: 24,
@@ -158,18 +208,18 @@ export default function DoughTempTracker() {
         parseFloat(b.finalTemp), parseFloat(b.mixTime), parseFloat(b.hydration)
       ]);
 
-      const means = [];
-      const stds = [];
+      const means: number[] = [];
+      const stds: number[] = [];
       for (let j = 1; j < 7; j++) {
-        const values = rawX.map(row => row[j]);
-        const mean = values.reduce((a, b) => a + b, 0) / n;
-        const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
+        const values = rawX.map((row: number[]) => row[j]);
+        const mean = values.reduce((a: number, b: number) => a + b, 0) / n;
+        const variance = values.reduce((sum: number, val: number) => sum + Math.pow(val - mean, 2), 0) / n;
         const std = Math.sqrt(variance) || 1;
         means.push(mean);
         stds.push(std);
       }
 
-      const X = rawX.map(row => [row[0], ...row.slice(1).map((val, idx) => (val - means[idx]) / stds[idx])]);
+      const X = rawX.map((row: number[]) => [row[0], ...row.slice(1).map((val: number, idx: number) => (val - means[idx]) / stds[idx])]);
       const beta = solveRobust(X, y);
 
       if (!beta || beta.some(isNaN) || beta.some(val => !isFinite(val))) {
@@ -199,13 +249,13 @@ export default function DoughTempTracker() {
         levainCoef: denormBeta[3], targetCoef: denormBeta[4], mixTimeCoef: denormBeta[5],
         hydrationCoef: denormBeta[6], rSquared: rSquared, nSamples: n
       };
-    } catch (error) {
+    } catch (error: any) {
       setDebugInfo(`❌ Error: ${error.message}`);
       return null;
     }
   };
 
-  const solveRobust = (X, y) => {
+  const solveRobust = (X: number[][], y: number[]) => {
     const n = X.length, m = X[0].length, lambda = 0.01;
     const XtX = Array(m).fill(0).map(() => Array(m).fill(0));
     for (let i = 0; i < m; i++) {
@@ -224,7 +274,7 @@ export default function DoughTempTracker() {
     return gaussianEliminationPivot(XtX, Xty);
   };
 
-  const gaussianEliminationPivot = (A, b) => {
+  const gaussianEliminationPivot = (A: number[][], b: number[]) => {
     const n = A.length;
     const Ab = A.map((row, i) => [...row, b[i]]);
     for (let i = 0; i < n; i++) {
@@ -262,17 +312,17 @@ export default function DoughTempTracker() {
     }]);
   };
 
-  const deleteBake = (id) => setBakes(bakes.filter(b => b.id !== id));
-  const updateBake = (id, field, value) => setBakes(bakes.map(b => b.id === id ? { ...b, [field]: value } : b));
-  const updateCurrentCondition = (field, value) => setCurrentConditions({ ...currentConditions, [field]: value });
+  const deleteBake = (id: number) => setBakes(bakes.filter(b => b.id !== id));
+  const updateBake = (id: number, field: keyof Bake, value: string | number) => setBakes(bakes.map(b => b.id === id ? { ...b, [field]: value } : b));
+  const updateCurrentCondition = (field: string, value: string | number) => setCurrentConditions({ ...currentConditions, [field]: value });
 
-  const calculateSimpleFriction = (bake) => {
+  const calculateSimpleFriction = (bake: Bake) => {
     const { roomTemp, flourTemp, waterTemp, levainTemp, finalTemp } = bake;
     if (!roomTemp || !flourTemp || !waterTemp || !levainTemp || !finalTemp) return '-';
     return ((5 * parseFloat(finalTemp)) - (parseFloat(roomTemp) + parseFloat(flourTemp) + parseFloat(waterTemp) + parseFloat(levainTemp))).toFixed(1);
   };
 
-  const predictWaterTemp = (roomTemp, flourTemp, levainTemp, targetFinal, mixTime, hydration) => {
+  const predictWaterTemp = (roomTemp: number | string, flourTemp: number | string, levainTemp: number | string, targetFinal: number | string, mixTime: number | string, hydration: number | string) => {
     if (!regressionModel) return null;
     return regressionModel.intercept + regressionModel.roomCoef * parseFloat(roomTemp) +
       regressionModel.flourCoef * parseFloat(flourTemp) + regressionModel.levainCoef * parseFloat(levainTemp) +
@@ -340,15 +390,14 @@ export default function DoughTempTracker() {
             <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-1 px-1">
               <Package size={18} className="text-apple-red" /> Select Product
             </h2>
-            <p className="text-xs text-apple-gray mb-4 px-1 text-center font-medium">
-              Scroll to select • Click pencil to rename
+            <p className="text-xs text-apple-gray mb-4 px-1 text-left font-medium">
+              Scroll to select
             </p>
             <ProductWheelSelector
               products={products}
               selectedProductId={selectedProductId}
               setSelectedProductId={setSelectedProductId}
               productCounts={productCounts}
-              onRename={handleRenameProduct}
             />
           </div>
 
@@ -534,8 +583,8 @@ export default function DoughTempTracker() {
                           type="number"
                           placeholder="--"
                           className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                          value={bake[field.key]}
-                          onChange={(e) => updateBake(bake.id, field.key, e.target.value)}
+                          value={bake[field.key as keyof Bake]}
+                          onChange={(e) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
                         />
                       </div>
                     ))}
@@ -605,16 +654,83 @@ export default function DoughTempTracker() {
                 {products.map(product => (
                   <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${product.color}`}></div>
-                      <span className="text-sm font-medium">{product.name}</span>
-                      <span className="text-xs text-gray-400">
-                        ({bakes.filter(b => b.productId === product.id).length} sessions)
-                      </span>
+                      <div className="flex items-center space-x-0.5 mr-2">
+                        <button
+                          onClick={() => moveProduct(products.indexOf(product), 'up')}
+                          disabled={products.indexOf(product) === 0}
+                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move Up"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => moveProduct(products.indexOf(product), 'down')}
+                          disabled={products.indexOf(product) === products.length - 1}
+                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                          title="Move Down"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 flex-grow">
+                        <div className={`w-3 h-3 rounded-full ${product.color} flex-shrink-0`}></div>
+                        {editingProductId === product.id ? (
+                          <div className="flex items-center gap-1 flex-grow">
+                            <input
+                              type="text"
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleRenameProduct(product.id, editName);
+                                  setEditingProductId(null);
+                                } else if (e.key === 'Escape') {
+                                  setEditingProductId(null);
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                handleRenameProduct(product.id, editName);
+                                setEditingProductId(null);
+                              }}
+                              className="text-green-600 hover:text-green-700 p-0.5"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={() => setEditingProductId(null)}
+                              className="text-red-500 hover:text-red-600 p-0.5"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-sm font-medium truncate">{product.name}</span>
+                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                              ({bakes.filter(b => b.productId === product.id).length})
+                            </span>
+                            <button
+                              onClick={() => {
+                                setEditingProductId(product.id);
+                                setEditName(product.name);
+                              }}
+                              className="text-gray-300 hover:text-purple-600 transition-colors p-1"
+                              title="Rename Product"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => deleteProduct(product.id)}
                       disabled={products.length === 1}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-2"
                       title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
                     >
                       <Trash2 size={16} />
@@ -677,35 +793,21 @@ export default function DoughTempTracker() {
         </div>
 
       </div>
-    </div>
+    </div >
   );
 }
 
 // Product Card Selector - Clean Grid Design
 // Product Wheel Selector Component (Apple Clock Style - Red Palette)
-interface Product {
-  id: string;
-  name: string;
-}
-
-interface ProductCount {
-  id: string;
-  count: number;
-}
-
 interface ProductWheelSelectorProps {
   products: Product[];
-  selectedProductId: string;
-  setSelectedProductId: (id: string) => void;
+  selectedProductId: number;
+  setSelectedProductId: (id: number) => void;
   productCounts: ProductCount[];
-  onRename: (id: string, newName: string) => void;
 }
 
-function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts, onRename }: ProductWheelSelectorProps) {
+function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts }: ProductWheelSelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
   const isScrollingRef = useRef(false);
   const animationFrameId = useRef<number | null>(null);
 
@@ -757,31 +859,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     noise.start(audioContextRef.current.currentTime);
   };
 
-  // 3D Transform Logic - NO OPACITY OVERRIDE
-  const updateTransforms = () => {
-    if (!containerRef.current) return;
 
-    const scrollTop = containerRef.current.scrollTop;
-    const containerCenter = scrollTop + (containerRef.current.clientHeight / 2);
-
-    itemsRef.current.forEach((item, index) => {
-      if (!item) return;
-
-      const itemCenter = (index * ITEM_HEIGHT) + (ITEM_HEIGHT / 2);
-      const distanceFromCenter = containerCenter - itemCenter;
-      const angle = (distanceFromCenter / ITEM_HEIGHT) * 8; // Reduced from 20 for flatter iOS look
-      const absDistance = Math.abs(distanceFromCenter);
-
-      // iOS Clock shows 5-7 cards - much wider visibility
-      const isVisible = absDistance <= ITEM_HEIGHT * 4; // Increased to show more cards
-
-      item.style.transform = `rotateX(${angle}deg) translateZ(${RADIUS}px)`;
-      item.style.zIndex = Math.round(100 - absDistance);
-      item.style.visibility = isVisible ? 'visible' : 'hidden';
-
-      // CRITICAL: Don't touch opacity - let isSelected styling show through
-    });
-  };
 
   // Scroll Animation Helpers
   const cancelScrollAnimation = () => {
@@ -834,8 +912,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   const lastSelectedRef = useRef(selectedProductId);
   const handleScroll = () => {
     if (!containerRef.current) return;
-    requestAnimationFrame(updateTransforms);
-    if (isScrollingRef.current) return;
+    // if (isScrollingRef.current) return;
 
     const scrollTop = containerRef.current.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
@@ -843,71 +920,53 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
     const targetProduct = products[clampedIndex];
 
     if (targetProduct && targetProduct.id !== lastSelectedRef.current) {
-      if (!editingId) {
-        lastSelectedRef.current = targetProduct.id;
-        setSelectedProductId(targetProduct.id);
-        playTickSound();
-      }
+      lastSelectedRef.current = targetProduct.id;
+      setSelectedProductId(targetProduct.id);
+      playTickSound();
     }
   };
 
+
   // Initial Setup
   useLayoutEffect(() => {
-    updateTransforms();
     if (containerRef.current) {
       const index = products.findIndex(p => p.id === selectedProductId);
       if (index !== -1) {
         isScrollingRef.current = true;
         containerRef.current.scrollTop = index * ITEM_HEIGHT;
         setTimeout(() => isScrollingRef.current = false, 100);
-        updateTransforms();
       }
     }
   }, []);
 
   // Sync external selection changes
   useEffect(() => {
-    if (isScrollingRef.current || !containerRef.current || editingId) return;
+    if (isScrollingRef.current || !containerRef.current) return;
 
     const index = products.findIndex(p => p.id === selectedProductId);
     if (index !== -1 && selectedProductId !== lastSelectedRef.current) {
       lastSelectedRef.current = selectedProductId;
       smoothScrollTo(containerRef.current, index * ITEM_HEIGHT, 50000);
     }
-  }, [selectedProductId, products, editingId]);
-
-  const startEditing = (productId: string, currentName: string) => {
-    setEditingId(productId);
-    setEditValue(currentName);
-  };
-
-  const saveEdit = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (editValue.trim() && editValue !== product?.name) {
-      onRename(productId, editValue);
-    }
-    setEditingId(null);
-  };
+  }, [selectedProductId, products]);
 
   return (
-    <div className="relative h-[144px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
+    <div className="relative h-[108px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
       {/* Center Highlight Zone */}
-      <div className="absolute top-[54px] left-0 right-14 h-[36px] z-0 pointer-events-none" />
+      <div className="absolute top-[36px] left-0 right-14 h-[36px] z-0 pointer-events-none" />
 
-      {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-14 h-4 bg-gradient-to-b from-apple-bg to-transparent z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-14 h-4 bg-gradient-to-t from-apple-bg to-transparent z-10 pointer-events-none" />
+
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[36px] no-scrollbar relative z-20 mr-14"
         onScroll={handleScroll}
         onTouchStart={() => cancelScrollAnimation()}
         onMouseDown={() => cancelScrollAnimation()}
         onWheel={() => cancelScrollAnimation()}
         onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-          if (!containerRef.current || editingId) return;
+          if (!containerRef.current) return;
 
           const rect = containerRef.current.getBoundingClientRect();
           const clickY = e.clientY - rect.top;
@@ -918,92 +977,61 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
           if (clickY < centerY - ITEM_HEIGHT / 2 && currentIndex > 0) {
             const targetIndex = currentIndex - 1;
             playTickSound();
-            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 50000);
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
           }
           // Click below center - go to next card
           else if (clickY > centerY + ITEM_HEIGHT / 2 && currentIndex < products.length - 1) {
             const targetIndex = currentIndex + 1;
             playTickSound();
-            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 50000);
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
           }
         }}
         style={{
-          scrollBehavior: 'auto',
-          transformStyle: 'preserve-3d'
+          scrollBehavior: 'auto'
         }}
       >
-        <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
+        <div className="relative">
           {products.map((product, i) => {
             const isSelected = product.id === selectedProductId;
-            const isEditing = editingId === product.id;
 
             return (
               <div
                 key={product.id}
-                ref={el => itemsRef.current[i] = el}
-                className="h-[36px] flex items-center justify-center snap-center absolute top-0 left-0 right-14 will-change-transform backface-visibility-hidden"
-                style={{ top: `${i * ITEM_HEIGHT}px` }}
+                className="h-[36px] flex items-center justify-center snap-center w-full"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation(); // Prevent container onClick from interfering
-                  if (!isEditing) {
-                    setSelectedProductId(product.id);
-                    playTickSound();
-                  }
+                  setSelectedProductId(product.id);
+                  playTickSound();
                 }}
               >
                 {/* Compact iOS Clock style cards */}
-                <div className={`w-64 mx-3 px-5 py-2 rounded-full transition-all duration-200 flex items-center gap-3
-                    ${isSelected ? 'justify-start' : 'justify-center'}
+                <div className={`w-[230px] mx-3 px-5 py-2 rounded-2xl flex items-center gap-3 justify-start transition-all duration-300 ease-out origin-center
                     ${isSelected
-                    ? 'bg-apple-red hover:bg-red-600 text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-apple-gray hover:text-black'
+                    ? 'bg-gradient-to-br from-apple-red to-red-600 scale-110 shadow-xl z-10'
+                    : 'bg-white border border-apple-red text-apple-gray hover:text-black hover:scale-105'
                   }`}>
 
                   <ChefHat size={20} className={isSelected ? 'text-white' : 'text-apple-gray'} />
 
-                  {isEditing ? (
-                    <input
-                      value={editValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditValue(e.target.value)}
-                      onBlur={() => saveEdit(product.id)}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && saveEdit(product.id)}
-                      className="bg-transparent border-b border-white text-center w-40 outline-none text-base font-bold text-white"
-                      autoFocus
-                    />
-                  ) : (
-                    <span className={`tracking-tight cursor-pointer transition-all duration-200 
+                  <span className={`tracking-tight cursor-pointer 
                             ${isSelected ? 'font-black text-lg' : 'font-medium text-base'}`}>
-                      {product.name}
-                    </span>
-                  )}
-
-                  {isSelected && !isEditing && (
-                    <button
-                      onClick={(e: React.MouseEvent) => { e.stopPropagation(); startEditing(product.id, product.name); }}
-                      className="p-1 text-white/80 hover:text-white transition-colors ml-auto"
-                    >
-                      <Pencil size={12} />
-                    </button>
-                  )}
+                    {product.name}
+                  </span>
                 </div>
               </div>
             );
           })}
 
-          <div style={{ height: `${products.length * ITEM_HEIGHT}px` }} />
         </div>
       </div>
 
-      {/* Gradient Masks */}
-      <div className="absolute top-0 left-0 right-14 h-16 bg-gradient-to-b from-apple-bg to-transparent pointer-events-none z-30" />
-      <div className="absolute bottom-0 left-0 right-14 h-16 bg-gradient-to-t from-apple-bg to-transparent pointer-events-none z-30" />
+
       {/* Navigation Buttons */}
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-40">
         <button
           onClick={(e) => {
             e.stopPropagation();
-
-            if (!containerRef.current || editingId) return;
+            if (!containerRef.current) return;
             const currentIndex = products.findIndex(p => p.id === selectedProductId);
             if (currentIndex > 0) {
               const targetIndex = currentIndex - 1;
@@ -1011,7 +1039,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
               smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
             }
           }}
-          className="p-2 rounded-full bg-[#ffb3ae] hover:bg-[#ff9a94] text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
           disabled={products.findIndex(p => p.id === selectedProductId) <= 0}
         >
           <ChevronUp size={20} strokeWidth={3} />
@@ -1019,7 +1047,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (!containerRef.current || editingId) return;
+            if (!containerRef.current) return;
             const currentIndex = products.findIndex(p => p.id === selectedProductId);
             if (currentIndex < products.length - 1) {
               const targetIndex = currentIndex + 1;
@@ -1027,7 +1055,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
               smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
             }
           }}
-          className="p-2 rounded-full bg-[#ffb3ae] hover:bg-[#ff9a94] text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
           disabled={products.findIndex(p => p.id === selectedProductId) >= products.length - 1}
         >
           <ChevronDown size={20} strokeWidth={3} />
