@@ -847,16 +847,18 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   };
 
   return (
-    <div className="relative h-48 w-full select-none overflow-hidden bg-transparent"
-      style={{ perspective: '1000px' }}>
+    <div className="relative h-80 w-full overflow-hidden select-none bg-gray-50 rounded-2xl border border-gray-200">
+      {/* Center Highlight Zone */}
+      <div className="absolute top-32 left-0 right-0 h-16 bg-white border-y border-apple-red/20 z-0 pointer-events-none shadow-sm" />
 
-      {/* Apple Clock Style Highlight Bar */}
-      <div className="absolute top-1/2 left-0 right-0 h-[44px] -mt-[22px] z-10 pointer-events-none rounded-lg bg-gray-200/10 backdrop-blur-[0.5px]" />
+      {/* Gradient Masks */}
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-gray-50 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none" />
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative z-20"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-32 no-scrollbar relative z-20"
         onScroll={handleScroll}
         onClick={(e: React.MouseEvent<HTMLDivElement>) => {
           if (!containerRef.current || editingId) return;
@@ -887,8 +889,6 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
         }}
         style={{
           scrollBehavior: isScrollingRef.current ? 'smooth' : 'auto',
-          paddingTop: `calc(50% - ${ITEM_HEIGHT / 2}px)`,
-          paddingBottom: `calc(50% - ${ITEM_HEIGHT / 2}px)`,
           transformStyle: 'preserve-3d'
         }}
       >
