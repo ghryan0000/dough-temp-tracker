@@ -983,7 +983,7 @@ export default function DoughTempTracker() {
                   { title: t.step5Title, content: t.step5Content },
                 ].map((step, index) => (
                   <div key={index} className="flex gap-2">
-                    <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
+                    <span className="font-semibold text-apple-red min-w-[20px]">{index + 1}.</span>
                     <div>
                       <strong>{step.title}:</strong> {step.content}
                     </div>
