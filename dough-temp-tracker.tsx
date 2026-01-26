@@ -632,7 +632,7 @@ export default function DoughTempTracker() {
                   <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
                     <div className="flex items-center gap-1.5 mb-2">
                       <BarChart3 size={12} className="text-purple-600" />
-                      <span className="text-[10px] font-bold text-purple-900">{t.model}</span>
+                      <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
                     </div>
                     <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
                       Water = {regressionModel.intercept.toFixed(2)}
@@ -651,7 +651,7 @@ export default function DoughTempTracker() {
                     <div className="bg-white rounded-lg p-2.5 border border-orange-100">
                       <div className="flex items-center gap-1 mb-2">
                         <Activity size={11} className="text-orange-600" />
-                        <span className="text-[9px] font-bold text-orange-900">{t.coefficients}</span>
+                        <span className="text-[14px] underline font-bold text-orange-900">{t.coefficients}</span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between items-center">
@@ -669,7 +669,7 @@ export default function DoughTempTracker() {
                     <div className="bg-white rounded-lg p-2.5 border border-pink-100">
                       <div className="flex items-center gap-1 mb-2">
                         <TrendingUp size={11} className="text-pink-600" />
-                        <span className="text-[9px] font-bold text-pink-900">{t.quality}</span>
+                        <span className="text-[14px] underline font-bold text-pink-900">{t.quality}</span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between items-center">
