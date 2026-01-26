@@ -576,7 +576,7 @@ export default function DoughTempTracker() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
             {/* Target Display */}
-            <div className={`p-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-50 to-white border-apple-red/20 shadow-inner' : 'bg-gray-50 border-transparent'}`}>
+            <div className={`py-2 px-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
               <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">{t.targetWaterTemp}</div>
               <div className={`text-4xl md:text-5xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                 {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
