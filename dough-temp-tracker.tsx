@@ -28,15 +28,16 @@ interface ProductCount {
   count: number;
 }
 
-intercept: number;
-roomCoef: number;
-flourCoef: number;
-levainCoef: number;
-targetCoef: number;
-mixTimeCoef: number;
-hydrationCoef: number;
-rSquared: number;
-nSamples: number;
+interface RegressionModel {
+  intercept: number;
+  roomCoef: number;
+  flourCoef: number;
+  levainCoef: number;
+  targetCoef: number;
+  mixTimeCoef: number;
+  hydrationCoef: number;
+  rSquared: number;
+  nSamples: number;
 }
 
 // Extend Window for WebkitAudioContext
