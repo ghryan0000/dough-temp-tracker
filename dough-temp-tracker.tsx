@@ -54,6 +54,7 @@ export default function DoughTempTracker() {
     en: {
       appTitle: "Ryan's Bakery",
       appSubtitle: "Water Temperature Tracker",
+      appDescription: "Calculate optimal water temp for consistent dough quality.",
       modelReady: "Model Ready",
       selectProduct: "Select Product",
       scrollToSelect: "Scroll to select",
@@ -105,6 +106,7 @@ export default function DoughTempTracker() {
     zh: {
       appTitle: "Ryan's Bakery",
       appSubtitle: "水溫追蹤器",
+      appDescription: "計算最佳水溫，確保麵團品質穩定一致。",
       modelReady: "模型就緒",
       selectProduct: "選擇產品",
       scrollToSelect: "滾動選擇",
@@ -155,6 +157,7 @@ export default function DoughTempTracker() {
     ja: {
       appTitle: "ライアンのベーカリー",
       appSubtitle: "水温トラッカー",
+      appDescription: "最適な水温を計算し、安定した生地品質を実現します。",
       modelReady: "モデル準備完了",
       selectProduct: "製品を選択",
       scrollToSelect: "スクロールして選択",
@@ -563,6 +566,11 @@ export default function DoughTempTracker() {
             ))}
           </div>
         </div>
+
+        {/* App Description - One Liner */}
+        <p className="text-xs text-gray-500 mb-6 -mt-2 px-1 italic leading-relaxed max-w-[390px]">
+          {t.appDescription}
+        </p>
 
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8 items-start">
