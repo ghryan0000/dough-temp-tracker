@@ -572,13 +572,13 @@ export default function DoughTempTracker() {
           </div>
 
           {/* Right Column: Calculator */}
-          <div className="md:col-span-8 bg-white rounded-3xl shadow-lg border border-red-50 p-6 md:p-8 relative overflow-hidden">
+          <div className="md:col-span-8 bg-white rounded-3xl shadow-lg border border-red-50 p-4 md:p-8 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
             {/* Target Display */}
-            <div className={`p-4 rounded-2xl text-center mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-50 to-white border-apple-red/20 shadow-inner' : 'bg-gray-50 border-transparent'}`}>
+            <div className={`p-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-50 to-white border-apple-red/20 shadow-inner' : 'bg-gray-50 border-transparent'}`}>
               <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">{t.targetWaterTemp}</div>
-              <div className={`text-5xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+              <div className={`text-4xl md:text-5xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                 {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
                 <span className="text-2xl ml-1 font-medium text-gray-400">°C</span>
               </div>
