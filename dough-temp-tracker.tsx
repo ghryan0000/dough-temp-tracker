@@ -552,7 +552,7 @@ export default function DoughTempTracker() {
         </div>
 
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8 items-start">
 
           {/* Left Column: Product Selector (Card Grid) */}
           <div className="md:col-span-4 flex flex-col w-full max-w-xs mx-auto md:max-w-none md:mx-0">
