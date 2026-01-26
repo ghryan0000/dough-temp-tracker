@@ -28,17 +28,22 @@ interface ProductCount {
   count: number;
 }
 
-interface RegressionModel {
-  intercept: number;
-  roomCoef: number;
-  flourCoef: number;
-  levainCoef: number;
-  targetCoef: number;
-  mixTimeCoef: number;
-  hydrationCoef: number;
-  rSquared: number;
-  nSamples: number;
+intercept: number;
+roomCoef: number;
+flourCoef: number;
+levainCoef: number;
+targetCoef: number;
+mixTimeCoef: number;
+hydrationCoef: number;
+rSquared: number;
+nSamples: number;
 }
+
+// Extend Window for WebkitAudioContext
+interface WindowWithWebkit extends Window {
+  webkitAudioContext: typeof AudioContext;
+}
+
 export default function DoughTempTracker() {
   // Product colors for dynamic assignment
   const productColors: string[] = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
@@ -416,226 +421,230 @@ export default function DoughTempTracker() {
         levainCoef: denormBeta[3], targetCoef: denormBeta[4], mixTimeCoef: denormBeta[5],
         hydrationCoef: denormBeta[6], rSquared: rSquared, nSamples: n
       };
-    } catch (error: any) {
+    };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
       setDebugInfo(`❌ Error: ${error.message}`);
-      return null;
+    } else {
+      setDebugInfo(`❌ Error: Unknown regression error`);
     }
-  };
+    return null;
+  }
+};
 
-  const solveRobust = (X: number[][], y: number[]) => {
-    const n = X.length, m = X[0].length, lambda = 0.01;
-    const XtX = Array(m).fill(0).map(() => Array(m).fill(0));
-    for (let i = 0; i < m; i++) {
-      for (let j = 0; j < m; j++) {
-        let sum = 0;
-        for (let k = 0; k < n; k++) sum += X[k][i] * X[k][j];
-        XtX[i][j] = sum + (i === j ? lambda : 0);
-      }
-    }
-    const Xty = Array(m).fill(0);
-    for (let i = 0; i < m; i++) {
+const solveRobust = (X: number[][], y: number[]) => {
+  const n = X.length, m = X[0].length, lambda = 0.01;
+  const XtX = Array(m).fill(0).map(() => Array(m).fill(0));
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < m; j++) {
       let sum = 0;
-      for (let k = 0; k < n; k++) sum += X[k][i] * y[k];
-      Xty[i] = sum;
+      for (let k = 0; k < n; k++) sum += X[k][i] * X[k][j];
+      XtX[i][j] = sum + (i === j ? lambda : 0);
     }
-    return gaussianEliminationPivot(XtX, Xty);
-  };
+  }
+  const Xty = Array(m).fill(0);
+  for (let i = 0; i < m; i++) {
+    let sum = 0;
+    for (let k = 0; k < n; k++) sum += X[k][i] * y[k];
+    Xty[i] = sum;
+  }
+  return gaussianEliminationPivot(XtX, Xty);
+};
 
-  const gaussianEliminationPivot = (A: number[][], b: number[]) => {
-    const n = A.length;
-    const Ab = A.map((row, i) => [...row, b[i]]);
-    for (let i = 0; i < n; i++) {
-      let maxRow = i;
-      for (let k = i + 1; k < n; k++) {
-        if (Math.abs(Ab[k][i]) > Math.abs(Ab[maxRow][i])) maxRow = k;
-      }
-      [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
-      if (Math.abs(Ab[i][i]) < 1e-12) return null;
-      for (let k = i + 1; k < n; k++) {
-        const factor = Ab[k][i] / Ab[i][i];
-        for (let j = i; j <= n; j++) Ab[k][j] -= factor * Ab[i][j];
-      }
+const gaussianEliminationPivot = (A: number[][], b: number[]) => {
+  const n = A.length;
+  const Ab = A.map((row, i) => [...row, b[i]]);
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(Ab[k][i]) > Math.abs(Ab[maxRow][i])) maxRow = k;
     }
-    const x = Array(n).fill(0);
-    for (let i = n - 1; i >= 0; i--) {
-      x[i] = Ab[i][n];
-      for (let j = i + 1; j < n; j++) x[i] -= Ab[i][j] * x[j];
-      x[i] /= Ab[i][i];
-      if (!isFinite(x[i])) return null;
+    [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
+    if (Math.abs(Ab[i][i]) < 1e-12) return null;
+    for (let k = i + 1; k < n; k++) {
+      const factor = Ab[k][i] / Ab[i][i];
+      for (let j = i; j <= n; j++) Ab[k][j] -= factor * Ab[i][j];
     }
-    return x;
-  };
+  }
+  const x = Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    x[i] = Ab[i][n];
+    for (let j = i + 1; j < n; j++) x[i] -= Ab[i][j] * x[j];
+    x[i] /= Ab[i][i];
+    if (!isFinite(x[i])) return null;
+  }
+  return x;
+};
 
-  useEffect(() => {
-    const model = calculateRegression();
-    setRegressionModel(model);
-  }, [bakes, selectedProductId]);
+useEffect(() => {
+  const model = calculateRegression();
+  setRegressionModel(model);
+}, [bakes, selectedProductId]);
 
-  const addBake = () => {
-    const newId = bakes.length > 0 ? Math.max(...bakes.map(b => b.id)) + 1 : 1;
-    setBakes([...bakes, {
-      id: newId, productId: selectedProductId, date: new Date().toISOString().split('T')[0], roomTemp: '', flourTemp: '',
-      waterTemp: '', levainTemp: '', finalTemp: '', mixTime: '', hydration: ''
-    }]);
-  };
+const addBake = () => {
+  const newId = bakes.length > 0 ? Math.max(...bakes.map(b => b.id)) + 1 : 1;
+  setBakes([...bakes, {
+    id: newId, productId: selectedProductId, date: new Date().toISOString().split('T')[0], roomTemp: '', flourTemp: '',
+    waterTemp: '', levainTemp: '', finalTemp: '', mixTime: '', hydration: ''
+  }]);
+};
 
-  const deleteBake = (id: number) => setBakes(bakes.filter(b => b.id !== id));
-  const updateBake = (id: number, field: keyof Bake, value: string | number) => setBakes(bakes.map(b => b.id === id ? { ...b, [field]: value } : b));
-  const updateCurrentCondition = (field: string, value: string | number) => setCurrentConditions({ ...currentConditions, [field]: value });
+const deleteBake = (id: number) => setBakes(bakes.filter(b => b.id !== id));
+const updateBake = (id: number, field: keyof Bake, value: string | number) => setBakes(bakes.map(b => b.id === id ? { ...b, [field]: value } : b));
+const updateCurrentCondition = (field: string, value: string | number) => setCurrentConditions({ ...currentConditions, [field]: value });
 
-  const calculateSimpleFriction = (bake: Bake) => {
-    const { roomTemp, flourTemp, waterTemp, levainTemp, finalTemp } = bake;
-    if (!roomTemp || !flourTemp || !waterTemp || !levainTemp || !finalTemp) return '-';
-    return ((5 * parseFloat(finalTemp)) - (parseFloat(roomTemp) + parseFloat(flourTemp) + parseFloat(waterTemp) + parseFloat(levainTemp))).toFixed(1);
-  };
+const calculateSimpleFriction = (bake: Bake) => {
+  const { roomTemp, flourTemp, waterTemp, levainTemp, finalTemp } = bake;
+  if (!roomTemp || !flourTemp || !waterTemp || !levainTemp || !finalTemp) return '-';
+  return ((5 * parseFloat(finalTemp)) - (parseFloat(roomTemp) + parseFloat(flourTemp) + parseFloat(waterTemp) + parseFloat(levainTemp))).toFixed(1);
+};
 
-  const predictWaterTemp = (roomTemp: number | string, flourTemp: number | string, levainTemp: number | string, targetFinal: number | string, mixTime: number | string, hydration: number | string) => {
-    if (!regressionModel) return null;
-    return regressionModel.intercept + regressionModel.roomCoef * parseFloat(roomTemp) +
-      regressionModel.flourCoef * parseFloat(flourTemp) + regressionModel.levainCoef * parseFloat(levainTemp) +
-      regressionModel.targetCoef * parseFloat(targetFinal) + regressionModel.mixTimeCoef * parseFloat(mixTime) +
-      regressionModel.hydrationCoef * parseFloat(hydration);
-  };
+const predictWaterTemp = (roomTemp: number | string, flourTemp: number | string, levainTemp: number | string, targetFinal: number | string, mixTime: number | string, hydration: number | string) => {
+  if (!regressionModel) return null;
+  return regressionModel.intercept + regressionModel.roomCoef * parseFloat(roomTemp) +
+    regressionModel.flourCoef * parseFloat(flourTemp) + regressionModel.levainCoef * parseFloat(levainTemp) +
+    regressionModel.targetCoef * parseFloat(targetFinal) + regressionModel.mixTimeCoef * parseFloat(mixTime) +
+    regressionModel.hydrationCoef * parseFloat(hydration);
+};
 
-  const currentPredictedWater = predictWaterTemp(
-    currentConditions.roomTemp, currentConditions.flourTemp, currentConditions.levainTemp,
-    targetTemp, currentConditions.mixTime, currentConditions.hydration
-  );
+const currentPredictedWater = predictWaterTemp(
+  currentConditions.roomTemp, currentConditions.flourTemp, currentConditions.levainTemp,
+  targetTemp, currentConditions.mixTime, currentConditions.hydration
+);
 
-  const exportCSV = () => {
-    const product = products.find(p => p.id === selectedProductId);
-    const productBakes = bakes.filter(b => b.productId === selectedProductId);
-    const headers = ['Date', 'Product', 'Room', 'Flour', 'Water', 'Levain', 'Final', 'Mix', 'Hydration', 'Friction'];
-    const rows = productBakes.map(b => [b.date, product?.name, b.roomTemp, b.flourTemp, b.waterTemp, b.levainTemp, b.finalTemp, b.mixTime, b.hydration, calculateSimpleFriction(b)]);
-    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${product?.name.replace(/\s+/g, '_')}_data.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+const exportCSV = () => {
+  const product = products.find(p => p.id === selectedProductId);
+  const productBakes = bakes.filter(b => b.productId === selectedProductId);
+  const headers = ['Date', 'Product', 'Room', 'Flour', 'Water', 'Levain', 'Final', 'Mix', 'Hydration', 'Friction'];
+  const rows = productBakes.map(b => [b.date, product?.name, b.roomTemp, b.flourTemp, b.waterTemp, b.levainTemp, b.finalTemp, b.mixTime, b.hydration, calculateSimpleFriction(b)]);
+  const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${product?.name.replace(/\s+/g, '_')}_data.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
 
-  const currentProduct = products.find(p => p.id === selectedProductId);
-  const currentBakes = bakes.filter(b => b.productId === selectedProductId);
-  const productCounts = products.map(product => ({
-    id: product.id,
-    name: product.name,
-    count: bakes.filter(b => b.productId === product.id && b.roomTemp !== '').length
-  }));
+const currentProduct = products.find(p => p.id === selectedProductId);
+const currentBakes = bakes.filter(b => b.productId === selectedProductId);
+const productCounts = products.map(product => ({
+  id: product.id,
+  name: product.name,
+  count: bakes.filter(b => b.productId === product.id && b.roomTemp !== '').length
+}));
 
-  // Update regression model when product changes or bakes update
-  useEffect(() => {
-    setRegressionModel(calculateRegression(bakes, selectedProductId));
-  }, [bakes, selectedProductId]);
+// Update regression model when product changes or bakes update
+useEffect(() => {
+  setRegressionModel(calculateRegression(bakes, selectedProductId));
+}, [bakes, selectedProductId]);
 
 
 
-  return (
-    <div className="min-h-screen bg-apple-bg pt-6 pb-20 font-sans overflow-x-hidden">
-      <div className="max-w-4xl mx-auto px-4">
+return (
+  <div className="min-h-screen bg-apple-bg pt-6 pb-20 font-sans overflow-x-hidden">
+    <div className="max-w-4xl mx-auto px-4">
 
-        {/* Header - Compact */}
-        {/* Header - Compact */}
-        <div className="flex items-end justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
-          <div>
-            <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">{t.appTitle}</h1>
-            <p className="text-red-50/90 text-xs font-medium">{t.appSubtitle}</p>
+      {/* Header - Compact */}
+      {/* Header - Compact */}
+      <div className="flex items-end justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">{t.appTitle}</h1>
+          <p className="text-red-50/90 text-xs font-medium">{t.appSubtitle}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {[
+            { code: 'en', label: 'EN' },
+            { code: 'zh', label: '繁' },
+            { code: 'ja', label: '日' }
+          ].map((langOption) => (
+            <button
+              key={langOption.code}
+              onClick={() => setLanguage(langOption.code as Language)}
+              className={`text-[10px] font-bold px-2 py-1 rounded-full transition-colors ${language === langOption.code
+                ? 'bg-white text-apple-red shadow-sm'
+                : 'text-red-100 hover:text-white hover:bg-white/20'
+                }`}
+              aria-label={`Switch to ${langOption.label}`}
+            >
+              {langOption.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8 items-start">
+
+        {/* Left Column: Product Selector (Card Grid) */}
+        <div className="md:col-span-4 flex flex-col w-full">
+          <div className="flex items-start gap-2 mb-4 px-1">
+            <Package size={18} className="text-apple-red mt-1" />
+            <div className="flex flex-row items-baseline gap-2">
+              <h2 className="text-lg font-bold text-black leading-tight">{t.selectProduct}</h2>
+              <p className="text-xs text-apple-gray font-medium">{t.scrollToSelect}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {[
-              { code: 'en', label: 'EN' },
-              { code: 'zh', label: '繁' },
-              { code: 'ja', label: '日' }
-            ].map((langOption) => (
-              <button
-                key={langOption.code}
-                onClick={() => setLanguage(langOption.code as Language)}
-                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-colors ${language === langOption.code
-                  ? 'bg-white text-apple-red shadow-sm'
-                  : 'text-red-100 hover:text-white hover:bg-white/20'
-                  }`}
-                aria-label={`Switch to ${langOption.label}`}
-              >
-                {langOption.label}
-              </button>
-            ))}
-          </div>
+          <ProductWheelSelector
+            products={[...products].sort((a, b) => a.name.localeCompare(b.name))}
+            selectedProductId={selectedProductId}
+            setSelectedProductId={setSelectedProductId}
+          />
         </div>
 
-        {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8 items-start">
-
-          {/* Left Column: Product Selector (Card Grid) */}
-          <div className="md:col-span-4 flex flex-col w-full">
-            <div className="flex items-start gap-2 mb-4 px-1">
-              <Package size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-row items-baseline gap-2">
-                <h2 className="text-lg font-bold text-black leading-tight">{t.selectProduct}</h2>
-                <p className="text-xs text-apple-gray font-medium">{t.scrollToSelect}</p>
-              </div>
+        {/* Right Column: Calculator */}
+        <div className="md:col-span-8 flex flex-col">
+          <div className="flex items-start gap-2 mb-4 px-1">
+            <Calculator size={18} className="text-apple-red mt-1" />
+            <div className="flex flex-row items-baseline gap-2">
+              <h2 className="text-lg font-bold text-black leading-tight">{t.calculatorTitle}</h2>
+              <p className="text-xs text-apple-gray font-medium">{t.enterData}</p>
             </div>
-            <ProductWheelSelector
-              products={[...products].sort((a, b) => a.name.localeCompare(b.name))}
-              selectedProductId={selectedProductId}
-              setSelectedProductId={setSelectedProductId}
-              productCounts={productCounts}
-            />
           </div>
 
-          {/* Right Column: Calculator */}
-          <div className="md:col-span-8 flex flex-col">
-            <div className="flex items-start gap-2 mb-4 px-1">
-              <Calculator size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-row items-baseline gap-2">
-                <h2 className="text-lg font-bold text-black leading-tight">{t.calculatorTitle}</h2>
-                <p className="text-xs text-apple-gray font-medium">{t.enterData}</p>
+          <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-3 md:p-5 relative overflow-hidden w-full">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
+
+            {/* Target Display */}
+            <div className={`py-1 px-3 md:p-3 rounded-2xl text-center mb-2 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
+              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
+              <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-3 md:p-5 relative overflow-hidden w-full">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
-
-              {/* Target Display */}
-              <div className={`py-1 px-3 md:p-3 rounded-2xl text-center mb-2 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
-                <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
-                <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
-                  {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                  <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
-                </div>
-              </div>
-
-              {/* Input Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
-                {[
-                  { label: t.room, key: 'roomTemp', unit: '°C' },
-                  { label: t.flour, key: 'flourTemp', unit: '°C' },
-                  { label: t.levain, key: 'levainTemp', unit: '°C' },
-                  { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
-                  { label: t.mix, key: 'mixTime', unit: 'min' },
-                  { label: t.hydration, key: 'hydration', unit: '%' }
-                ].map((field) => (
-                  <div key={field.label} className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
-                    <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
-                    <div className="flex items-baseline mt-2">
-                      <input
-                        type="number"
-                        value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
-                        className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
-                        placeholder="--"
-                        aria-label={field.label}
-                      />
-                      <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
-                    </div>
+            {/* Input Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+              {[
+                { label: t.room, key: 'roomTemp', unit: '°C' },
+                { label: t.flour, key: 'flourTemp', unit: '°C' },
+                { label: t.levain, key: 'levainTemp', unit: '°C' },
+                { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
+                { label: t.mix, key: 'mixTime', unit: 'min' },
+                { label: t.hydration, key: 'hydration', unit: '%' }
+              ].map((field) => (
+                <div key={field.label} className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+                  <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
+                  <div className="flex items-baseline mt-2">
+                    <input
+                      type="number"
+                      value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
+                      className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
+                      placeholder="--"
+                      aria-label={field.label}
+                    />
+                    <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
 
-              {/* Result Display */}
-              {/* This section was replaced by the new Target Display and Input Grid above */}
-              {/*
+            {/* Result Display */}
+            {/* This section was replaced by the new Target Display and Input Grid above */}
+            {/*
             <div className={`p-2 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
               <div className="flex items-center justify-center gap-2 mb-0.5">
                 <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">TARGET WATER TEMP</div>
@@ -652,352 +661,352 @@ export default function DoughTempTracker() {
             </div>
             */}
 
-              {/* Model Training Status - Detailed View */}
-              {regressionModel && (
-                <div className="mt-2 p-3 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-                  <div className="flex flex-col items-start mb-2 gap-1">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 size={16} className="text-purple-600" />
-                      <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-6">
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-                        <Activity size={10} /> {t.modelReady}
-                      </span>
-                      <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
-                        {t.sessions}: {regressionModel.nSamples}
-                      </span>
-                    </div>
+            {/* Model Training Status - Detailed View */}
+            {regressionModel && (
+              <div className="mt-2 p-3 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+                <div className="flex flex-col items-start mb-2 gap-1">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 size={16} className="text-purple-600" />
+                    <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
                   </div>
-
-                  {/* Regression Formula */}
-                  <div className="mb-2 p-2 bg-white rounded-lg border border-purple-100">
-                    <div className="flex items-end gap-1.5 mb-2">
-                      <BarChart3 size={12} className="text-purple-600" />
-                      <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
-                      <span className="text-[11px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
-                    </div>
-                    <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
-                      Water = {regressionModel.intercept.toFixed(2)}
-                      {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
-                      {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
-                      {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
-                      {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
-                      {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
-                      {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
-                    </div>
+                  <div className="flex items-center gap-2 ml-6">
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+                      <Activity size={10} /> {t.modelReady}
+                    </span>
+                    <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
+                      {t.sessions}: {regressionModel.nSamples}
+                    </span>
                   </div>
-
-                  {/* Coefficients and Quality Grid */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Coefficients */}
-                    <div className="bg-white rounded-lg p-2.5 border border-orange-100">
-                      <div className="flex items-center gap-1 mb-2">
-                        <Activity size={11} className="text-orange-600" />
-                        <span className="text-[14px] underline font-bold text-orange-900">{t.coefficients}</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
-                          <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
-                          <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Quality */}
-                    <div className="bg-white rounded-lg p-2.5 border border-pink-100">
-                      <div className="flex items-center gap-1 mb-2">
-                        <TrendingUp size={11} className="text-pink-600" />
-                        <span className="text-[14px] underline font-bold text-pink-900">{t.quality}</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">R²:</span>
-                          <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">{t.fit}:</span>
-                          <span className="text-[9px] font-medium text-green-600">
-                            {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">Samples:</span>
-                          <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* History List */}
-        <div className="px-1">
-          <div className="mb-3">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
-              <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
-            </h2>
-            <div className="flex gap-2">
-              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
-                <Plus size={14} /> Add Session
-              </button>
-              <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
-                <Download size={12} /> Export CSV
-              </button>
-            </div>
-          </div>
+                {/* Regression Formula */}
+                <div className="mb-2 p-2 bg-white rounded-lg border border-purple-100">
+                  <div className="flex items-end gap-1.5 mb-2">
+                    <BarChart3 size={12} className="text-purple-600" />
+                    <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
+                    <span className="text-[11px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
+                  </div>
+                  <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
+                    Water = {regressionModel.intercept.toFixed(2)}
+                    {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
+                    {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
+                    {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
+                    {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
+                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
+                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
+                  </div>
+                </div>
 
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
-            {currentBakes.length === 0 ? (
-              <div className="p-8 text-center text-apple-gray">
-                <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
+                {/* Coefficients and Quality Grid */}
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Coefficients */}
+                  <div className="bg-white rounded-lg p-2.5 border border-orange-100">
+                    <div className="flex items-center gap-1 mb-2">
+                      <Activity size={11} className="text-orange-600" />
+                      <span className="text-[14px] underline font-bold text-orange-900">{t.coefficients}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
+                        <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
+                        <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quality */}
+                  <div className="bg-white rounded-lg p-2.5 border border-pink-100">
+                    <div className="flex items-center gap-1 mb-2">
+                      <TrendingUp size={11} className="text-pink-600" />
+                      <span className="text-[14px] underline font-bold text-pink-900">{t.quality}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">R²:</span>
+                        <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">{t.fit}:</span>
+                        <span className="text-[9px] font-medium text-green-600">
+                          {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] text-gray-600">Samples:</span>
+                        <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
-            ) : (
-              currentBakes.slice().reverse().map((bake) => (
-                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {/* Date */}
-                    <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
-                      <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
-                      <input
-                        type="date"
-                        value={bake.date}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                        className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                        aria-label="Bake Date"
-                      />
-                    </div>
-
-                    {[
-                      { label: t.room, key: 'roomTemp' },
-                      { label: t.flour, key: 'flourTemp' },
-                      { label: t.levain, key: 'levainTemp' },
-                      { label: t.water, key: 'waterTemp' },
-                      { label: t.final, key: 'finalTemp' },
-                      { label: t.mixShort, key: 'mixTime' },
-                      { label: t.hydrShort, key: 'hydration' }
-                    ].map((field) => (
-                      <div key={field.key} className="flex-none w-14 text-center">
-                        <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
-                        <input
-                          type="number"
-                          placeholder="--"
-                          className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                          value={bake[field.key as keyof Bake]}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
-                          aria-label={field.label}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Friction */}
-                    <div className="flex-none w-14 text-center">
-                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
-                      <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
-                        {calculateSimpleFriction(bake)}
-                      </div>
-                    </div>
-
-                    {/* Delete */}
-                    <div className="flex-none w-8 flex items-center justify-center pt-3">
-                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              ))
             )}
           </div>
         </div>
+      </div>
 
-        {/* Product Manager Section */}
-        <div className="mt-8 px-1">
-          <div className="mb-3 flex flex-col items-start gap-2">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
-              <Package size={18} className="text-purple-600" /> Manage Products
-            </h2>
-            <button
-              onClick={() => setShowProductManager(!showProductManager)}
-              className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
-            >
-              <Package size={14} />
-              {showProductManager ? 'Hide Manager' : 'Show Manager'}
-              <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
+      {/* History List */}
+      <div className="px-1">
+        <div className="mb-3">
+          <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
+            <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
+          </h2>
+          <div className="flex gap-2">
+            <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+              <Plus size={14} /> Add Session
+            </button>
+            <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
+              <Download size={12} /> Export CSV
             </button>
           </div>
-
-          {showProductManager && (
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              {/* Add Product */}
-              <div className="mb-4 mt-4">
-                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newProductName}
-                    onChange={(e) => setNewProductName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addProduct()}
-                    placeholder="e.g., Croissant"
-                    className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
-                  />
-                  <button
-                    onClick={addProduct}
-                    className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
-                    title="Add Product"
-                    aria-label="Add Product"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Product List */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
-                {products.map((product: Product) => (
-                  <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center space-x-0.5 mr-2">
-                        <button
-                          onClick={() => moveProduct(products.indexOf(product), 'up')}
-                          disabled={products.indexOf(product) === 0}
-                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
-                          title="Move Up"
-                        >
-                          <ArrowUp size={14} />
-                        </button>
-                        <button
-                          onClick={() => moveProduct(products.indexOf(product), 'down')}
-                          disabled={products.indexOf(product) === products.length - 1}
-                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
-                          title="Move Down"
-                        >
-                          <ArrowDown size={14} />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2 flex-grow">
-                        <div className={`w-3 h-3 rounded-full ${product.color} flex-shrink-0`}></div>
-                        {editingProductId === product.id ? (
-                          <div className="flex items-center gap-1 flex-grow">
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
-                              className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
-                              autoFocus
-                              aria-label="Edit Product Name"
-                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                  handleRenameProduct(product.id, editName);
-                                  setEditingProductId(null);
-                                } else if (e.key === 'Escape') {
-                                  setEditingProductId(null);
-                                }
-                              }}
-                            />
-                            <button
-                              onClick={() => {
-                                handleRenameProduct(product.id, editName);
-                                setEditingProductId(null);
-                              }}
-                              className="text-green-600 hover:text-green-700 p-0.5"
-                              title="Save"
-                              aria-label="Save"
-                            >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              onClick={() => setEditingProductId(null)}
-                              className="text-red-500 hover:text-red-600 p-0.5"
-                              title="Cancel"
-                              aria-label="Cancel"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <span className="text-sm font-medium truncate">{product.name}</span>
-                            <span className="text-xs text-gray-400 whitespace-nowrap">
-                              ({bakes.filter((b: Bake) => b.productId === product.id).length})
-                            </span>
-                            <button
-                              onClick={() => {
-                                setEditingProductId(product.id);
-                                setEditName(product.name);
-                              }}
-                              className="text-gray-300 hover:text-purple-600 transition-colors p-1"
-                              title="Rename Product"
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      disabled={products.length === 1}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-2"
-                      title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* App Information Footer */}
-        <div className="mt-8 px-1">
-          <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-3">
-            <Activity size={18} className="text-apple-red" /> {t.aboutTitle}
-          </h2>
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
+          {currentBakes.length === 0 ? (
+            <div className="p-8 text-center text-apple-gray">
+              <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
+            </div>
+          ) : (
+            currentBakes.slice().reverse().map((bake) => (
+              <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+                  {/* Date */}
+                  <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
+                    <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
+                    <input
+                      type="date"
+                      value={bake.date}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
+                      className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+                      aria-label="Bake Date"
+                    />
+                  </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">
-              {t.aboutContent}
-            </p>
+                  {[
+                    { label: t.room, key: 'roomTemp' },
+                    { label: t.flour, key: 'flourTemp' },
+                    { label: t.levain, key: 'levainTemp' },
+                    { label: t.water, key: 'waterTemp' },
+                    { label: t.final, key: 'finalTemp' },
+                    { label: t.mixShort, key: 'mixTime' },
+                    { label: t.hydrShort, key: 'hydration' }
+                  ].map((field) => (
+                    <div key={field.key} className="flex-none w-14 text-center">
+                      <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
+                      <input
+                        type="number"
+                        placeholder="--"
+                        className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+                        value={bake[field.key as keyof Bake]}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
+                        aria-label={field.label}
+                      />
+                    </div>
+                  ))}
 
-            <div>
-              <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
-                <ChevronRight size={16} className="text-purple-600" /> {t.howToUseTitle}
-              </h3>
-              <div className="space-y-3 text-sm text-gray-600">
-                {[
-                  { title: t.step1Title, content: t.step1Content },
-                  { title: t.step2Title, content: t.step2Content },
-                  { title: t.step3Title, content: t.step3Content },
-                  { title: t.step4Title, content: t.step4Content },
-                  { title: t.step5Title, content: t.step5Content },
-                ].map((step, index) => (
-                  <div key={index} className="flex gap-2">
-                    <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
-                    <div>
-                      <strong>{step.title}:</strong> {step.content}
+                  {/* Friction */}
+                  <div className="flex-none w-14 text-center">
+                    <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
+                    <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
+                      {calculateSimpleFriction(bake)}
                     </div>
                   </div>
-                ))}
+
+                  {/* Delete */}
+                  <div className="flex-none w-8 flex items-center justify-center pt-3">
+                    <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                </div>
               </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Product Manager Section */}
+      <div className="mt-8 px-1">
+        <div className="mb-3 flex flex-col items-start gap-2">
+          <h2 className="text-lg font-bold text-black flex items-center gap-2">
+            <Package size={18} className="text-purple-600" /> Manage Products
+          </h2>
+          <button
+            onClick={() => setShowProductManager(!showProductManager)}
+            className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+          >
+            <Package size={14} />
+            {showProductManager ? 'Hide Manager' : 'Show Manager'}
+            <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
+          </button>
+        </div>
+
+        {showProductManager && (
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            {/* Add Product */}
+            <div className="mb-4 mt-4">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addProduct()}
+                  placeholder="e.g., Croissant"
+                  className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
+                />
+                <button
+                  onClick={addProduct}
+                  className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                  title="Add Product"
+                  aria-label="Add Product"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Product List */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
+              {products.map((product: Product) => (
+                <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center space-x-0.5 mr-2">
+                      <button
+                        onClick={() => moveProduct(products.indexOf(product), 'up')}
+                        disabled={products.indexOf(product) === 0}
+                        className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                        title="Move Up"
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => moveProduct(products.indexOf(product), 'down')}
+                        disabled={products.indexOf(product) === products.length - 1}
+                        className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                        title="Move Down"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 flex-grow">
+                      <div className={`w-3 h-3 rounded-full ${product.color} flex-shrink-0`}></div>
+                      {editingProductId === product.id ? (
+                        <div className="flex items-center gap-1 flex-grow">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
+                            className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
+                            autoFocus
+                            aria-label="Edit Product Name"
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                              if (e.key === 'Enter') {
+                                handleRenameProduct(product.id, editName);
+                                setEditingProductId(null);
+                              } else if (e.key === 'Escape') {
+                                setEditingProductId(null);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              handleRenameProduct(product.id, editName);
+                              setEditingProductId(null);
+                            }}
+                            className="text-green-600 hover:text-green-700 p-0.5"
+                            title="Save"
+                            aria-label="Save"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={() => setEditingProductId(null)}
+                            className="text-red-500 hover:text-red-600 p-0.5"
+                            title="Cancel"
+                            aria-label="Cancel"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium truncate">{product.name}</span>
+                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                            ({bakes.filter((b: Bake) => b.productId === product.id).length})
+                          </span>
+                          <button
+                            onClick={() => {
+                              setEditingProductId(product.id);
+                              setEditName(product.name);
+                            }}
+                            className="text-gray-300 hover:text-purple-600 transition-colors p-1"
+                            title="Rename Product"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => deleteProduct(product.id)}
+                    disabled={products.length === 1}
+                    className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-2"
+                    title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* App Information Footer */}
+      <div className="mt-8 px-1">
+        <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-3">
+          <Activity size={18} className="text-apple-red" /> {t.aboutTitle}
+        </h2>
+
+        <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <p className="text-sm text-gray-600 leading-relaxed mb-6">
+            {t.aboutContent}
+          </p>
+
+          <div>
+            <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
+              <ChevronRight size={16} className="text-purple-600" /> {t.howToUseTitle}
+            </h3>
+            <div className="space-y-3 text-sm text-gray-600">
+              {[
+                { title: t.step1Title, content: t.step1Content },
+                { title: t.step2Title, content: t.step2Content },
+                { title: t.step3Title, content: t.step3Content },
+                { title: t.step4Title, content: t.step4Content },
+                { title: t.step5Title, content: t.step5Content },
+              ].map((step, index) => (
+                <div key={index} className="flex gap-2">
+                  <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
+                  <div>
+                    <strong>{step.title}:</strong> {step.content}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
       </div>
-    </div >
-  );
+
+    </div>
+  </div >
+);
 }
 
 // Product Card Selector - Clean Grid Design
@@ -1006,10 +1015,9 @@ interface ProductWheelSelectorProps {
   products: Product[];
   selectedProductId: number;
   setSelectedProductId: (id: number) => void;
-  productCounts: ProductCount[];
 }
 
-function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts }: ProductWheelSelectorProps) {
+function ProductWheelSelector({ products, selectedProductId, setSelectedProductId }: ProductWheelSelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const animationFrameId = useRef<number | null>(null);
@@ -1021,8 +1029,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
 
   // Initialize Audio
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContext = window.AudioContext || (window as unknown as WindowWithWebkit).webkitAudioContext;
     if (AudioContext) {
       audioContextRef.current = new AudioContext();
     }
@@ -1162,6 +1169,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
 
       {/* Scroll Container */}
       <div
+        role="listbox"
+        aria-label="Product Selector Wheel"
         ref={containerRef}
         className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20 mr-14"
         onScroll={handleScroll}
