@@ -583,7 +583,7 @@ export default function DoughTempTracker() {
           <div className="md:col-span-8 flex flex-col">
             <div className="flex items-start gap-2 mb-4 px-1">
               <Calculator size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-col">
+              <div className="flex flex-row items-baseline gap-2">
                 <h2 className="text-lg font-bold text-black leading-tight">{t.calculatorTitle}</h2>
                 <p className="text-xs text-apple-gray font-medium">{t.enterData}</p>
               </div>
