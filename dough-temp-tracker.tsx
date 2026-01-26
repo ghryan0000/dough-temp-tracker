@@ -566,7 +566,7 @@ export default function DoughTempTracker() {
           <div className="md:col-span-4 flex flex-col w-full max-w-xs mx-auto md:max-w-none md:mx-0">
             <div className="flex items-start gap-2 mb-4 px-1">
               <Package size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-col">
+              <div className="flex flex-row items-baseline gap-2">
                 <h2 className="text-lg font-bold text-black leading-tight">{t.selectProduct}</h2>
                 <p className="text-xs text-apple-gray font-medium">{t.scrollToSelect}</p>
               </div>
