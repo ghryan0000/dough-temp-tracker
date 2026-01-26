@@ -774,16 +774,19 @@ export default function DoughTempTracker() {
                     {/* Date */}
                     <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors shadow-[6px_0_10px_-4px_rgba(0,0,0,0.15)]">
                       <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
-                      <div className="relative">
+                      <div className="relative group/date">
+                        <div className="absolute inset-0 flex items-center px-2 text-[11px] font-bold text-black pointer-events-none z-0">
+                          {bake.date ? bake.date.replace(/-/g, '/') : '----/--/--'}
+                        </div>
                         <input
                           type="date"
                           value={bake.date}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                          className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 pr-6 py-1.5 outline-none focus:ring-1 focus:ring-apple-red appearance-none"
+                          className="w-full text-[11px] font-bold bg-apple-bg rounded px-2 pr-7 py-1.5 outline-none focus:ring-1 focus:ring-apple-red appearance-none text-transparent relative z-10"
                           style={{ colorScheme: 'light' }}
                           aria-label="Bake Date"
                         />
-                        <Calendar size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <Calendar size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-20" />
                       </div>
                     </div>
 
