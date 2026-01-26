@@ -993,37 +993,38 @@ export default function DoughTempTracker() {
               </div>
             </div>
           </div>
-
         </div>
-      </div >
-      );
+
+      </div>
+    </div >
+  );
 }
 
-      // Product Card Selector - Clean Grid Design
-      // Product Wheel Selector Component (Apple Clock Style - Red Palette)
-      interface ProductWheelSelectorProps {
-        products: Product[];
-      selectedProductId: number;
+// Product Card Selector - Clean Grid Design
+// Product Wheel Selector Component (Apple Clock Style - Red Palette)
+interface ProductWheelSelectorProps {
+  products: Product[];
+  selectedProductId: number;
   setSelectedProductId: (id: number) => void;
-      productCounts: ProductCount[];
+  productCounts: ProductCount[];
 }
 
-      function ProductWheelSelector({products, selectedProductId, setSelectedProductId, productCounts}: ProductWheelSelectorProps) {
+function ProductWheelSelector({ products, selectedProductId, setSelectedProductId, productCounts }: ProductWheelSelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-        const isScrollingRef = useRef(false);
-        const animationFrameId = useRef<number | null>(null);
+  const isScrollingRef = useRef(false);
+  const animationFrameId = useRef<number | null>(null);
 
-        const audioContextRef = useRef<AudioContext | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
-        const ITEM_HEIGHT = 54; // Reduced gap but kept non-touching
-        const RADIUS = 120;
+  const ITEM_HEIGHT = 54; // Reduced gap but kept non-touching
+  const RADIUS = 120;
 
   // Initialize Audio
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContext) {
-          audioContextRef.current = new AudioContext();
+    if (AudioContext) {
+      audioContextRef.current = new AudioContext();
     }
     return () => {
       if (audioContextRef.current) audioContextRef.current.close();
@@ -1033,32 +1034,32 @@ export default function DoughTempTracker() {
   // Apple Clock realistic mechanical click
   const playTickSound = () => {
     if (!audioContextRef.current) return;
-        if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
+    if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
 
-        const bufferSize = audioContextRef.current.sampleRate * 0.015;
-        const buffer = audioContextRef.current.createBuffer(1, bufferSize, audioContextRef.current.sampleRate);
-        const data = buffer.getChannelData(0);
+    const bufferSize = audioContextRef.current.sampleRate * 0.015;
+    const buffer = audioContextRef.current.createBuffer(1, bufferSize, audioContextRef.current.sampleRate);
+    const data = buffer.getChannelData(0);
 
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
     }
 
-        const noise = audioContextRef.current.createBufferSource();
-        noise.buffer = buffer;
+    const noise = audioContextRef.current.createBufferSource();
+    noise.buffer = buffer;
 
-        const filter = audioContextRef.current.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 2000;
-        filter.Q.value = 2;
+    const filter = audioContextRef.current.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 2;
 
-        const gain = audioContextRef.current.createGain();
-        gain.gain.value = 0.08;
+    const gain = audioContextRef.current.createGain();
+    gain.gain.value = 0.08;
 
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioContextRef.current.destination);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioContextRef.current.destination);
 
-        noise.start(audioContextRef.current.currentTime);
+    noise.start(audioContextRef.current.currentTime);
   };
 
 
@@ -1066,65 +1067,65 @@ export default function DoughTempTracker() {
   // Scroll Animation Helpers
   const cancelScrollAnimation = () => {
     if (animationFrameId.current) {
-          cancelAnimationFrame(animationFrameId.current);
-        animationFrameId.current = null;
+      cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = null;
     }
-        // Don't set isScrollingRef to false here immediately if we want to separate concerns,
-        // but typically if we cancel, we are done scrolling programmatically.
-        // However, user might be scrolling.
-        isScrollingRef.current = false;
-        if (containerRef.current) {
-          containerRef.current.style.scrollSnapType = '';
+    // Don't set isScrollingRef to false here immediately if we want to separate concerns,
+    // but typically if we cancel, we are done scrolling programmatically.
+    // However, user might be scrolling.
+    isScrollingRef.current = false;
+    if (containerRef.current) {
+      containerRef.current.style.scrollSnapType = '';
     }
   };
 
   const smoothScrollTo = (container: HTMLElement, target: number, duration: number) => {
-          cancelScrollAnimation();
+    cancelScrollAnimation();
 
-        const start = container.scrollTop;
-        const change = target - start;
-        const startTime = performance.now();
+    const start = container.scrollTop;
+    const change = target - start;
+    const startTime = performance.now();
 
-        isScrollingRef.current = true;
-        container.style.scrollSnapType = 'none';
+    isScrollingRef.current = true;
+    container.style.scrollSnapType = 'none';
 
     const animateScroll = (currentTime: number) => {
       const elapsed = currentTime - startTime;
 
       if (elapsed > duration) {
-          container.scrollTop = target;
+        container.scrollTop = target;
         isScrollingRef.current = false;
         container.style.scrollSnapType = '';
         animationFrameId.current = null;
         return;
       }
 
-        // easeInOutCubic
-        let t = elapsed / duration;
-        t = t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+      // easeInOutCubic
+      let t = elapsed / duration;
+      t = t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
-        container.scrollTop = start + change * t;
-        animationFrameId.current = requestAnimationFrame(animateScroll);
+      container.scrollTop = start + change * t;
+      animationFrameId.current = requestAnimationFrame(animateScroll);
     };
 
-        animationFrameId.current = requestAnimationFrame(animateScroll);
+    animationFrameId.current = requestAnimationFrame(animateScroll);
   };
 
-        // Main Scroll Loop
-        const lastSelectedRef = useRef(selectedProductId);
+  // Main Scroll Loop
+  const lastSelectedRef = useRef(selectedProductId);
   const handleScroll = () => {
     if (!containerRef.current) return;
-        // if (isScrollingRef.current) return;
+    // if (isScrollingRef.current) return;
 
-        const scrollTop = containerRef.current.scrollTop;
-        const index = Math.round(scrollTop / ITEM_HEIGHT);
-        const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
-        const targetProduct = products[clampedIndex];
+    const scrollTop = containerRef.current.scrollTop;
+    const index = Math.round(scrollTop / ITEM_HEIGHT);
+    const clampedIndex = Math.max(0, Math.min(index, products.length - 1));
+    const targetProduct = products[clampedIndex];
 
-        if (targetProduct && targetProduct.id !== lastSelectedRef.current) {
-          lastSelectedRef.current = targetProduct.id;
-        setSelectedProductId(targetProduct.id);
-        playTickSound();
+    if (targetProduct && targetProduct.id !== lastSelectedRef.current) {
+      lastSelectedRef.current = targetProduct.id;
+      setSelectedProductId(targetProduct.id);
+      playTickSound();
     }
   };
 
@@ -1133,8 +1134,8 @@ export default function DoughTempTracker() {
   useLayoutEffect(() => {
     if (containerRef.current) {
       const index = products.findIndex(p => p.id === selectedProductId);
-        if (index !== -1) {
-          isScrollingRef.current = true;
+      if (index !== -1) {
+        isScrollingRef.current = true;
         containerRef.current.scrollTop = index * ITEM_HEIGHT;
         setTimeout(() => isScrollingRef.current = false, 100);
       }
@@ -1146,129 +1147,129 @@ export default function DoughTempTracker() {
     if (isScrollingRef.current || !containerRef.current) return;
 
     const index = products.findIndex(p => p.id === selectedProductId);
-        if (index !== -1 && selectedProductId !== lastSelectedRef.current) {
-          lastSelectedRef.current = selectedProductId;
-        smoothScrollTo(containerRef.current, index * ITEM_HEIGHT, 50000);
+    if (index !== -1 && selectedProductId !== lastSelectedRef.current) {
+      lastSelectedRef.current = selectedProductId;
+      smoothScrollTo(containerRef.current, index * ITEM_HEIGHT, 50000);
     }
   }, [selectedProductId, products]);
 
-        return (
-        <div className="relative h-[162px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
-          {/* Center Highlight Zone */}
-          <div className="absolute top-[54px] left-0 right-14 h-[54px] z-0 pointer-events-none" />
+  return (
+    <div className="relative h-[162px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
+      {/* Center Highlight Zone */}
+      <div className="absolute top-[54px] left-0 right-14 h-[54px] z-0 pointer-events-none" />
 
 
 
-          {/* Scroll Container */}
-          <div
-            ref={containerRef}
-            className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20 mr-14"
-            onScroll={handleScroll}
-            onTouchStart={() => cancelScrollAnimation()}
-            onMouseDown={() => cancelScrollAnimation()}
-            onWheel={() => cancelScrollAnimation()}
-            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-              if (!containerRef.current) return;
+      {/* Scroll Container */}
+      <div
+        ref={containerRef}
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20 mr-14"
+        onScroll={handleScroll}
+        onTouchStart={() => cancelScrollAnimation()}
+        onMouseDown={() => cancelScrollAnimation()}
+        onWheel={() => cancelScrollAnimation()}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+          if (!containerRef.current) return;
 
-              const rect = containerRef.current.getBoundingClientRect();
-              const clickY = e.clientY - rect.top;
-              const centerY = rect.height / 2;
-              const currentIndex = products.findIndex(p => p.id === selectedProductId);
+          const rect = containerRef.current.getBoundingClientRect();
+          const clickY = e.clientY - rect.top;
+          const centerY = rect.height / 2;
+          const currentIndex = products.findIndex(p => p.id === selectedProductId);
 
-              // Click above center - go to previous card
-              if (clickY < centerY - ITEM_HEIGHT / 2 && currentIndex > 0) {
-                const targetIndex = currentIndex - 1;
-                playTickSound();
-                smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
-              }
-              // Click below center - go to next card
-              else if (clickY > centerY + ITEM_HEIGHT / 2 && currentIndex < products.length - 1) {
-                const targetIndex = currentIndex + 1;
-                playTickSound();
-                smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
-              }
-            }}
-            style={{
-              scrollBehavior: 'auto'
-            }}
-          >
-            <div className="relative">
-              {products.map((product, i) => {
-                const isSelected = product.id === selectedProductId;
+          // Click above center - go to previous card
+          if (clickY < centerY - ITEM_HEIGHT / 2 && currentIndex > 0) {
+            const targetIndex = currentIndex - 1;
+            playTickSound();
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
+          }
+          // Click below center - go to next card
+          else if (clickY > centerY + ITEM_HEIGHT / 2 && currentIndex < products.length - 1) {
+            const targetIndex = currentIndex + 1;
+            playTickSound();
+            smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 500);
+          }
+        }}
+        style={{
+          scrollBehavior: 'auto'
+        }}
+      >
+        <div className="relative">
+          {products.map((product, i) => {
+            const isSelected = product.id === selectedProductId;
 
-                return (
-                  <div
-                    key={product.id}
-                    className="h-[54px] flex items-center justify-center snap-center w-full"
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation(); // Prevent container onClick from interfering
-                      setSelectedProductId(product.id);
-                      playTickSound();
-                    }}
-                  >
-                    {/* Compact iOS Clock style cards */}
-                    <div
-                      style={{ zIndex: isSelected ? 50 : products.length - i }}
-                      className={`mx-3 px-5 rounded-full flex items-center gap-3 transition-all duration-300 ease-out origin-center
+            return (
+              <div
+                key={product.id}
+                className="h-[54px] flex items-center justify-center snap-center w-full"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation(); // Prevent container onClick from interfering
+                  setSelectedProductId(product.id);
+                  playTickSound();
+                }}
+              >
+                {/* Compact iOS Clock style cards */}
+                <div
+                  style={{ zIndex: isSelected ? 50 : products.length - i }}
+                  className={`mx-3 px-5 rounded-full flex items-center gap-3 transition-all duration-300 ease-out origin-center
                     ${isSelected
-                          ? 'w-[237px] bg-gradient-to-br from-apple-red to-red-600 scale-105 py-1.5 shadow-xl text-white justify-center'
-                          : 'w-[201px] bg-red-50/50 border-2 border-red-100 text-apple-gray hover:text-black hover:scale-105 py-[6px] justify-center'
-                        }`}>
+                      ? 'w-[237px] bg-gradient-to-br from-apple-red to-red-600 scale-105 py-1.5 shadow-xl text-white justify-center'
+                      : 'w-[201px] bg-red-50/50 border-2 border-red-100 text-apple-gray hover:text-black hover:scale-105 py-[6px] justify-center'
+                    }`}>
 
-                      <ChefHat size={20} className={isSelected ? 'text-white' : 'text-apple-gray'} />
+                  <ChefHat size={20} className={isSelected ? 'text-white' : 'text-apple-gray'} />
 
-                      <span className={`tracking-tight cursor-pointer
+                  <span className={`tracking-tight cursor-pointer
                             ${isSelected ? 'font-black text-lg border-b-[3px] border-white/60 pb-0.5' : 'font-medium text-base'}`}>
-                        {product.name}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                    {product.name}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
 
-            </div>
-          </div>
-
-
-          {/* Navigation Buttons - Positioned right beside the card edge */}
-          <div className="absolute left-1/2 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40 translate-x-[102px]">
-            <button
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                if (!containerRef.current) return;
-                const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
-                if (currentIndex > 0) {
-                  const targetIndex = currentIndex - 1;
-                  playTickSound();
-                  smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
-                }
-              }}
-              className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Previous Product"
-              aria-label="Previous Product"
-              disabled={products.findIndex((p: Product) => p.id === selectedProductId) <= 0}
-            >
-              <ChevronUp size={20} strokeWidth={3} />
-            </button>
-            <button
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                if (!containerRef.current) return;
-                const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
-                if (currentIndex < products.length - 1) {
-                  const targetIndex = currentIndex + 1;
-                  playTickSound();
-                  smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
-                }
-              }}
-              className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Next Product"
-              aria-label="Next Product"
-              disabled={products.findIndex((p: Product) => p.id === selectedProductId) >= products.length - 1}
-            >
-              <ChevronDown size={20} strokeWidth={3} />
-            </button>
-          </div>
         </div>
-        );
+      </div>
+
+
+      {/* Navigation Buttons - Positioned right beside the card edge */}
+      <div className="absolute left-1/2 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40 translate-x-[102px]">
+        <button
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (!containerRef.current) return;
+            const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
+            if (currentIndex > 0) {
+              const targetIndex = currentIndex - 1;
+              playTickSound();
+              smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
+            }
+          }}
+          className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Previous Product"
+          aria-label="Previous Product"
+          disabled={products.findIndex((p: Product) => p.id === selectedProductId) <= 0}
+        >
+          <ChevronUp size={20} strokeWidth={3} />
+        </button>
+        <button
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (!containerRef.current) return;
+            const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
+            if (currentIndex < products.length - 1) {
+              const targetIndex = currentIndex + 1;
+              playTickSound();
+              smoothScrollTo(containerRef.current, targetIndex * ITEM_HEIGHT, 300);
+            }
+          }}
+          className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Next Product"
+          aria-label="Next Product"
+          disabled={products.findIndex((p: Product) => p.id === selectedProductId) >= products.length - 1}
+        >
+          <ChevronDown size={20} strokeWidth={3} />
+        </button>
+      </div>
+    </div>
+  );
 }
