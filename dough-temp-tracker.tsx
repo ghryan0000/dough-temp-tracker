@@ -597,9 +597,9 @@ export default function DoughTempTracker() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
               {/* Target Display */}
-              <div className={`py-1 px-3 md:p-3 rounded-2xl text-left mb-2 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
-                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
-                <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+              <div className={`py-1 px-3 md:p-3 rounded-2xl mb-2 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
+                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider text-left">{t.targetWaterTemp}</div>
+                <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none text-center ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                   {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
                   <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
                 </div>
