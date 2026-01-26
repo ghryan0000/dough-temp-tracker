@@ -496,7 +496,7 @@ export default function DoughTempTracker() {
 
         {/* Header - Compact */}
         {/* Header - Compact */}
-        <div className="flex items-center justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
+        <div className="flex items-end justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
           <div>
             <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">{t.appTitle}</h1>
             <p className="text-red-50/90 text-xs font-medium">{t.appSubtitle}</p>
