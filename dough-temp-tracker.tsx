@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
 import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X, Calendar } from 'lucide-react';
 
 
@@ -45,169 +45,222 @@ interface WindowWithWebkit extends Window {
   webkitAudioContext: typeof AudioContext;
 }
 
-export default function DoughTempTracker() {
-  // Product colors for dynamic assignment
-  const productColors: string[] = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
+// Product colors for dynamic assignment
+const PRODUCT_COLORS: string[] = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
 
-  // Translations
-  const translations = {
-    en: {
-      appTitle: "Ryan's Bakery",
-      appSubtitle: "Water Temperature Tracker",
-      appDescription: "Calculate optimal water temp for consistent dough quality.",
-      modelReady: "Model Ready",
-      selectProduct: "Select Product",
-      scrollToSelect: "Scroll to select",
-      calculatorTitle: "Calculate Water Temp",
-      enterData: "Enter variables",
-      targetWaterTemp: "TARGET WATER TEMP",
-      calculateButton: "Calculate Water Temp",
-      historyTitle: "MLR Training History",
-      entries: "Entries",
-      noData: "No training data yet.",
-      addBakesHint: "Add previous bakes to train the model.",
-      yourProducts: "Your Products",
-      friction: "Friction",
-      date: "Date",
-      // Field Labels
-      room: "Room",
-      flour: "Flour",
-      levain: "Levain",
-      target: "Target Temp",
-      mix: "Mix Time", // Expanded for clarity in calc
-      hydration: "Hydration",
-      water: "Water",
-      final: "Final",
-      mixShort: "Mix", // For table headers
-      hydrShort: "Hydr %",
-      mlrTraining: "MLR Training",
-      sessions: "Total Session",
-      model: "Model",
-      coefficients: "Coefficients",
-      frictionPerMin: "Friction/min",
-      hydrationPercent: "Hydration/%",
-      quality: "Quality",
-      fit: "Fit",
-      // Documentation
-      aboutTitle: "User Guide",
-      aboutContent: "Ryan's Bakery Water Temperature Tracker ensures consistent dough by calculating the precise water temperature needed. It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
-      howToUseTitle: "How to Use",
-      step1Title: "Select Product",
-      step1Content: "Scroll the wheel to select a dough type.",
-      step2Title: "Calculate Temp",
-      step2Content: "Enter current conditions (Room, Flour, etc.) to get the Target Water Temp.",
-      step3Title: "Record Session",
-      step3Content: "After mixing, use 'Add Session' to log the actual results to train the MLR model.",
-      step4Title: "Export Data",
-      step4Content: "Download your baking history as a CSV file.",
-      step5Title: "Manage Products",
-      step5Content: "Add, rename, reorder, or delete products below.",
-    },
-    zh: {
-      appTitle: "Ryan's Bakery",
-      appSubtitle: "水溫追蹤器",
-      appDescription: "計算最佳水溫，確保麵團品質穩定一致。",
-      modelReady: "模型就緒",
-      selectProduct: "選擇產品",
-      scrollToSelect: "滾動選擇",
-      calculatorTitle: "計算水溫",
-      enterData: "輸入變數",
-      targetWaterTemp: "目標水溫",
-      calculateButton: "計算水溫",
-      historyTitle: "MLR 訓練歷史",
-      entries: "條紀錄",
-      noData: "暫無訓練數據",
-      addBakesHint: "添加過往烘焙紀錄以訓練模型",
-      yourProducts: "您的產品",
-      friction: "摩擦升溫",
-      date: "日期",
-      room: "室溫",
-      flour: "粉溫",
-      levain: "酵種",
-      target: "目標溫度",
-      mix: "攪拌時間",
-      hydration: "含水量",
-      water: "水溫",
-      final: "最終",
-      mixShort: "攪拌",
-      hydrShort: "含水%",
-      mlrTraining: "MLR 訓練",
-      sessions: "總場次",
-      model: "模型",
-      coefficients: "係數",
-      frictionPerMin: "摩擦升溫/分",
-      hydrationPercent: "含水量/%",
-      quality: "品質",
-      fit: "擬合度",
-      // Documentation
-      aboutTitle: "使用指南",
-      aboutContent: "Ryan 的烘焙坊水溫追蹤器通過計算理想水溫，助您製作出品質穩定的麵團。應用利用多元線性回歸 (MLR) 從您的烘焙紀錄中學習，根據環境條件預測最佳水溫。",
-      howToUseTitle: "使用說明",
-      step1Title: "選擇產品",
-      step1Content: "滾動轉輪以選擇麵團類型。",
-      step2Title: "計算水溫",
-      step2Content: "輸入當前條件（室溫、粉溫等）以獲取目標水溫。",
-      step3Title: "紀錄場次",
-      step3Content: "攪拌後，點擊「添加場次」紀錄實際結果，以訓練 MLR 模型。",
-      step4Title: "匯出數據",
-      step4Content: "將您的烘焙歷史下載為 CSV 文件。",
-      step5Title: "管理產品",
-      step5Content: "在下方添加、重命名、排序或刪除產品。",
-    },
-    ja: {
-      appTitle: "ライアンのベーカリー",
-      appSubtitle: "水温トラッカー",
-      appDescription: "最適な水温を計算し、安定した生地品質を実現します。",
-      modelReady: "モデル準備完了",
-      selectProduct: "製品を選択",
-      scrollToSelect: "スクロールして選択",
-      calculatorTitle: "水温を計算",
-      enterData: "変数を入力",
-      targetWaterTemp: "目標水温",
-      calculateButton: "水温を計算",
-      historyTitle: "MLR 学習履歴",
-      entries: "件",
-      noData: "データがありません",
-      addBakesHint: "過去のデータを追加してモデルを学習",
-      yourProducts: "製品一覧",
-      friction: "摩擦熱",
-      date: "日付",
-      room: "室温",
-      flour: "粉温",
-      levain: "種温",
-      target: "目標温度",
-      mix: "ミキシング",
-      hydration: "加水率",
-      water: "水温",
-      final: "捏上",
-      mixShort: "ミキシング",
-      hydrShort: "加水%",
-      mlrTraining: "MLR 学習",
-      sessions: "総セッション",
-      model: "モデル",
-      coefficients: "係数",
-      frictionPerMin: "摩擦/分",
-      hydrationPercent: "加水率/%",
-      quality: "品質",
-      fit: "適合度",
-      // Documentation
-      aboutTitle: "ユーザーガイド",
-      aboutContent: "Ryan's Bakery 水温トラッカーは、理想的な水温を計算し、安定した生地作りをサポートします。重回帰分析 (MLR) を用いて過去のデータから学習し、環境に応じた最適な水温を予測します。",
-      howToUseTitle: "使い方",
-      step1Title: "製品を選択",
-      step1Content: "ホイールをスクロールして生地タイプを選択します。",
-      step2Title: "水温を計算",
-      step2Content: "現在の条件（室温、粉温など）を入力し、目標水温を取得します。",
-      step3Title: "セッションを記録",
-      step3Content: "ミキシング後、「セッションを追加」で結果を記録し、MLRモデルを学習させます。",
-      step4Title: "データをエクスポート",
-      step4Content: "履歴をCSVファイルとしてダウンロードできます。",
-      step5Title: "製品を管理",
-      step5Content: "製品の追加、名前変更、並べ替え、削除が可能です。",
+// Translations
+const TRANSLATIONS = {
+  en: {
+    appTitle: "Ryan's Bakery",
+    appSubtitle: "Water Temperature Tracker",
+    appDescription: "Calculate optimal water temp for consistent dough quality.",
+    modelReady: "Model Ready",
+    selectProduct: "Select Product",
+    scrollToSelect: "Scroll to select",
+    calculatorTitle: "Calculate Water Temp",
+    enterData: "Enter variables",
+    targetWaterTemp: "TARGET WATER TEMP",
+    calculateButton: "Calculate Water Temp",
+    historyTitle: "MLR Training History",
+    entries: "Entries",
+    noData: "No training data yet.",
+    addBakesHint: "Add previous bakes to train the model.",
+    yourProducts: "Your Products",
+    friction: "Friction",
+    date: "Date",
+    // Field Labels
+    room: "Room",
+    flour: "Flour",
+    levain: "Levain",
+    target: "Target Temp",
+    mix: "Mix Time", // Expanded for clarity in calc
+    hydration: "Hydration",
+    water: "Water",
+    final: "Final",
+    mixShort: "Mix", // For table headers
+    hydrShort: "Hydr %",
+    mlrTraining: "MLR Training",
+    sessions: "Total Session",
+    model: "Model",
+    coefficients: "Coefficients",
+    frictionPerMin: "Friction/min",
+    hydrationPercent: "Hydration/%",
+    quality: "Quality",
+    fit: "Fit",
+    // Documentation
+    aboutTitle: "User Guide",
+    aboutContent: "Ryan's Bakery Water Temperature Tracker ensures consistent dough by calculating the precise water temperature needed. It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
+    howToUseTitle: "How to Use",
+    step1Title: "Select Product",
+    step1Content: "Scroll the wheel to select a dough type.",
+    step2Title: "Calculate Temp",
+    step2Content: "Enter current conditions (Room, Flour, etc.) to get the Target Water Temp.",
+    step3Title: "Record Session",
+    step3Content: "After mixing, use 'Add Session' to log the actual results to train the MLR model.",
+    step4Title: "Export Data",
+    step4Content: "Download your baking history as a CSV file.",
+    step5Title: "Manage Products",
+    step5Content: "Add, rename, reorder, or delete products below.",
+  },
+  zh: {
+    appTitle: "Ryan's Bakery",
+    appSubtitle: "水溫追蹤器",
+    appDescription: "計算最佳水溫，確保麵團品質穩定一致。",
+    modelReady: "模型就緒",
+    selectProduct: "選擇產品",
+    scrollToSelect: "滾動選擇",
+    calculatorTitle: "計算水溫",
+    enterData: "輸入變數",
+    targetWaterTemp: "目標水溫",
+    calculateButton: "計算水溫",
+    historyTitle: "MLR 訓練歷史",
+    entries: "條紀錄",
+    noData: "暫無訓練數據",
+    addBakesHint: "添加過往烘焙紀錄以訓練模型",
+    yourProducts: "您的產品",
+    friction: "摩擦升溫",
+    date: "日期",
+    room: "室溫",
+    flour: "粉溫",
+    levain: "酵種",
+    target: "目標溫度",
+    mix: "攪拌時間",
+    hydration: "含水量",
+    water: "水溫",
+    final: "最終",
+    mixShort: "攪拌",
+    hydrShort: "含水%",
+    mlrTraining: "MLR 訓練",
+    sessions: "總場次",
+    model: "模型",
+    coefficients: "係數",
+    frictionPerMin: "摩擦升溫/分",
+    hydrationPercent: "含水量/%",
+    quality: "品質",
+    fit: "擬合度",
+    // Documentation
+    aboutTitle: "使用指南",
+    aboutContent: "Ryan 的烘焙坊水溫追蹤器通過計算理想水溫，助您製作出品質穩定的麵團。應用利用多元線性回歸 (MLR) 從您的烘焙紀錄中學習，根據環境條件預測最佳水溫。",
+    howToUseTitle: "使用說明",
+    step1Title: "選擇產品",
+    step1Content: "滾動轉輪以選擇麵團類型。",
+    step2Title: "計算水溫",
+    step2Content: "輸入當前條件（室溫、粉溫等）以獲取目標水溫。",
+    step3Title: "紀錄場次",
+    step3Content: "攪拌後，點擊「添加場次」紀錄實際結果，以訓練 MLR 模型。",
+    step4Title: "匯出數據",
+    step4Content: "將您的烘焙歷史下載為 CSV 文件。",
+    step5Title: "管理產品",
+    step5Content: "在下方添加、重命名、排序或刪除產品。",
+  },
+  ja: {
+    appTitle: "ライアンのベーカリー",
+    appSubtitle: "水温トラッカー",
+    appDescription: "最適な水温を計算し、安定した生地品質を実現します。",
+    modelReady: "モデル準備完了",
+    selectProduct: "製品を選択",
+    scrollToSelect: "スクロールして選択",
+    calculatorTitle: "水温を計算",
+    enterData: "変数を入力",
+    targetWaterTemp: "目標水温",
+    calculateButton: "水温を計算",
+    historyTitle: "MLR 学習履歴",
+    entries: "件",
+    noData: "データがありません",
+    addBakesHint: "過去のデータを追加してモデルを学習",
+    yourProducts: "製品一覧",
+    friction: "摩擦熱",
+    date: "日付",
+    room: "室温",
+    flour: "粉温",
+    levain: "種温",
+    target: "目標温度",
+    mix: "ミキシング",
+    hydration: "加水率",
+    water: "水温",
+    final: "捏上",
+    mixShort: "ミキシング",
+    hydrShort: "加水%",
+    mlrTraining: "MLR 学習",
+    sessions: "総セッション",
+    model: "モデル",
+    coefficients: "係数",
+    frictionPerMin: "摩擦/分",
+    hydrationPercent: "加水率/%",
+    quality: "品質",
+    fit: "適合度",
+    // Documentation
+    aboutTitle: "ユーザーガイド",
+    aboutContent: "Ryan's Bakery 水温トラッカーは、理想的な水温を計算し、安定した生地作りをサポートします。重回歸分析 (MLR) を用いて過去のデータから学習し、環境に応じた最適な水温を予測します。",
+    howToUseTitle: "使い方",
+    step1Title: "製品を選択",
+    step1Content: "ホイールをスクロールして生地タイプを選択します。",
+    step2Title: "水温を計算",
+    step2Content: "現在の条件（室温、粉温など）を入力し、目標水温を取得します。",
+    step3Title: "セッションを記録",
+    step3Content: "ミキシング後、「セッションを追加」で結果を記録し、MLRモデルを学習させます。",
+    step4Title: "データをエクスポート",
+    step4Content: "履歴をCSVファイルとしてダウンロードできます。",
+    step5Title: "製品を管理",
+    step5Content: "製品の追加、名前変更、並べ替え、削除が可能です。",
+  }
+};
+
+type Language = 'en' | 'zh' | 'ja';
+type Translation = typeof TRANSLATIONS.en;
+
+// Utility functions outside the component
+const calculateSimpleFriction = (bake: Bake): string => {
+  const { roomTemp, flourTemp, waterTemp, levainTemp, finalTemp } = bake;
+  if (roomTemp === '' || flourTemp === '' || waterTemp === '' || levainTemp === '' || finalTemp === '') return '-';
+  return ((5 * Number(finalTemp)) - (Number(roomTemp) + Number(flourTemp) + Number(waterTemp) + Number(levainTemp))).toFixed(1);
+};
+
+const solveRobust = (X: number[][], y: number[]): number[] | null => {
+  const n = X.length, m = X[0].length, lambda = 0.01;
+  const XtX = Array(m).fill(0).map(() => Array(m).fill(0));
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < m; j++) {
+      let sum = 0;
+      for (let k = 0; k < n; k++) sum += X[k][i] * X[k][j];
+      XtX[i][j] = sum + (i === j ? lambda : 0);
     }
-  };
+  }
+  const Xty = Array(m).fill(0);
+  for (let i = 0; i < m; i++) {
+    let sum = 0;
+    for (let k = 0; k < n; k++) sum += X[k][i] * y[k];
+    Xty[i] = sum;
+  }
+  return gaussianEliminationPivot(XtX, Xty);
+};
 
-  type Language = 'en' | 'zh' | 'ja';
+const gaussianEliminationPivot = (A: number[][], b: number[]): number[] | null => {
+  const n = A.length;
+  const Ab = A.map((row, i) => [...row, b[i]]);
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(Ab[k][i]) > Math.abs(Ab[maxRow][i])) maxRow = k;
+    }
+    [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
+    if (Math.abs(Ab[i][i]) < 1e-12) return null;
+    for (let k = i + 1; k < n; k++) {
+      const factor = Ab[k][i] / Ab[i][i];
+      for (let j = i; j <= n; j++) Ab[k][j] -= factor * Ab[i][j];
+    }
+  }
+  const x = Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    x[i] = Ab[i][n];
+    for (let j = i + 1; j < n; j++) x[i] -= Ab[i][j] * x[j];
+    x[i] /= Ab[i][i];
+    if (!isFinite(x[i])) return null;
+  }
+  return x;
+};
+
+export default function DoughTempTracker() {
   const [language, setLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem('app-language');
     return (saved as Language) || 'en';
@@ -217,7 +270,7 @@ export default function DoughTempTracker() {
     localStorage.setItem('app-language', language);
   }, [language]);
 
-  const t = translations[language];
+  const t = TRANSLATIONS[language];
 
   // Data migration and initialization
   const [products, setProducts] = useState<Product[]>(() => {
@@ -230,11 +283,11 @@ export default function DoughTempTracker() {
     // Migrate from old format
     const oldFormat = localStorage.getItem('productNames');
     if (oldFormat) {
-      const productNames = JSON.parse(oldFormat);
+      const productNames = JSON.parse(oldFormat) as string[];
       const migratedProducts = productNames.map((name, index) => ({
         id: index + 1,
         name: name,
-        color: productColors[index % productColors.length]
+        color: PRODUCT_COLORS[index % PRODUCT_COLORS.length]
       }));
       localStorage.setItem('products-v2', JSON.stringify(migratedProducts));
       return migratedProducts;
@@ -283,11 +336,11 @@ export default function DoughTempTracker() {
     // Migrate from old format
     const oldFormat = localStorage.getItem('bakesData');
     if (oldFormat) {
-      const oldBakes = JSON.parse(oldFormat);
+      const oldBakes = JSON.parse(oldFormat) as Array<{ productType: string;[key: string]: any }>;
       const migratedBakes = oldBakes.map(bake => {
         const product = products.find(p => p.name === bake.productType);
         const { productType, ...rest } = bake;
-        return { ...rest, productId: product ? product.id : 1 };
+        return { ...rest, productId: product ? product.id : 1 } as unknown as Bake;
       });
       localStorage.setItem('bakes-v2', JSON.stringify(migratedBakes));
       return migratedBakes;
@@ -317,7 +370,7 @@ export default function DoughTempTracker() {
     const newProduct = {
       id: newId,
       name: newProductName.trim(),
-      color: productColors[products.length % productColors.length]
+      color: PRODUCT_COLORS[products.length % PRODUCT_COLORS.length]
     };
     setProducts([...products, newProduct]);
     setNewProductName('');
@@ -353,9 +406,6 @@ export default function DoughTempTracker() {
     }
   };
 
-  const [regressionModel, setRegressionModel] = useState<RegressionModel | null>(null);
-  const [showAnalysis, setShowAnalysis] = useState(false);
-  const [debugInfo, setDebugInfo] = useState('');
   const [currentConditions, setCurrentConditions] = useState<Record<string, string | number>>({
     roomTemp: 22,
     flourTemp: 20,
@@ -364,24 +414,21 @@ export default function DoughTempTracker() {
     hydration: 70
   });
 
-  const calculateRegression = () => {
+  const regressionModel = useMemo(() => {
     const validBakes = bakes.filter(b =>
       b.productId === selectedProductId &&
       b.roomTemp !== '' && b.flourTemp !== '' && b.waterTemp !== '' &&
       b.levainTemp !== '' && b.finalTemp !== '' && b.mixTime !== '' && b.hydration !== ''
     );
 
-    if (validBakes.length < 3) {
-      setDebugInfo(`Need at least 3 complete baking sessions. Currently have: ${validBakes.length}`);
-      return null;
-    }
+    if (validBakes.length < 3) return null;
 
     try {
       const n = validBakes.length;
-      const y = validBakes.map(b => parseFloat(b.waterTemp));
+      const y = validBakes.map(b => parseFloat(b.waterTemp as string));
       const rawX = validBakes.map(b => [
-        1, parseFloat(b.roomTemp), parseFloat(b.flourTemp), parseFloat(b.levainTemp),
-        parseFloat(b.finalTemp), parseFloat(b.mixTime), parseFloat(b.hydration)
+        1, parseFloat(b.roomTemp as string), parseFloat(b.flourTemp as string), parseFloat(b.levainTemp as string),
+        parseFloat(b.finalTemp as string), parseFloat(b.mixTime as string), parseFloat(b.hydration as string)
       ]);
 
       const means: number[] = [];
@@ -398,10 +445,7 @@ export default function DoughTempTracker() {
       const X = rawX.map((row: number[]) => [row[0], ...row.slice(1).map((val: number, idx: number) => (val - means[idx]) / stds[idx])]);
       const beta = solveRobust(X, y);
 
-      if (!beta || beta.some(isNaN) || beta.some(val => !isFinite(val))) {
-        setDebugInfo(`Regression failed. Try adding more varied data.`);
-        return null;
-      }
+      if (!beta) return null;
 
       const denormBeta = [
         beta[0] - beta.slice(1).reduce((sum, b, i) => sum + b * means[i] / stds[i], 0),
@@ -418,22 +462,16 @@ export default function DoughTempTracker() {
       }
 
       const rSquared = ssTotal > 0 ? Math.max(0, Math.min(1, 1 - (ssResidual / ssTotal))) : 0;
-      setDebugInfo(`✅ Regression successful! R² = ${rSquared.toFixed(3)}, n = ${n}`);
-
       return {
         intercept: denormBeta[0], roomCoef: denormBeta[1], flourCoef: denormBeta[2],
         levainCoef: denormBeta[3], targetCoef: denormBeta[4], mixTimeCoef: denormBeta[5],
         hydrationCoef: denormBeta[6], rSquared: rSquared, nSamples: n
       };
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setDebugInfo(`❌ Error: ${error.message}`);
-      } else {
-        setDebugInfo(`❌ Error: Unknown regression error`);
-      }
+    } catch (error) {
+      console.error('Regression failed:', error);
       return null;
     }
-  };
+  }, [bakes, selectedProductId]);
 
   const solveRobust = (X: number[][], y: number[]) => {
     const n = X.length, m = X[0].length, lambda = 0.01;
@@ -479,10 +517,7 @@ export default function DoughTempTracker() {
     return x;
   };
 
-  useEffect(() => {
-    const model = calculateRegression();
-    setRegressionModel(model);
-  }, [bakes, selectedProductId]);
+  // Removed manual regression trigger useEffect
 
   const addBake = () => {
     const newId = bakes.length > 0 ? Math.max(...bakes.map(b => b.id)) + 1 : 1;
@@ -496,12 +531,7 @@ export default function DoughTempTracker() {
   const updateBake = (id: number, field: keyof Bake, value: string | number) => setBakes(bakes.map(b => b.id === id ? { ...b, [field]: value } : b));
   const updateCurrentCondition = (field: string, value: string | number) => setCurrentConditions({ ...currentConditions, [field]: value });
 
-  const calculateSimpleFriction = (bake: Bake) => {
-    const { roomTemp, flourTemp, waterTemp, levainTemp, finalTemp } = bake;
-    if (roomTemp === '' || flourTemp === '' || waterTemp === '' || levainTemp === '' || finalTemp === '') return '-';
-    return ((5 * Number(finalTemp)) - (Number(roomTemp) + Number(flourTemp) + Number(waterTemp) + Number(levainTemp))).toFixed(1);
-  };
-
+  // Prediciton logic stays near calculator
   const predictWaterTemp = (roomTemp: number | string, flourTemp: number | string, levainTemp: number | string, targetFinal: number | string, mixTime: number | string, hydration: number | string) => {
     if (!regressionModel) return null;
     return regressionModel.intercept + regressionModel.roomCoef * Number(roomTemp) +
@@ -510,10 +540,14 @@ export default function DoughTempTracker() {
       regressionModel.hydrationCoef * Number(hydration);
   };
 
-  const currentPredictedWater = predictWaterTemp(
+  const currentPredictedWater = useMemo(() => predictWaterTemp(
     currentConditions.roomTemp, currentConditions.flourTemp, currentConditions.levainTemp,
     targetTemp, currentConditions.mixTime, currentConditions.hydration
-  );
+  ), [regressionModel, currentConditions, targetTemp]);
+
+  const currentProduct = useMemo(() => products.find(p => p.id === selectedProductId), [products, selectedProductId]);
+  const currentBakes = useMemo(() => bakes.filter(b => b.productId === selectedProductId), [bakes, selectedProductId]);
+  const memoizedSortedProducts = useMemo(() => [...products].sort((a, b) => a.name.localeCompare(b.name)), [products]);
 
   const exportCSV = () => {
     const product = products.find(p => p.id === selectedProductId);
@@ -529,10 +563,6 @@ export default function DoughTempTracker() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
-  const currentProduct = products.find(p => p.id === selectedProductId);
-  const currentBakes = bakes.filter(b => b.productId === selectedProductId);
-
 
 
   return (
@@ -585,7 +615,7 @@ export default function DoughTempTracker() {
               </div>
             </div>
             <ProductWheelSelector
-              products={[...products].sort((a, b) => a.name.localeCompare(b.name))}
+              products={memoizedSortedProducts}
               selectedProductId={selectedProductId}
               setSelectedProductId={setSelectedProductId}
             />
@@ -619,24 +649,17 @@ export default function DoughTempTracker() {
                   { label: t.room, key: 'roomTemp', unit: '°C' },
                   { label: t.flour, key: 'flourTemp', unit: '°C' },
                   { label: t.levain, key: 'levainTemp', unit: '°C' },
-                  { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
+                  { label: t.target, key: 'target', unit: '°C' },
                   { label: t.mix, key: 'mixTime', unit: 'min' },
                   { label: t.hydration, key: 'hydration', unit: '%' }
                 ].map((field) => (
-                  <div key={field.label} className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
-                    <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
-                    <div className="flex items-baseline mt-2">
-                      <input
-                        type="number"
-                        value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
-                        className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
-                        placeholder="--"
-                        aria-label={field.label}
-                      />
-                      <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
-                    </div>
-                  </div>
+                  <CalculatorInput
+                    key={field.key}
+                    label={field.label}
+                    unit={field.unit}
+                    value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
+                    onChange={(val) => field.key === 'target' ? setTargetTemp(val) : updateCurrentCondition(field.key, val)}
+                  />
                 ))}
               </div>
 
@@ -768,67 +791,14 @@ export default function DoughTempTracker() {
                 <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
               </div>
             ) : (
-              currentBakes.slice().reverse().map((bake) => (
-                <div key={bake.id} className="group p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 overflow-hidden">
-                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {/* Date */}
-                    <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors">
-                      <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
-                      <div className="relative group/date h-[28px]">
-                        <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-black pointer-events-none z-20">
-                          {bake.date ? bake.date.replace(/-/g, '/') : '----/--/--'}
-                        </div>
-                        <input
-                          type="date"
-                          value={bake.date}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                          className="w-full h-full text-xs font-medium bg-apple-bg rounded outline-none focus:ring-1 focus:ring-apple-red appearance-none text-transparent relative z-10"
-                          style={{ colorScheme: 'light' }}
-                          aria-label="Bake Date"
-                        />
-                        <Calendar size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none z-30" />
-                      </div>
-                    </div>
-
-                    {[
-                      { label: t.room, key: 'roomTemp' },
-                      { label: t.flour, key: 'flourTemp' },
-                      { label: t.levain, key: 'levainTemp' },
-                      { label: t.water, key: 'waterTemp' },
-                      { label: t.final, key: 'finalTemp' },
-                      { label: t.mixShort, key: 'mixTime' },
-                      { label: t.hydrShort, key: 'hydration' }
-                    ].map((field) => (
-                      <div key={field.key} className="flex-none w-14 text-center">
-                        <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
-                        <input
-                          type="number"
-                          placeholder="--"
-                          className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                          value={bake[field.key as keyof Bake]}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
-                          aria-label={field.label}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Friction */}
-                    <div className="flex-none w-14 text-center">
-                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
-                      <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
-                        {calculateSimpleFriction(bake)}
-                      </div>
-                    </div>
-
-                    {/* Delete */}
-                    <div className="flex-none w-8 flex items-center justify-center pt-3">
-                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
+              currentBakes.slice().reverse().map((bake: Bake) => (
+                <HistoryRow
+                  key={bake.id}
+                  bake={bake}
+                  t={t}
+                  updateBake={updateBake}
+                  deleteBake={deleteBake}
+                />
               ))
             )}
           </div>
@@ -1283,6 +1253,103 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
         >
           <ChevronDown size={20} strokeWidth={3} />
         </button>
+      </div>
+    </div>
+  );
+}
+
+// Sub-components
+interface CalculatorInputProps {
+  label: string;
+  unit: string;
+  value: string | number;
+  onChange: (val: string) => void;
+}
+
+function CalculatorInput({ label, unit, value, onChange }: CalculatorInputProps) {
+  return (
+    <div className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+      <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{label}</label>
+      <div className="flex items-baseline mt-2">
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
+          placeholder="--"
+          aria-label={label}
+        />
+        <span className="text-xs font-medium text-gray-400 ml-1">{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+interface HistoryRowProps {
+  bake: Bake;
+  t: Translation;
+  updateBake: (id: number, field: keyof Bake, value: string | number) => void;
+  deleteBake: (id: number) => void;
+}
+
+function HistoryRow({ bake, t, updateBake, deleteBake }: HistoryRowProps) {
+  return (
+    <div className="group p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 overflow-hidden">
+      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+        {/* Date */}
+        <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors">
+          <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
+          <div className="relative group/date h-[28px]">
+            <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-black pointer-events-none z-20">
+              {bake.date ? bake.date.replace(/-/g, '/') : '----/--/--'}
+            </div>
+            <input
+              type="date"
+              value={bake.date}
+              onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
+              className="w-full h-full text-xs font-medium bg-apple-bg rounded outline-none focus:ring-1 focus:ring-apple-red appearance-none text-transparent relative z-10 apple-date-picker"
+              aria-label="Bake Date"
+            />
+            <Calendar size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none z-30" />
+          </div>
+        </div>
+
+        {[
+          { label: t.room, key: 'roomTemp' },
+          { label: t.flour, key: 'flourTemp' },
+          { label: t.levain, key: 'levainTemp' },
+          { label: t.water, key: 'waterTemp' },
+          { label: t.final, key: 'finalTemp' },
+          { label: t.mixShort, key: 'mixTime' },
+          { label: t.hydrShort, key: 'hydration' }
+        ].map((field) => (
+          <div key={field.key} className="flex-none w-14 text-center">
+            <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
+            <input
+              type="number"
+              placeholder="--"
+              className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+              value={bake[field.key as keyof Bake]}
+              onChange={(e) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
+              aria-label={field.label}
+            />
+          </div>
+        ))}
+
+        {/* Friction */}
+        <div className="flex-none w-14 text-center">
+          <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
+          <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
+            {calculateSimpleFriction(bake)}
+          </div>
+        </div>
+
+        {/* Delete */}
+        <div className="flex-none w-8 flex items-center justify-center pt-3">
+          <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
     </div>
   );

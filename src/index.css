@@ -64,3 +64,7 @@ body {
 .rotate-y-300 {
   transform: rotateY(300deg) translateZ(150px);
 }
+
+.apple-date-picker {
+  color-scheme: light;
+}
