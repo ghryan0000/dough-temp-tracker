@@ -772,7 +772,7 @@ export default function DoughTempTracker() {
                 <div key={bake.id} className="group p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 overflow-hidden">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
                     {/* Date */}
-                    <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors border-r border-gray-100">
+                    <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors">
                       <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
                       <div className="relative group/date h-[28px]">
                         <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-black pointer-events-none z-20">
