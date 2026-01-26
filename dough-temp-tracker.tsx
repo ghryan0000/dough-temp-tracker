@@ -966,33 +966,30 @@ export default function DoughTempTracker() {
           </h2>
 
           <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 leading-relaxed mb-6">
               {t.aboutContent}
             </p>
-          </div>
-        </div>
 
-        {/* How to Use Section */}
-        <div className="mt-8 px-1">
-          <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-3">
-            <ChevronRight size={18} className="text-purple-600" /> {t.howToUseTitle}
-          </h2>
-          <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <div className="space-y-3 text-sm text-gray-600">
-              {[
-                { title: t.step1Title, content: t.step1Content },
-                { title: t.step2Title, content: t.step2Content },
-                { title: t.step3Title, content: t.step3Content },
-                { title: t.step4Title, content: t.step4Content },
-                { title: t.step5Title, content: t.step5Content },
-              ].map((step, index) => (
-                <div key={index} className="flex gap-2">
-                  <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
-                  <div>
-                    <strong>{step.title}:</strong> {step.content}
+            <div>
+              <h3 className="bg-apple-red text-white px-4 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1 shadow-sm mb-3">
+                <ChevronRight size={14} className="text-white" /> {t.howToUseTitle}
+              </h3>
+              <div className="space-y-3 text-sm text-gray-600">
+                {[
+                  { title: t.step1Title, content: t.step1Content },
+                  { title: t.step2Title, content: t.step2Content },
+                  { title: t.step3Title, content: t.step3Content },
+                  { title: t.step4Title, content: t.step4Content },
+                  { title: t.step5Title, content: t.step5Content },
+                ].map((step, index) => (
+                  <div key={index} className="flex gap-2">
+                    <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
+                    <div>
+                      <strong>{step.title}:</strong> {step.content}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
