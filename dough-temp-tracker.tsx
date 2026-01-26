@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X, Calendar } from 'lucide-react';
 
 
 // Interfaces
@@ -769,18 +769,22 @@ export default function DoughTempTracker() {
               </div>
             ) : (
               currentBakes.slice().reverse().map((bake) => (
-                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                <div key={bake.id} className="group p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 overflow-hidden">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
                     {/* Date */}
-                    <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
+                    <div className="flex-none w-32 sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-3 transition-colors shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]">
                       <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
-                      <input
-                        type="date"
-                        value={bake.date}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                        className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                        aria-label="Bake Date"
-                      />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={bake.date}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
+                          className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red appearance-none"
+                          style={{ colorScheme: 'light' }}
+                          aria-label="Bake Date"
+                        />
+                        <Calendar size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
 
                     {[
