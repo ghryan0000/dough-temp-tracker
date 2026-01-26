@@ -1007,7 +1007,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
                 {/* Compact iOS Clock style cards */}
                 <div className={`w-[230px] mx-3 px-5 py-2 rounded-2xl flex items-center gap-3 justify-start transition-all duration-300 ease-out origin-center
                     ${isSelected
-                    ? 'bg-gradient-to-br from-apple-red to-red-600 scale-110 shadow-xl z-10'
+                    ? 'bg-gradient-to-br from-apple-red to-red-600 scale-110 shadow-xl z-10 text-white'
                     : 'bg-white border border-apple-red text-apple-gray hover:text-black hover:scale-105'
                   }`}>
 
