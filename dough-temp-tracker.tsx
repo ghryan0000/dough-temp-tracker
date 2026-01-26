@@ -370,16 +370,11 @@ export default function DoughTempTracker() {
       <div className="max-w-4xl mx-auto px-4">
 
         {/* Header - Compact */}
-        <div className="flex items-baseline justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
           <div>
-            <h1 className="text-2xl font-bold text-black tracking-tight">Ryan's Bakery</h1>
-            <p className="text-apple-gray text-xs font-medium">Water Temperature Tracker</p>
+            <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">Ryan's Bakery</h1>
+            <p className="text-red-50/90 text-xs font-medium">Water Temperature Tracker</p>
           </div>
-          {regressionModel && (
-            <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-              <Activity size={10} /> Model Ready
-            </span>
-          )}
         </div>
 
         {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
@@ -387,12 +382,13 @@ export default function DoughTempTracker() {
 
           {/* Left Column: Product Selector (Card Grid) */}
           <div className="md:col-span-4 flex flex-col w-full max-w-xs mx-auto md:max-w-none md:mx-0">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-1 px-1">
-              <Package size={18} className="text-apple-red" /> Select Product
-            </h2>
-            <p className="text-xs text-apple-gray mb-4 px-1 text-left font-medium">
-              Scroll to select
-            </p>
+            <div className="flex items-start gap-2 mb-4 px-1">
+              <Package size={18} className="text-apple-red mt-1" />
+              <div className="flex flex-col">
+                <h2 className="text-lg font-bold text-black leading-tight">Select Product</h2>
+                <p className="text-xs text-apple-gray font-medium">Scroll to select</p>
+              </div>
+            </div>
             <ProductWheelSelector
               products={products}
               selectedProductId={selectedProductId}
@@ -403,10 +399,12 @@ export default function DoughTempTracker() {
 
           {/* Right Column: Calculator */}
           <div className="md:col-span-8 bg-white rounded-2xl shadow-sm p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-black flex items-center gap-2">
-                <Calculator size={18} className="text-apple-red" /> Target Water Temp Calculator
-              </h2>
+            <div className="flex items-start gap-2 mb-4">
+              <Calculator size={18} className="text-apple-red mt-1" />
+              <div className="flex flex-col">
+                <h2 className="text-lg font-bold text-black leading-tight">Target Water Temp Calculator</h2>
+                <p className="text-xs text-apple-gray font-medium">Adjust Variables to Calculate Ideal Water Temp</p>
+              </div>
             </div>
 
             {/* Inputs with Units */}
@@ -437,7 +435,14 @@ export default function DoughTempTracker() {
 
             {/* Result Display */}
             <div className={`p-2 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
-              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-0.5">TARGET WATER TEMP</div>
+              <div className="flex items-center justify-center gap-2 mb-0.5">
+                <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">TARGET WATER TEMP</div>
+                {regressionModel && (
+                  <span className="text-[9px] font-bold px-1.5 py-px bg-green-50 text-green-700 border border-green-200 rounded-full flex items-center gap-0.5">
+                    <Activity size={8} /> Model Ready
+                  </span>
+                )}
+              </div>
               <div className={`text-3xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                 {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
                 <span className="text-sm ml-0.5 font-medium text-gray-400">°C</span>
@@ -447,16 +452,16 @@ export default function DoughTempTracker() {
             {/* Model Training Status - Detailed View */}
             {regressionModel && (
               <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col items-start mb-3 gap-1">
                   <div className="flex items-center gap-2">
                     <BarChart3 size={16} className="text-purple-600" />
                     <span className="text-sm font-bold text-purple-900">MLR Training: {currentProduct?.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 ml-6">
                     <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
                       ✓ Trained! R²={regressionModel.rSquared.toFixed(3)}
                     </span>
-                    <span className="text-[10px] font-medium text-gray-500">
+                    <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
                       Sessions: {regressionModel.nSamples}
                     </span>
                   </div>
@@ -539,11 +544,11 @@ export default function DoughTempTracker() {
               <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
             </h2>
             <div className="flex gap-2">
+              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+                <Plus size={14} /> Add Session
+              </button>
               <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
                 <Download size={12} /> Export CSV
-              </button>
-              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1">
-                <Plus size={14} /> Add Session
               </button>
             </div>
           </div>
@@ -612,21 +617,23 @@ export default function DoughTempTracker() {
         </div>
 
         {/* Product Manager Section */}
-        <div className="mt-8 bg-white rounded-2xl shadow-sm p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mt-8 px-1">
+          <div className="mb-3 flex flex-col items-start gap-2">
             <h2 className="text-lg font-bold text-black flex items-center gap-2">
               <Package size={18} className="text-purple-600" /> Manage Products
             </h2>
             <button
               onClick={() => setShowProductManager(!showProductManager)}
-              className="text-apple-gray hover:text-black transition-colors"
+              className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
             >
-              <ChevronDown className={`transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={18} />
+              <Package size={14} />
+              {showProductManager ? 'Hide Manager' : 'Show Manager'}
+              <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
             </button>
           </div>
 
           {showProductManager && (
-            <div>
+            <div className="bg-white rounded-2xl shadow-sm p-5">
               {/* Add Product */}
               <div className="mb-4 mt-4">
                 <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
@@ -813,7 +820,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const ITEM_HEIGHT = 36; // Reduced to minimize spacing
+  const ITEM_HEIGHT = 54; // Reduced gap but kept non-touching
   const RADIUS = 120;
 
   // Initialize Audio
@@ -951,16 +958,16 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
   }, [selectedProductId, products]);
 
   return (
-    <div className="relative h-[108px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
+    <div className="relative h-[162px] w-full overflow-hidden select-none bg-transparent rounded-2xl">
       {/* Center Highlight Zone */}
-      <div className="absolute top-[36px] left-0 right-14 h-[36px] z-0 pointer-events-none" />
+      <div className="absolute top-[54px] left-0 right-14 h-[54px] z-0 pointer-events-none" />
 
 
 
       {/* Scroll Container */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto snap-y snap-mandatory py-[36px] no-scrollbar relative z-20 mr-14"
+        className="h-full overflow-y-auto snap-y snap-mandatory py-[54px] no-scrollbar relative z-20 mr-14"
         onScroll={handleScroll}
         onTouchStart={() => cancelScrollAnimation()}
         onMouseDown={() => cancelScrollAnimation()}
@@ -997,7 +1004,7 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             return (
               <div
                 key={product.id}
-                className="h-[36px] flex items-center justify-center snap-center w-full"
+                className="h-[54px] flex items-center justify-center snap-center w-full"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation(); // Prevent container onClick from interfering
                   setSelectedProductId(product.id);
@@ -1005,16 +1012,18 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
                 }}
               >
                 {/* Compact iOS Clock style cards */}
-                <div className={`w-[230px] mx-3 px-5 py-2 rounded-2xl flex items-center gap-3 justify-start transition-all duration-300 ease-out origin-center
+                <div
+                  style={{ zIndex: isSelected ? 50 : products.length - i }}
+                  className={`mx-3 px-5 rounded-full flex items-center gap-3 transition-all duration-300 ease-out origin-center
                     ${isSelected
-                    ? 'bg-gradient-to-br from-apple-red to-red-600 scale-110 shadow-xl z-10 text-white'
-                    : 'bg-white border border-apple-red text-apple-gray hover:text-black hover:scale-105'
-                  }`}>
+                      ? 'w-[237px] bg-gradient-to-br from-apple-red to-red-600 scale-105 py-1.5 shadow-xl text-white justify-center'
+                      : 'w-[201px] bg-red-50/50 border-2 border-red-100 text-apple-gray hover:text-black hover:scale-105 py-[6px] justify-center'
+                    }`}>
 
                   <ChefHat size={20} className={isSelected ? 'text-white' : 'text-apple-gray'} />
 
-                  <span className={`tracking-tight cursor-pointer 
-                            ${isSelected ? 'font-black text-lg' : 'font-medium text-base'}`}>
+                  <span className={`tracking-tight cursor-pointer
+                            ${isSelected ? 'font-black text-lg border-b-[3px] border-white/60 pb-0.5' : 'font-medium text-base'}`}>
                     {product.name}
                   </span>
                 </div>
@@ -1026,8 +1035,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
       </div>
 
 
-      {/* Navigation Buttons */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-40">
+      {/* Navigation Buttons - Positioned right beside the card edge */}
+      <div className="absolute left-1/2 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40 translate-x-[102px]">
         <button
           onClick={(e) => {
             e.stopPropagation();
