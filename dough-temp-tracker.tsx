@@ -633,7 +633,7 @@ export default function DoughTempTracker() {
                     <div className="flex items-center gap-1.5 mb-2">
                       <BarChart3 size={12} className="text-purple-600" />
                       <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
-                      <span className="text-[9px] text-gray-400 font-normal ml-auto">Auto-saved • Updates with each new session</span>
+                      <span className="text-[12px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
                     </div>
                     <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
                       Water = {regressionModel.intercept.toFixed(2)}
@@ -691,285 +691,285 @@ export default function DoughTempTracker() {
                     </div>
                   </div>
 
-
+                </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* History List */}
-        <div className="px-1">
-          <div className="mb-3">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
-              <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
-            </h2>
-            <div className="flex gap-2">
-              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
-                <Plus size={14} /> Add Session
-              </button>
-              <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
-                <Download size={12} /> Export CSV
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
-            {currentBakes.length === 0 ? (
-              <div className="p-8 text-center text-apple-gray">
-                <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
-              </div>
-            ) : (
-              currentBakes.slice().reverse().map((bake) => (
-                <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {/* Date */}
-                    <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
-                      <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
-                      <input
-                        type="date"
-                        value={bake.date}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                        className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                        aria-label="Bake Date"
-                      />
-                    </div>
-
-                    {[
-                      { label: t.room, key: 'roomTemp' },
-                      { label: t.flour, key: 'flourTemp' },
-                      { label: t.levain, key: 'levainTemp' },
-                      { label: t.water, key: 'waterTemp' },
-                      { label: t.final, key: 'finalTemp' },
-                      { label: t.mixShort, key: 'mixTime' },
-                      { label: t.hydrShort, key: 'hydration' }
-                    ].map((field) => (
-                      <div key={field.key} className="flex-none w-14 text-center">
-                        <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
-                        <input
-                          type="number"
-                          placeholder="--"
-                          className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
-                          value={bake[field.key as keyof Bake]}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
-                          aria-label={field.label}
-                        />
-                      </div>
-                    ))}
-
-                    {/* Friction */}
-                    <div className="flex-none w-14 text-center">
-                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
-                      <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
-                        {calculateSimpleFriction(bake)}
-                      </div>
-                    </div>
-
-                    {/* Delete */}
-                    <div className="flex-none w-8 flex items-center justify-center pt-3">
-                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Product Manager Section */}
-        <div className="mt-8 px-1">
-          <div className="mb-3 flex flex-col items-start gap-2">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
-              <Package size={18} className="text-purple-600" /> Manage Products
-            </h2>
-            <button
-              onClick={() => setShowProductManager(!showProductManager)}
-              className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
-            >
-              <Package size={14} />
-              {showProductManager ? 'Hide Manager' : 'Show Manager'}
-              <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
+      {/* History List */}
+      <div className="px-1">
+        <div className="mb-3">
+          <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
+            <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
+          </h2>
+          <div className="flex gap-2">
+            <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
+              <Plus size={14} /> Add Session
+            </button>
+            <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
+              <Download size={12} /> Export CSV
             </button>
           </div>
+        </div>
 
-          {showProductManager && (
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              {/* Add Product */}
-              <div className="mb-4 mt-4">
-                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newProductName}
-                    onChange={(e) => setNewProductName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addProduct()}
-                    placeholder="e.g., Croissant"
-                    className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
-                  />
-                  <button
-                    onClick={addProduct}
-                    className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
-                    title="Add Product"
-                    aria-label="Add Product"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
+          {currentBakes.length === 0 ? (
+            <div className="p-8 text-center text-apple-gray">
+              <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
+            </div>
+          ) : (
+            currentBakes.slice().reverse().map((bake) => (
+              <div key={bake.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+                  {/* Date */}
+                  <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
+                    <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
+                    <input
+                      type="date"
+                      value={bake.date}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
+                      className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+                      aria-label="Bake Date"
+                    />
+                  </div>
 
-              {/* Product List */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
-                {products.map((product: Product) => (
-                  <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center space-x-0.5 mr-2">
-                        <button
-                          onClick={() => moveProduct(products.indexOf(product), 'up')}
-                          disabled={products.indexOf(product) === 0}
-                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
-                          title="Move Up"
-                        >
-                          <ArrowUp size={14} />
-                        </button>
-                        <button
-                          onClick={() => moveProduct(products.indexOf(product), 'down')}
-                          disabled={products.indexOf(product) === products.length - 1}
-                          className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
-                          title="Move Down"
-                        >
-                          <ArrowDown size={14} />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2 flex-grow">
-                        <div className={`w-3 h-3 rounded-full ${product.color} flex-shrink-0`}></div>
-                        {editingProductId === product.id ? (
-                          <div className="flex items-center gap-1 flex-grow">
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
-                              className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
-                              autoFocus
-                              aria-label="Edit Product Name"
-                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                  handleRenameProduct(product.id, editName);
-                                  setEditingProductId(null);
-                                } else if (e.key === 'Escape') {
-                                  setEditingProductId(null);
-                                }
-                              }}
-                            />
-                            <button
-                              onClick={() => {
-                                handleRenameProduct(product.id, editName);
-                                setEditingProductId(null);
-                              }}
-                              className="text-green-600 hover:text-green-700 p-0.5"
-                              title="Save"
-                              aria-label="Save"
-                            >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              onClick={() => setEditingProductId(null)}
-                              className="text-red-500 hover:text-red-600 p-0.5"
-                              title="Cancel"
-                              aria-label="Cancel"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <span className="text-sm font-medium truncate">{product.name}</span>
-                            <span className="text-xs text-gray-400 whitespace-nowrap">
-                              ({bakes.filter((b: Bake) => b.productId === product.id).length})
-                            </span>
-                            <button
-                              onClick={() => {
-                                setEditingProductId(product.id);
-                                setEditName(product.name);
-                              }}
-                              className="text-gray-300 hover:text-purple-600 transition-colors p-1"
-                              title="Rename Product"
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                  {[
+                    { label: t.room, key: 'roomTemp' },
+                    { label: t.flour, key: 'flourTemp' },
+                    { label: t.levain, key: 'levainTemp' },
+                    { label: t.water, key: 'waterTemp' },
+                    { label: t.final, key: 'finalTemp' },
+                    { label: t.mixShort, key: 'mixTime' },
+                    { label: t.hydrShort, key: 'hydration' }
+                  ].map((field) => (
+                    <div key={field.key} className="flex-none w-14 text-center">
+                      <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
+                      <input
+                        type="number"
+                        placeholder="--"
+                        className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+                        value={bake[field.key as keyof Bake]}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
+                        aria-label={field.label}
+                      />
                     </div>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      disabled={products.length === 1}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-2"
-                      title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
-                    >
-                      <Trash2 size={16} />
+                  ))}
+
+                  {/* Friction */}
+                  <div className="flex-none w-14 text-center">
+                    <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
+                    <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
+                      {calculateSimpleFriction(bake)}
+                    </div>
+                  </div>
+
+                  {/* Delete */}
+                  <div className="flex-none w-8 flex items-center justify-center pt-3">
+                    <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
+                      <Trash2 size={14} />
                     </button>
                   </div>
-                ))}
+
+                </div>
               </div>
-            </div>
+            ))
           )}
         </div>
+      </div>
 
-        {/* App Information Footer */}
-        <div className="mt-8 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <div className="mb-4">
-            <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
-              <Activity size={16} className="text-apple-red" /> About This App
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Ryan's Bakery Water Temperature Tracker helps you achieve consistent dough temperatures by calculating the ideal water temperature for your recipes. Using Multiple Linear Regression (MLR), the app learns from your baking sessions to predict optimal water temperatures based on environmental conditions.
-            </p>
+      {/* Product Manager Section */}
+      <div className="mt-8 px-1">
+        <div className="mb-3 flex flex-col items-start gap-2">
+          <h2 className="text-lg font-bold text-black flex items-center gap-2">
+            <Package size={18} className="text-purple-600" /> Manage Products
+          </h2>
+          <button
+            onClick={() => setShowProductManager(!showProductManager)}
+            className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+          >
+            <Package size={14} />
+            {showProductManager ? 'Hide Manager' : 'Show Manager'}
+            <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
+          </button>
+        </div>
+
+        {showProductManager && (
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            {/* Add Product */}
+            <div className="mb-4 mt-4">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addProduct()}
+                  placeholder="e.g., Croissant"
+                  className="flex-1 px-3 py-2 bg-white border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-300 outline-none"
+                />
+                <button
+                  onClick={addProduct}
+                  className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                  title="Add Product"
+                  aria-label="Add Product"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Product List */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
+              {products.map((product: Product) => (
+                <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center space-x-0.5 mr-2">
+                      <button
+                        onClick={() => moveProduct(products.indexOf(product), 'up')}
+                        disabled={products.indexOf(product) === 0}
+                        className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                        title="Move Up"
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => moveProduct(products.indexOf(product), 'down')}
+                        disabled={products.indexOf(product) === products.length - 1}
+                        className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed"
+                        title="Move Down"
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 flex-grow">
+                      <div className={`w-3 h-3 rounded-full ${product.color} flex-shrink-0`}></div>
+                      {editingProductId === product.id ? (
+                        <div className="flex items-center gap-1 flex-grow">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
+                            className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
+                            autoFocus
+                            aria-label="Edit Product Name"
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                              if (e.key === 'Enter') {
+                                handleRenameProduct(product.id, editName);
+                                setEditingProductId(null);
+                              } else if (e.key === 'Escape') {
+                                setEditingProductId(null);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              handleRenameProduct(product.id, editName);
+                              setEditingProductId(null);
+                            }}
+                            className="text-green-600 hover:text-green-700 p-0.5"
+                            title="Save"
+                            aria-label="Save"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={() => setEditingProductId(null)}
+                            className="text-red-500 hover:text-red-600 p-0.5"
+                            title="Cancel"
+                            aria-label="Cancel"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium truncate">{product.name}</span>
+                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                            ({bakes.filter((b: Bake) => b.productId === product.id).length})
+                          </span>
+                          <button
+                            onClick={() => {
+                              setEditingProductId(product.id);
+                              setEditName(product.name);
+                            }}
+                            className="text-gray-300 hover:text-purple-600 transition-colors p-1"
+                            title="Rename Product"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => deleteProduct(product.id)}
+                    disabled={products.length === 1}
+                    className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-2"
+                    title={products.length === 1 ? "Cannot delete the last product" : "Delete product"}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
+        )}
+      </div>
 
-          <div>
-            <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
-              <ChevronRight size={16} className="text-purple-600" /> How to Use
-            </h3>
-            <div className="space-y-3 text-sm text-gray-600">
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">1.</span>
-                <div>
-                  <strong>Select Your Product:</strong> Rotate the jukebox carousel or click a product card to switch between different dough types.
-                </div>
+      {/* App Information Footer */}
+      <div className="mt-8 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <div className="mb-4">
+          <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
+            <Activity size={16} className="text-apple-red" /> About This App
+          </h3>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Ryan's Bakery Water Temperature Tracker helps you achieve consistent dough temperatures by calculating the ideal water temperature for your recipes. Using Multiple Linear Regression (MLR), the app learns from your baking sessions to predict optimal water temperatures based on environmental conditions.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
+            <ChevronRight size={16} className="text-purple-600" /> How to Use
+          </h3>
+          <div className="space-y-3 text-sm text-gray-600">
+            <div className="flex gap-2">
+              <span className="font-semibold text-purple-600 min-w-[20px]">1.</span>
+              <div>
+                <strong>Select Your Product:</strong> Rotate the jukebox carousel or click a product card to switch between different dough types.
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">2.</span>
-                <div>
-                  <strong>Use the Calculator:</strong> Enter room temp, flour temp, levain temp, target dough temp, mix time, and hydration to get the recommended water temperature.
-                </div>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-semibold text-purple-600 min-w-[20px]">2.</span>
+              <div>
+                <strong>Use the Calculator:</strong> Enter room temp, flour temp, levain temp, target dough temp, mix time, and hydration to get the recommended water temperature.
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">3.</span>
-                <div>
-                  <strong>Train the Model:</strong> Click "Add Session" to record actual baking data. The more sessions you add, the more accurate the predictions become.
-                </div>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-semibold text-purple-600 min-w-[20px]">3.</span>
+              <div>
+                <strong>Train the Model:</strong> Click "Add Session" to record actual baking data. The more sessions you add, the more accurate the predictions become.
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">4.</span>
-                <div>
-                  <strong>Export Data:</strong> Use the "Export CSV" button to download your baking history for analysis or backup.
-                </div>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-semibold text-purple-600 min-w-[20px]">4.</span>
+              <div>
+                <strong>Export Data:</strong> Use the "Export CSV" button to download your baking history for analysis or backup.
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">5.</span>
-                <div>
-                  <strong>Manage Products:</strong> Add, rename, or delete product types to customize the app for your bakery's needs.
-                </div>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-semibold text-purple-600 min-w-[20px]">5.</span>
+              <div>
+                <strong>Manage Products:</strong> Add, rename, or delete product types to customize the app for your bakery's needs.
               </div>
             </div>
           </div>
         </div>
-
       </div>
+
+    </div>
     </div >
   );
 }
