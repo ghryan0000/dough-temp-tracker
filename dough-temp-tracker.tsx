@@ -633,7 +633,7 @@ export default function DoughTempTracker() {
                     <div className="flex items-center gap-1.5 mb-2">
                       <BarChart3 size={12} className="text-purple-600" />
                       <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
-                      <span className="text-[12px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
+                      <span className="text-[15px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
                     </div>
                     <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
                       Water = {regressionModel.intercept.toFixed(2)}
