@@ -963,18 +963,18 @@ export default function DoughTempTracker() {
         {/* App Information Footer */}
         <div className="mt-8 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <div className="mb-4">
-            <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
-              <Activity size={16} className="text-apple-red" /> {t.aboutTitle}
-            </h3>
+            <h2 className="text-lg font-bold text-black mb-2 flex items-center gap-2">
+              <Activity size={18} className="text-apple-red" /> {t.aboutTitle}
+            </h2>
             <p className="text-sm text-gray-600 leading-relaxed">
               {t.aboutContent}
             </p>
           </div>
 
           <div>
-            <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
-              <ChevronRight size={16} className="text-purple-600" /> {t.howToUseTitle}
-            </h3>
+            <h2 className="text-lg font-bold text-black mb-3 flex items-center gap-2">
+              <ChevronRight size={18} className="text-purple-600" /> {t.howToUseTitle}
+            </h2>
             <div className="space-y-3 text-sm text-gray-600">
               {[
                 { title: t.step1Title, content: t.step1Content },
