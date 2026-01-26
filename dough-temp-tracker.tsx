@@ -772,14 +772,14 @@ export default function DoughTempTracker() {
                 <div key={bake.id} className="group p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 overflow-hidden">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
                     {/* Date */}
-                    <div className="flex-none w-32 sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-3 transition-colors shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]">
+                    <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors shadow-[6px_0_10px_-4px_rgba(0,0,0,0.15)]">
                       <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
                       <div className="relative">
                         <input
                           type="date"
                           value={bake.date}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
-                          className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red appearance-none"
+                          className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 pr-6 py-1.5 outline-none focus:ring-1 focus:ring-apple-red appearance-none"
                           style={{ colorScheme: 'light' }}
                           aria-label="Bake Date"
                         />
