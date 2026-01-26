@@ -80,7 +80,7 @@ export default function DoughTempTracker() {
       mixShort: "Mix", // For table headers
       hydrShort: "Hydr %",
       mlrTraining: "MLR Training",
-      sessions: "Sessions",
+      sessions: "Total Session",
       model: "Model",
       coefficients: "Coefficients",
       frictionPerMin: "Friction/min",
@@ -130,7 +130,7 @@ export default function DoughTempTracker() {
       mixShort: "攪拌",
       hydrShort: "含水%",
       mlrTraining: "MLR 訓練",
-      sessions: "訓練場次",
+      sessions: "總場次",
       model: "模型",
       coefficients: "係數",
       frictionPerMin: "摩擦升溫/分",
@@ -180,7 +180,7 @@ export default function DoughTempTracker() {
       mixShort: "ミキシング",
       hydrShort: "加水%",
       mlrTraining: "MLR 学習",
-      sessions: "セッション",
+      sessions: "総セッション",
       model: "モデル",
       coefficients: "係数",
       frictionPerMin: "摩擦/分",
@@ -660,11 +660,11 @@ export default function DoughTempTracker() {
                       <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
                     </div>
                     <div className="flex items-center gap-2 ml-6">
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-                        <Activity size={10} /> {t.modelReady}
-                      </span>
                       <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
                         {t.sessions}: {regressionModel.nSamples}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+                        <Activity size={10} /> {t.modelReady}
                       </span>
                     </div>
                   </div>
