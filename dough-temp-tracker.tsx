@@ -775,7 +775,7 @@ export default function DoughTempTracker() {
                     <div className="flex-none w-[140px] sticky left-0 bg-white group-hover:bg-gray-50 z-10 pr-6 transition-colors shadow-[6px_0_10px_-4px_rgba(0,0,0,0.15)]">
                       <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
                       <div className="relative group/date">
-                        <div className="absolute inset-0 flex items-center px-2 text-[11px] font-bold text-black pointer-events-none z-0">
+                        <div className="absolute inset-0 flex items-center px-2 text-[11px] font-bold text-black pointer-events-none z-20">
                           {bake.date ? bake.date.replace(/-/g, '/') : '----/--/--'}
                         </div>
                         <input
@@ -786,7 +786,7 @@ export default function DoughTempTracker() {
                           style={{ colorScheme: 'light' }}
                           aria-label="Bake Date"
                         />
-                        <Calendar size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-20" />
+                        <Calendar size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-30" />
                       </div>
                     </div>
 
