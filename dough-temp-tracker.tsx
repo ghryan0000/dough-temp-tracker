@@ -972,7 +972,7 @@ export default function DoughTempTracker() {
 
             <div>
               <h3 className="bg-apple-red text-white px-4 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1 shadow-sm mb-3">
-                <ChevronRight size={14} className="text-white" /> {t.howToUseTitle}
+                {t.howToUseTitle}
               </h3>
               <div className="space-y-3 text-sm text-gray-600">
                 {[
