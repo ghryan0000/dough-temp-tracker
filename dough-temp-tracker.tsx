@@ -153,46 +153,10 @@ export default function DoughTempTracker() {
       hydrationPercent: "加水率/%",
       quality: "品質",
       fit: "適合度",
-    },
-    es: {
-      appTitle: "Panadería de Ryan",
-      appSubtitle: "Rastreador de Presión",
-      modelReady: "Modelo Listo",
-      selectProduct: "Seleccionar Producto",
-      scrollToSelect: "Desplazar para seleccionar",
-      calculatorTitle: "Calcular Temp. Agua",
-      enterData: "Introducir variables",
-      targetWaterTemp: "TEMP. AGUA OBJETIVO",
-      calculateButton: "Calcular Temp. Agua",
-      historyTitle: "Historial de MLR",
-      entries: "Entradas",
-      noData: "Sin datos de entrenamiento",
-      addBakesHint: "Añade horneados anteriores para entrenar",
-      yourProducts: "Tus Productos",
-      friction: "Fricción",
-      date: "Fecha",
-      room: "Ambiente",
-      flour: "Harina",
-      levain: "Levadura",
-      target: "Temp. Meta",
-      mix: "Mezclado",
-      hydration: "Hidratación",
-      water: "Agua",
-      final: "Final",
-      mixShort: "Mezcla",
-      hydrShort: "Hidr %",
-      mlrTraining: "Entrenamiento MLR",
-      sessions: "Sesiones",
-      model: "Modelo",
-      coefficients: "Coeficientes",
-      frictionPerMin: "Fricción/min",
-      hydrationPercent: "Hidratación/%",
-      quality: "Calidad",
-      fit: "Ajuste",
     }
   };
 
-  type Language = 'en' | 'zh' | 'ja' | 'es';
+  type Language = 'en' | 'zh' | 'ja';
   const [language, setLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem('app-language');
     return (saved as Language) || 'en';
@@ -541,8 +505,7 @@ export default function DoughTempTracker() {
             {[
               { code: 'en', label: 'EN' },
               { code: 'zh', label: '繁' },
-              { code: 'ja', label: '日' },
-              { code: 'es', label: 'ES' }
+              { code: 'ja', label: '日' }
             ].map((langOption) => (
               <button
                 key={langOption.code}
