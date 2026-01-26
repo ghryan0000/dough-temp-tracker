@@ -51,6 +51,8 @@ export default function DoughTempTracker() {
       modelReady: "Model Ready",
       selectProduct: "Select Product",
       scrollToSelect: "Scroll to select",
+      calculatorTitle: "Calculator",
+      enterData: "Enter variables",
       targetWaterTemp: "TARGET WATER TEMP",
       calculateButton: "Calculate Water Temp",
       historyTitle: "MLR Training History",
@@ -86,6 +88,8 @@ export default function DoughTempTracker() {
       modelReady: "模型就緒",
       selectProduct: "選擇產品",
       scrollToSelect: "滾動選擇",
+      calculatorTitle: "計算器",
+      enterData: "輸入變數",
       targetWaterTemp: "目標水溫",
       calculateButton: "計算水溫",
       historyTitle: "MLR 訓練歷史",
@@ -120,6 +124,8 @@ export default function DoughTempTracker() {
       modelReady: "モデル準備完了",
       selectProduct: "製品を選択",
       scrollToSelect: "スクロールして選択",
+      calculatorTitle: "計算機",
+      enterData: "変数を入力",
       targetWaterTemp: "目標水温",
       calculateButton: "水温を計算",
       historyTitle: "MLR 学習履歴",
@@ -154,6 +160,8 @@ export default function DoughTempTracker() {
       modelReady: "Modelo Listo",
       selectProduct: "Seleccionar Producto",
       scrollToSelect: "Desplazar para seleccionar",
+      calculatorTitle: "Calculadora",
+      enterData: "Introducir variables",
       targetWaterTemp: "TEMP. AGUA OBJETIVO",
       calculateButton: "Calcular Temp. Agua",
       historyTitle: "Historial de MLR",
@@ -572,48 +580,57 @@ export default function DoughTempTracker() {
           </div>
 
           {/* Right Column: Calculator */}
-          <div className="md:col-span-8 bg-white rounded-3xl shadow-lg border border-red-50 p-4 md:p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
-
-            {/* Target Display */}
-            <div className={`py-1 px-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
-              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
-              <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
-                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
+          <div className="md:col-span-8 flex flex-col">
+            <div className="flex items-start gap-2 mb-4 px-1">
+              <Calculator size={18} className="text-apple-red mt-1" />
+              <div className="flex flex-col">
+                <h2 className="text-lg font-bold text-black leading-tight">{t.calculatorTitle}</h2>
+                <p className="text-xs text-apple-gray font-medium">{t.enterData}</p>
               </div>
             </div>
 
-            {/* Input Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { label: t.room, key: 'roomTemp', unit: '°C' },
-                { label: t.flour, key: 'flourTemp', unit: '°C' },
-                { label: t.levain, key: 'levainTemp', unit: '°C' },
-                { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
-                { label: t.mix, key: 'mixTime', unit: 'min' },
-                { label: t.hydration, key: 'hydration', unit: '%' }
-              ].map((field) => (
-                <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-1.5 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
-                  <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
-                  <div className="flex items-baseline mt-3.5">
-                    <input
-                      type="number"
-                      value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
-                      className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
-                      placeholder="--"
-                      aria-label={field.label}
-                    />
-                    <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-4 md:p-8 relative overflow-hidden w-full">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
-            {/* Result Display */}
-            {/* This section was replaced by the new Target Display and Input Grid above */}
-            {/*
+              {/* Target Display */}
+              <div className={`py-1 px-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
+                <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
+                <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                  {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                  <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
+                </div>
+              </div>
+
+              {/* Input Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { label: t.room, key: 'roomTemp', unit: '°C' },
+                  { label: t.flour, key: 'flourTemp', unit: '°C' },
+                  { label: t.levain, key: 'levainTemp', unit: '°C' },
+                  { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
+                  { label: t.mix, key: 'mixTime', unit: 'min' },
+                  { label: t.hydration, key: 'hydration', unit: '%' }
+                ].map((field) => (
+                  <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-1.5 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+                    <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
+                    <div className="flex items-baseline mt-3.5">
+                      <input
+                        type="number"
+                        value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
+                        className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
+                        placeholder="--"
+                        aria-label={field.label}
+                      />
+                      <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Result Display */}
+              {/* This section was replaced by the new Target Display and Input Grid above */}
+              {/*
             <div className={`p-2 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
               <div className="flex items-center justify-center gap-2 mb-0.5">
                 <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">TARGET WATER TEMP</div>
@@ -630,91 +647,92 @@ export default function DoughTempTracker() {
             </div>
             */}
 
-            {/* Model Training Status - Detailed View */}
-            {regressionModel && (
-              <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-                <div className="flex flex-col items-start mb-3 gap-1">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 size={16} className="text-purple-600" />
-                    <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2 ml-6">
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-                      <Activity size={10} /> {t.modelReady}
-                    </span>
-                    <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
-                      {t.sessions}: {regressionModel.nSamples}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Regression Formula */}
-                <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <BarChart3 size={12} className="text-purple-600" />
-                    <span className="text-[10px] font-bold text-purple-900">{t.model}</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
-                    Water = {regressionModel.intercept.toFixed(2)}
-                    {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
-                    {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
-                    {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
-                    {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
-                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
-                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
-                  </div>
-                </div>
-
-                {/* Coefficients and Quality Grid */}
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Coefficients */}
-                  <div className="bg-white rounded-lg p-2.5 border border-orange-100">
-                    <div className="flex items-center gap-1 mb-2">
-                      <Activity size={11} className="text-orange-600" />
-                      <span className="text-[9px] font-bold text-orange-900">{t.coefficients}</span>
+              {/* Model Training Status - Detailed View */}
+              {regressionModel && (
+                <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+                  <div className="flex flex-col items-start mb-3 gap-1">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 size={16} className="text-purple-600" />
+                      <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
-                        <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
-                        <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
-                      </div>
+                    <div className="flex items-center gap-2 ml-6">
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+                        <Activity size={10} /> {t.modelReady}
+                      </span>
+                      <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
+                        {t.sessions}: {regressionModel.nSamples}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Quality */}
-                  <div className="bg-white rounded-lg p-2.5 border border-pink-100">
-                    <div className="flex items-center gap-1 mb-2">
-                      <TrendingUp size={11} className="text-pink-600" />
-                      <span className="text-[9px] font-bold text-pink-900">{t.quality}</span>
+                  {/* Regression Formula */}
+                  <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <BarChart3 size={12} className="text-purple-600" />
+                      <span className="text-[10px] font-bold text-purple-900">{t.model}</span>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">R²:</span>
-                        <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
+                    <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
+                      Water = {regressionModel.intercept.toFixed(2)}
+                      {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
+                      {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
+                      {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
+                      {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
+                      {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
+                      {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
+                    </div>
+                  </div>
+
+                  {/* Coefficients and Quality Grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Coefficients */}
+                    <div className="bg-white rounded-lg p-2.5 border border-orange-100">
+                      <div className="flex items-center gap-1 mb-2">
+                        <Activity size={11} className="text-orange-600" />
+                        <span className="text-[9px] font-bold text-orange-900">{t.coefficients}</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">{t.fit}:</span>
-                        <span className="text-[9px] font-medium text-green-600">
-                          {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
+                          <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
+                          <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">Samples:</span>
-                        <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
+                    </div>
+
+                    {/* Quality */}
+                    <div className="bg-white rounded-lg p-2.5 border border-pink-100">
+                      <div className="flex items-center gap-1 mb-2">
+                        <TrendingUp size={11} className="text-pink-600" />
+                        <span className="text-[9px] font-bold text-pink-900">{t.quality}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-600">R²:</span>
+                          <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-600">{t.fit}:</span>
+                          <span className="text-[9px] font-medium text-green-600">
+                            {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-gray-600">Samples:</span>
+                          <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-2 text-[8px] text-gray-400 text-center">
-                  Auto-saved • Updates with each new session
+                  <div className="mt-2 text-[8px] text-gray-400 text-center">
+                    Auto-saved • Updates with each new session
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
