@@ -81,6 +81,20 @@ export default function DoughTempTracker() {
       hydrationPercent: "Hydration/%",
       quality: "Quality",
       fit: "Fit",
+      // Documentation
+      aboutTitle: "About This App",
+      aboutContent: "Ryan's Bakery Water Temperature Tracker ensures consistent dough by calculating the precise water temperature needed. It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
+      howToUseTitle: "How to Use",
+      step1Title: "Select Product",
+      step1Content: "Scroll the wheel to select a dough type.",
+      step2Title: "Calculate Temp",
+      step2Content: "Enter current conditions (Room, Flour, etc.) to get the Target Water Temp.",
+      step3Title: "Record Session",
+      step3Content: "After mixing, use 'Add Session' to log the actual results to train the MLR model.",
+      step4Title: "Export Data",
+      step4Content: "Download your baking history as a CSV file.",
+      step5Title: "Manage Products",
+      step5Content: "Add, rename, reorder, or delete products below.",
     },
     zh: {
       appTitle: "Ryan's Bakery",
@@ -117,6 +131,20 @@ export default function DoughTempTracker() {
       hydrationPercent: "含水量/%",
       quality: "品質",
       fit: "擬合度",
+      // Documentation
+      aboutTitle: "關於本應用",
+      aboutContent: "Ryan 的烘焙坊水溫追蹤器通過計算理想水溫，助您製作出品質穩定的麵團。應用利用多元線性回歸 (MLR) 從您的烘焙紀錄中學習，根據環境條件預測最佳水溫。",
+      howToUseTitle: "使用說明",
+      step1Title: "選擇產品",
+      step1Content: "滾動轉輪以選擇麵團類型。",
+      step2Title: "計算水溫",
+      step2Content: "輸入當前條件（室溫、粉溫等）以獲取目標水溫。",
+      step3Title: "紀錄場次",
+      step3Content: "攪拌後，點擊「添加場次」紀錄實際結果，以訓練 MLR 模型。",
+      step4Title: "匯出數據",
+      step4Content: "將您的烘焙歷史下載為 CSV 文件。",
+      step5Title: "管理產品",
+      step5Content: "在下方添加、重命名、排序或刪除產品。",
     },
     ja: {
       appTitle: "ライアンのベーカリー",
@@ -153,6 +181,20 @@ export default function DoughTempTracker() {
       hydrationPercent: "加水率/%",
       quality: "品質",
       fit: "適合度",
+      // Documentation
+      aboutTitle: "このアプリについて",
+      aboutContent: "Ryan's Bakery 水温トラッカーは、理想的な水温を計算し、安定した生地作りをサポートします。重回帰分析 (MLR) を用いて過去のデータから学習し、環境に応じた最適な水温を予測します。",
+      howToUseTitle: "使い方",
+      step1Title: "製品を選択",
+      step1Content: "ホイールをスクロールして生地タイプを選択します。",
+      step2Title: "水温を計算",
+      step2Content: "現在の条件（室温、粉温など）を入力し、目標水温を取得します。",
+      step3Title: "セッションを記録",
+      step3Content: "ミキシング後、「セッションを追加」で結果を記録し、MLRモデルを学習させます。",
+      step4Title: "データをエクスポート",
+      step4Content: "履歴をCSVファイルとしてダウンロードできます。",
+      step5Title: "製品を管理",
+      step5Content: "製品の追加、名前変更、並べ替え、削除が可能です。",
     }
   };
 
@@ -922,48 +964,32 @@ export default function DoughTempTracker() {
         <div className="mt-8 bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <div className="mb-4">
             <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
-              <Activity size={16} className="text-apple-red" /> About This App
+              <Activity size={16} className="text-apple-red" /> {t.aboutTitle}
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Ryan's Bakery Water Temperature Tracker helps you achieve consistent dough temperatures by calculating the ideal water temperature for your recipes. Using Multiple Linear Regression (MLR), the app learns from your baking sessions to predict optimal water temperatures based on environmental conditions.
+              {t.aboutContent}
             </p>
           </div>
 
           <div>
             <h3 className="text-base font-bold text-black mb-3 flex items-center gap-2">
-              <ChevronRight size={16} className="text-purple-600" /> How to Use
+              <ChevronRight size={16} className="text-purple-600" /> {t.howToUseTitle}
             </h3>
             <div className="space-y-3 text-sm text-gray-600">
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">1.</span>
-                <div>
-                  <strong>Select Your Product:</strong> Rotate the jukebox carousel or click a product card to switch between different dough types.
+              {[
+                { title: t.step1Title, content: t.step1Content },
+                { title: t.step2Title, content: t.step2Content },
+                { title: t.step3Title, content: t.step3Content },
+                { title: t.step4Title, content: t.step4Content },
+                { title: t.step5Title, content: t.step5Content },
+              ].map((step, index) => (
+                <div key={index} className="flex gap-2">
+                  <span className="font-semibold text-purple-600 min-w-[20px]">{index + 1}.</span>
+                  <div>
+                    <strong>{step.title}:</strong> {step.content}
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">2.</span>
-                <div>
-                  <strong>Use the Calculator:</strong> Enter room temp, flour temp, levain temp, target dough temp, mix time, and hydration to get the recommended water temperature.
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">3.</span>
-                <div>
-                  <strong>Train the Model:</strong> Click "Add Session" to record actual baking data. The more sessions you add, the more accurate the predictions become.
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">4.</span>
-                <div>
-                  <strong>Export Data:</strong> Use the "Export CSV" button to download your baking history for analysis or backup.
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-purple-600 min-w-[20px]">5.</span>
-                <div>
-                  <strong>Manage Products:</strong> Add, rename, or delete product types to customize the app for your bakery's needs.
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
