@@ -665,7 +665,7 @@ export default function DoughTempTracker() {
                   <div className="flex flex-col items-start mb-2 gap-1">
                     <div className="flex items-center gap-2">
                       <BarChart3 size={16} className="text-purple-600" />
-                      <span className="text-sm font-bold text-gray-700">{t.mlrTraining}: {currentProduct?.name}</span>
+                      <span className="text-sm font-bold text-gray-700 underline">{t.mlrTraining}: {currentProduct?.name}</span>
                     </div>
                     <div className="flex items-center gap-2 ml-6">
                       <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
