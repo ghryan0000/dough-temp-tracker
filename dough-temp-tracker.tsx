@@ -43,6 +43,159 @@ export default function DoughTempTracker() {
   // Product colors for dynamic assignment
   const productColors: string[] = ['bg-amber-500', 'bg-orange-500', 'bg-red-500', 'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500'];
 
+  // Translations
+  const translations = {
+    en: {
+      appTitle: "Ryan's Bakery",
+      appSubtitle: "Water Temperature Tracker",
+      modelReady: "Model Ready",
+      selectProduct: "Select Product",
+      scrollToSelect: "Scroll to select",
+      targetWaterTemp: "TARGET WATER TEMP",
+      calculateButton: "Calculate Water Temp",
+      historyTitle: "MLR Training History",
+      entries: "Entries",
+      noData: "No training data yet.",
+      addBakesHint: "Add previous bakes to train the model.",
+      yourProducts: "Your Products",
+      friction: "Friction",
+      date: "Date",
+      // Field Labels
+      room: "Room",
+      flour: "Flour",
+      levain: "Levain",
+      target: "Target Temp",
+      mix: "Mix Time", // Expanded for clarity in calc
+      hydration: "Hydration",
+      water: "Water",
+      final: "Final",
+      mixShort: "Mix", // For table headers
+      hydrShort: "Hydr %",
+      mlrTraining: "MLR Training",
+      sessions: "Sessions",
+      model: "Model",
+      coefficients: "Coefficients",
+      frictionPerMin: "Friction/min",
+      hydrationPercent: "Hydration/%",
+      quality: "Quality",
+      fit: "Fit",
+    },
+    zh: {
+      appTitle: "Ryan's Bakery",
+      appSubtitle: "水溫追蹤器",
+      modelReady: "模型就緒",
+      selectProduct: "選擇產品",
+      scrollToSelect: "滾動選擇",
+      targetWaterTemp: "目標水溫",
+      calculateButton: "計算水溫",
+      historyTitle: "MLR 訓練歷史",
+      entries: "條紀錄",
+      noData: "暫無訓練數據",
+      addBakesHint: "添加過往烘焙紀錄以訓練模型",
+      yourProducts: "您的產品",
+      friction: "摩擦升溫",
+      date: "日期",
+      room: "室溫",
+      flour: "粉溫",
+      levain: "酵種",
+      target: "目標溫度",
+      mix: "攪拌時間",
+      hydration: "含水量",
+      water: "水溫",
+      final: "最終",
+      mixShort: "攪拌",
+      hydrShort: "含水%",
+      mlrTraining: "MLR 訓練",
+      sessions: "訓練場次",
+      model: "模型",
+      coefficients: "係數",
+      frictionPerMin: "摩擦升溫/分",
+      hydrationPercent: "含水量/%",
+      quality: "品質",
+      fit: "擬合度",
+    },
+    ja: {
+      appTitle: "ライアンのベーカリー",
+      appSubtitle: "水温トラッカー",
+      modelReady: "モデル準備完了",
+      selectProduct: "製品を選択",
+      scrollToSelect: "スクロールして選択",
+      targetWaterTemp: "目標水温",
+      calculateButton: "水温を計算",
+      historyTitle: "MLR 学習履歴",
+      entries: "件",
+      noData: "データがありません",
+      addBakesHint: "過去のデータを追加してモデルを学習",
+      yourProducts: "製品一覧",
+      friction: "摩擦熱",
+      date: "日付",
+      room: "室温",
+      flour: "粉温",
+      levain: "種温",
+      target: "目標温度",
+      mix: "ミキシング",
+      hydration: "加水率",
+      water: "水温",
+      final: "捏上",
+      mixShort: "ミキシング",
+      hydrShort: "加水%",
+      mlrTraining: "MLR 学習",
+      sessions: "セッション",
+      model: "モデル",
+      coefficients: "係数",
+      frictionPerMin: "摩擦/分",
+      hydrationPercent: "加水率/%",
+      quality: "品質",
+      fit: "適合度",
+    },
+    es: {
+      appTitle: "Panadería de Ryan",
+      appSubtitle: "Rastreador de Presión",
+      modelReady: "Modelo Listo",
+      selectProduct: "Seleccionar Producto",
+      scrollToSelect: "Desplazar para seleccionar",
+      targetWaterTemp: "TEMP. AGUA OBJETIVO",
+      calculateButton: "Calcular Temp. Agua",
+      historyTitle: "Historial de MLR",
+      entries: "Entradas",
+      noData: "Sin datos de entrenamiento",
+      addBakesHint: "Añade horneados anteriores para entrenar",
+      yourProducts: "Tus Productos",
+      friction: "Fricción",
+      date: "Fecha",
+      room: "Ambiente",
+      flour: "Harina",
+      levain: "Levadura",
+      target: "Temp. Meta",
+      mix: "Mezclado",
+      hydration: "Hidratación",
+      water: "Agua",
+      final: "Final",
+      mixShort: "Mezcla",
+      hydrShort: "Hidr %",
+      mlrTraining: "Entrenamiento MLR",
+      sessions: "Sesiones",
+      model: "Modelo",
+      coefficients: "Coeficientes",
+      frictionPerMin: "Fricción/min",
+      hydrationPercent: "Hidratación/%",
+      quality: "Calidad",
+      fit: "Ajuste",
+    }
+  };
+
+  type Language = 'en' | 'zh' | 'ja' | 'es';
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem('app-language');
+    return (saved as Language) || 'en';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('app-language', language);
+  }, [language]);
+
+  const t = translations[language];
+
   // Data migration and initialization
   const [products, setProducts] = useState<Product[]>(() => {
     // Check for new format first
@@ -370,10 +523,31 @@ export default function DoughTempTracker() {
       <div className="max-w-4xl mx-auto px-4">
 
         {/* Header - Compact */}
+        {/* Header - Compact */}
         <div className="flex items-center justify-between mb-4 -mx-4 px-4 py-2 bg-gradient-to-r from-apple-red/90 to-red-600/90 shadow-sm">
           <div>
-            <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">Ryan's Bakery</h1>
-            <p className="text-red-50/90 text-xs font-medium">Water Temperature Tracker</p>
+            <h1 className="text-2xl font-bold font-serif italic text-white tracking-tight">{t.appTitle}</h1>
+            <p className="text-red-50/90 text-xs font-medium">{t.appSubtitle}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {[
+              { code: 'en', label: 'EN' },
+              { code: 'zh', label: '繁' },
+              { code: 'ja', label: '日' },
+              { code: 'es', label: 'ES' }
+            ].map((langOption) => (
+              <button
+                key={langOption.code}
+                onClick={() => setLanguage(langOption.code as Language)}
+                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-colors ${language === langOption.code
+                  ? 'bg-white text-apple-red shadow-sm'
+                  : 'text-red-100 hover:text-white hover:bg-white/20'
+                  }`}
+                aria-label={`Switch to ${langOption.label}`}
+              >
+                {langOption.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -385,12 +559,12 @@ export default function DoughTempTracker() {
             <div className="flex items-start gap-2 mb-4 px-1">
               <Package size={18} className="text-apple-red mt-1" />
               <div className="flex flex-col">
-                <h2 className="text-lg font-bold text-black leading-tight">Select Product</h2>
-                <p className="text-xs text-apple-gray font-medium">Scroll to select</p>
+                <h2 className="text-lg font-bold text-black leading-tight">{t.selectProduct}</h2>
+                <p className="text-xs text-apple-gray font-medium">{t.scrollToSelect}</p>
               </div>
             </div>
             <ProductWheelSelector
-              products={products}
+              products={[...products].sort((a, b) => a.name.localeCompare(b.name))}
               selectedProductId={selectedProductId}
               setSelectedProductId={setSelectedProductId}
               productCounts={productCounts}
@@ -398,24 +572,27 @@ export default function DoughTempTracker() {
           </div>
 
           {/* Right Column: Calculator */}
-          <div className="md:col-span-8 bg-white rounded-2xl shadow-sm p-5">
-            <div className="flex items-start gap-2 mb-4">
-              <Calculator size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-col">
-                <h2 className="text-lg font-bold text-black leading-tight">Target Water Temp Calculator</h2>
-                <p className="text-xs text-apple-gray font-medium">Adjust Variables to Calculate Ideal Water Temp</p>
+          <div className="md:col-span-8 bg-white rounded-3xl shadow-lg border border-red-50 p-6 md:p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
+
+            {/* Target Display */}
+            <div className={`p-4 rounded-2xl text-center mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-50 to-white border-apple-red/20 shadow-inner' : 'bg-gray-50 border-transparent'}`}>
+              <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider mb-1">{t.targetWaterTemp}</div>
+              <div className={`text-5xl font-black tracking-tighter ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                <span className="text-2xl ml-1 font-medium text-gray-400">°C</span>
               </div>
             </div>
 
-            {/* Inputs with Units */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            {/* Input Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                { label: 'Room Temp', key: 'roomTemp', unit: '°C' },
-                { label: 'Flour Temp', key: 'flourTemp', unit: '°C' },
-                { label: 'Levain Temp', key: 'levainTemp', unit: '°C' },
-                { label: 'Mix Time', key: 'mixTime', unit: 'min' },
-                { label: 'Target Temp', key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
-                { label: 'Hydration', key: 'hydration', unit: '%' }
+                { label: t.room, key: 'roomTemp', unit: '°C' },
+                { label: t.flour, key: 'flourTemp', unit: '°C' },
+                { label: t.levain, key: 'levainTemp', unit: '°C' },
+                { label: t.target, key: 'target', unit: '°C', value: targetTemp, setter: setTargetTemp },
+                { label: t.mix, key: 'mixTime', unit: 'min' },
+                { label: t.hydration, key: 'hydration', unit: '%' }
               ].map((field) => (
                 <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-1.5 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
                   <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
@@ -423,9 +600,10 @@ export default function DoughTempTracker() {
                     <input
                       type="number"
                       value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
-                      onChange={(e) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.key === 'target' ? setTargetTemp(e.target.value) : updateCurrentCondition(field.key, e.target.value)}
                       className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
                       placeholder="--"
+                      aria-label={field.label}
                     />
                     <span className="text-xs font-medium text-gray-400 ml-1">{field.unit}</span>
                   </div>
@@ -434,6 +612,8 @@ export default function DoughTempTracker() {
             </div>
 
             {/* Result Display */}
+            {/* This section was replaced by the new Target Display and Input Grid above */}
+            {/*
             <div className={`p-2 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
               <div className="flex items-center justify-center gap-2 mb-0.5">
                 <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">TARGET WATER TEMP</div>
@@ -448,6 +628,7 @@ export default function DoughTempTracker() {
                 <span className="text-sm ml-0.5 font-medium text-gray-400">°C</span>
               </div>
             </div>
+            */}
 
             {/* Model Training Status - Detailed View */}
             {regressionModel && (
@@ -455,14 +636,14 @@ export default function DoughTempTracker() {
                 <div className="flex flex-col items-start mb-3 gap-1">
                   <div className="flex items-center gap-2">
                     <BarChart3 size={16} className="text-purple-600" />
-                    <span className="text-sm font-bold text-purple-900">MLR Training: {currentProduct?.name}</span>
+                    <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
                   </div>
                   <div className="flex items-center gap-2 ml-6">
-                    <span className="text-[10px] font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                      ✓ Trained! R²={regressionModel.rSquared.toFixed(3)}
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+                      <Activity size={10} /> {t.modelReady}
                     </span>
                     <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
-                      Sessions: {regressionModel.nSamples}
+                      {t.sessions}: {regressionModel.nSamples}
                     </span>
                   </div>
                 </div>
@@ -471,16 +652,16 @@ export default function DoughTempTracker() {
                 <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
                   <div className="flex items-center gap-1.5 mb-2">
                     <BarChart3 size={12} className="text-purple-600" />
-                    <span className="text-[10px] font-bold text-purple-900">Model</span>
+                    <span className="text-[10px] font-bold text-purple-900">{t.model}</span>
                   </div>
                   <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
                     Water = {regressionModel.intercept.toFixed(2)}
-                    {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×Room
-                    {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×Flour
-                    {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×Levain
-                    {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×Target
-                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×Mix
-                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×Hydration
+                    {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
+                    {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
+                    {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
+                    {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
+                    {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
+                    {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
                   </div>
                 </div>
 
@@ -490,15 +671,15 @@ export default function DoughTempTracker() {
                   <div className="bg-white rounded-lg p-2.5 border border-orange-100">
                     <div className="flex items-center gap-1 mb-2">
                       <Activity size={11} className="text-orange-600" />
-                      <span className="text-[9px] font-bold text-orange-900">Coefficients</span>
+                      <span className="text-[9px] font-bold text-orange-900">{t.coefficients}</span>
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">🔥 Friction/min:</span>
+                        <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
                         <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">💧 Hydration/%:</span>
+                        <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
                         <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
                       </div>
                     </div>
@@ -508,7 +689,7 @@ export default function DoughTempTracker() {
                   <div className="bg-white rounded-lg p-2.5 border border-pink-100">
                     <div className="flex items-center gap-1 mb-2">
                       <TrendingUp size={11} className="text-pink-600" />
-                      <span className="text-[9px] font-bold text-pink-900">Quality</span>
+                      <span className="text-[9px] font-bold text-pink-900">{t.quality}</span>
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between items-center">
@@ -516,7 +697,7 @@ export default function DoughTempTracker() {
                         <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-gray-600">Fit:</span>
+                        <span className="text-[9px] text-gray-600">{t.fit}:</span>
                         <span className="text-[9px] font-medium text-green-600">
                           {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
                         </span>
@@ -564,23 +745,24 @@ export default function DoughTempTracker() {
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar pb-2">
                     {/* Date */}
                     <div className="flex-none w-28 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] mr-2">
-                      <label className="text-[9px] text-gray-400 block mb-0.5">Date</label>
+                      <label className="text-[9px] text-gray-400 block mb-0.5">{t.date}</label>
                       <input
                         type="date"
                         value={bake.date}
-                        onChange={(e) => updateBake(bake.id, 'date', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, 'date', e.target.value)}
                         className="w-full text-xs font-bold text-black bg-apple-bg rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
+                        aria-label="Bake Date"
                       />
                     </div>
 
                     {[
-                      { label: 'Room', key: 'roomTemp' },
-                      { label: 'Flour', key: 'flourTemp' },
-                      { label: 'Levain', key: 'levainTemp' },
-                      { label: 'Water', key: 'waterTemp' },
-                      { label: 'Final', key: 'finalTemp' },
-                      { label: 'Mix', key: 'mixTime' },
-                      { label: 'Hydr %', key: 'hydration' }
+                      { label: t.room, key: 'roomTemp' },
+                      { label: t.flour, key: 'flourTemp' },
+                      { label: t.levain, key: 'levainTemp' },
+                      { label: t.water, key: 'waterTemp' },
+                      { label: t.final, key: 'finalTemp' },
+                      { label: t.mixShort, key: 'mixTime' },
+                      { label: t.hydrShort, key: 'hydration' }
                     ].map((field) => (
                       <div key={field.key} className="flex-none w-14 text-center">
                         <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
@@ -589,14 +771,15 @@ export default function DoughTempTracker() {
                           placeholder="--"
                           className="w-full text-center text-xs font-medium bg-apple-bg rounded py-1.5 outline-none focus:ring-1 focus:ring-apple-red"
                           value={bake[field.key as keyof Bake]}
-                          onChange={(e) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateBake(bake.id, field.key as keyof Bake, e.target.value)}
+                          aria-label={field.label}
                         />
                       </div>
                     ))}
 
                     {/* Friction */}
                     <div className="flex-none w-14 text-center">
-                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">Friction</label>
+                      <label className="text-[9px] text-gray-400 block mb-0.5 text-apple-red font-bold">{t.friction}</label>
                       <div className="text-xs font-bold text-apple-red bg-apple-red/5 rounded py-1.5">
                         {calculateSimpleFriction(bake)}
                       </div>
@@ -604,7 +787,7 @@ export default function DoughTempTracker() {
 
                     {/* Delete */}
                     <div className="flex-none w-8 flex items-center justify-center pt-3">
-                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors">
+                      <button onClick={() => deleteBake(bake.id)} className="text-gray-300 hover:text-apple-red transition-colors" title="Delete Bake" aria-label="Delete Bake">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -649,6 +832,8 @@ export default function DoughTempTracker() {
                   <button
                     onClick={addProduct}
                     className="px-4 py-2 bg-apple-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                    title="Add Product"
+                    aria-label="Add Product"
                   >
                     <Plus size={18} />
                   </button>
@@ -657,8 +842,8 @@ export default function DoughTempTracker() {
 
               {/* Product List */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600 block">Your Products</label>
-                {products.map(product => (
+                <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
+                {products.map((product: Product) => (
                   <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
                     <div className="flex items-center gap-2">
                       <div className="flex items-center space-x-0.5 mr-2">
@@ -686,10 +871,11 @@ export default function DoughTempTracker() {
                             <input
                               type="text"
                               value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
                               className="text-sm font-medium border-b border-purple-300 outline-none bg-transparent w-full min-w-0"
                               autoFocus
-                              onKeyDown={(e) => {
+                              aria-label="Edit Product Name"
+                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                 if (e.key === 'Enter') {
                                   handleRenameProduct(product.id, editName);
                                   setEditingProductId(null);
@@ -704,12 +890,16 @@ export default function DoughTempTracker() {
                                 setEditingProductId(null);
                               }}
                               className="text-green-600 hover:text-green-700 p-0.5"
+                              title="Save"
+                              aria-label="Save"
                             >
                               <Check size={14} />
                             </button>
                             <button
                               onClick={() => setEditingProductId(null)}
                               className="text-red-500 hover:text-red-600 p-0.5"
+                              title="Cancel"
+                              aria-label="Cancel"
                             >
                               <X size={14} />
                             </button>
@@ -718,7 +908,7 @@ export default function DoughTempTracker() {
                           <>
                             <span className="text-sm font-medium truncate">{product.name}</span>
                             <span className="text-xs text-gray-400 whitespace-nowrap">
-                              ({bakes.filter(b => b.productId === product.id).length})
+                              ({bakes.filter((b: Bake) => b.productId === product.id).length})
                             </span>
                             <button
                               onClick={() => {
@@ -1038,10 +1228,10 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
       {/* Navigation Buttons - Positioned right beside the card edge */}
       <div className="absolute left-1/2 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40 translate-x-[102px]">
         <button
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             if (!containerRef.current) return;
-            const currentIndex = products.findIndex(p => p.id === selectedProductId);
+            const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
             if (currentIndex > 0) {
               const targetIndex = currentIndex - 1;
               playTickSound();
@@ -1049,15 +1239,17 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             }
           }}
           className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-          disabled={products.findIndex(p => p.id === selectedProductId) <= 0}
+          title="Previous Product"
+          aria-label="Previous Product"
+          disabled={products.findIndex((p: Product) => p.id === selectedProductId) <= 0}
         >
           <ChevronUp size={20} strokeWidth={3} />
         </button>
         <button
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             if (!containerRef.current) return;
-            const currentIndex = products.findIndex(p => p.id === selectedProductId);
+            const currentIndex = products.findIndex((p: Product) => p.id === selectedProductId);
             if (currentIndex < products.length - 1) {
               const targetIndex = currentIndex + 1;
               playTickSound();
@@ -1065,7 +1257,9 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             }
           }}
           className="p-2 rounded-full bg-gradient-to-br from-apple-red to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-          disabled={products.findIndex(p => p.id === selectedProductId) >= products.length - 1}
+          title="Next Product"
+          aria-label="Next Product"
+          disabled={products.findIndex((p: Product) => p.id === selectedProductId) >= products.length - 1}
         >
           <ChevronDown size={20} strokeWidth={3} />
         </button>
