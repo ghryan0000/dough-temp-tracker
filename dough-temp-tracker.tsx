@@ -594,11 +594,11 @@ export default function DoughTempTracker() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-4 md:p-8 relative overflow-hidden w-full">
+            <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-3 md:p-5 relative overflow-hidden w-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
               {/* Target Display */}
-              <div className={`py-1 px-3 md:p-4 rounded-2xl text-center mb-4 md:mb-8 border-2 transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
+              <div className={`py-1 px-3 md:p-3 rounded-2xl text-center mb-2 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
                 <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">{t.targetWaterTemp}</div>
                 <div className={`text-3xl md:text-5xl font-black tracking-tighter leading-none ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                   {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
@@ -607,7 +607,7 @@ export default function DoughTempTracker() {
               </div>
 
               {/* Input Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
                 {[
                   { label: t.room, key: 'roomTemp', unit: '°C' },
                   { label: t.flour, key: 'flourTemp', unit: '°C' },
@@ -616,9 +616,9 @@ export default function DoughTempTracker() {
                   { label: t.mix, key: 'mixTime', unit: 'min' },
                   { label: t.hydration, key: 'hydration', unit: '%' }
                 ].map((field) => (
-                  <div key={field.label} className="bg-apple-bg rounded-lg px-3 py-1.5 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
+                  <div key={field.label} className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
                     <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{field.label}</label>
-                    <div className="flex items-baseline mt-3.5">
+                    <div className="flex items-baseline mt-2">
                       <input
                         type="number"
                         value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
@@ -654,8 +654,8 @@ export default function DoughTempTracker() {
 
               {/* Model Training Status - Detailed View */}
               {regressionModel && (
-                <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-                  <div className="flex flex-col items-start mb-3 gap-1">
+                <div className="mt-2 p-3 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
+                  <div className="flex flex-col items-start mb-2 gap-1">
                     <div className="flex items-center gap-2">
                       <BarChart3 size={16} className="text-purple-600" />
                       <span className="text-sm font-bold text-purple-900">{t.mlrTraining}: {currentProduct?.name}</span>
@@ -671,7 +671,7 @@ export default function DoughTempTracker() {
                   </div>
 
                   {/* Regression Formula */}
-                  <div className="mb-3 p-3 bg-white rounded-lg border border-purple-100">
+                  <div className="mb-2 p-2 bg-white rounded-lg border border-purple-100">
                     <div className="flex items-end gap-1.5 mb-2">
                       <BarChart3 size={12} className="text-purple-600" />
                       <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
