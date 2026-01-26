@@ -88,7 +88,7 @@ export default function DoughTempTracker() {
       quality: "Quality",
       fit: "Fit",
       // Documentation
-      aboutTitle: "About This App",
+      aboutTitle: "User Guide",
       aboutContent: "Ryan's Bakery Water Temperature Tracker ensures consistent dough by calculating the precise water temperature needed. It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
       howToUseTitle: "How to Use",
       step1Title: "Select Product",
@@ -138,7 +138,7 @@ export default function DoughTempTracker() {
       quality: "品質",
       fit: "擬合度",
       // Documentation
-      aboutTitle: "關於本應用",
+      aboutTitle: "使用指南",
       aboutContent: "Ryan 的烘焙坊水溫追蹤器通過計算理想水溫，助您製作出品質穩定的麵團。應用利用多元線性回歸 (MLR) 從您的烘焙紀錄中學習，根據環境條件預測最佳水溫。",
       howToUseTitle: "使用說明",
       step1Title: "選擇產品",
@@ -188,7 +188,7 @@ export default function DoughTempTracker() {
       quality: "品質",
       fit: "適合度",
       // Documentation
-      aboutTitle: "このアプリについて",
+      aboutTitle: "ユーザーガイド",
       aboutContent: "Ryan's Bakery 水温トラッカーは、理想的な水温を計算し、安定した生地作りをサポートします。重回帰分析 (MLR) を用いて過去のデータから学習し、環境に応じた最適な水温を予測します。",
       howToUseTitle: "使い方",
       step1Title: "製品を選択",
