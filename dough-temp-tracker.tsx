@@ -873,7 +873,7 @@ export default function DoughTempTracker() {
                           <h3 className="font-bold text-sm flex items-center gap-2 text-gray-800 font-mono">
                             <BarChart3 size={16} className="text-green-600" /> {t.model} Analysis
                           </h3>
-                          <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Live Engine v1.0</div>
+                          <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Live Engine v1.1</div>
                         </div>
 
                         <div className="p-4 space-y-5">
