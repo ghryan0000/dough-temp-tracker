@@ -747,7 +747,7 @@ export default function DoughTempTracker() {
         </div>
 
         {/* App Description - One Liner */}
-        <p className="text-[14.5px] font-bold italic text-apple-red mb-6 -mt-2 px-1 leading-relaxed max-w-[390px]">
+        <p className="text-[13px] font-bold italic text-apple-red mb-6 -mt-2 px-1 leading-relaxed max-w-[390px]">
           {t.appDescription}
         </p>
 
@@ -840,22 +840,19 @@ export default function DoughTempTracker() {
                 </h3>
 
                 <div className={`mb-4 p-3 rounded-lg border ${regressionModel?.ready ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className={`mt-0.5 ${regressionModel?.ready ? 'text-green-600' : 'text-gray-600'}`} size={18} />
-                    <div className="text-sm">
-                      <strong className="text-gray-900">Status:</strong> <span className="text-gray-700">
-                        {regressionModel?.isSynthetic ? 'Standard Formula' : 'MLR Trained!'}
-                        <span className="text-green-600 font-mono text-xs ml-1">
-                          {regressionModel?.isSynthetic
-                            ? `(Learning: ${regressionModel.nSamples}/3)`
-                            : `(R²=${regressionModel.rSquared.toFixed(3)})`}
-                        </span>
-                      </span><br />
-                      <strong className="text-gray-900">Fit Reliability:</strong> <span className={`font-bold uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
-                        {!regressionModel?.ready ? 'Learning' : regressionModel.rSquared >= 0.9 ? 'Excellent' : regressionModel.rSquared >= 0.7 ? 'Good' : 'Learning'}
+                  <div className="text-sm">
+                    <strong className="text-gray-900">Status:</strong> <span className={regressionModel?.isSynthetic ? 'text-green-600' : 'text-gray-700'}>
+                      {regressionModel?.isSynthetic ? 'Standard Formula' : 'MLR Trained!'}
+                      <span className="text-green-600 font-mono text-xs ml-1">
+                        {regressionModel?.isSynthetic
+                          ? `(Learning: ${regressionModel.nSamples}/3)`
+                          : `(R²=${regressionModel.rSquared.toFixed(3)})`}
                       </span>
-                      <span className="text-gray-400 font-mono text-xs ml-1">({(regressionModel.rSquared || 0).toFixed(3)})</span>
-                    </div>
+                    </span><br />
+                    <strong className="text-gray-900">Fit Reliability:</strong> <span className={`uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
+                      {!regressionModel?.ready ? 'Learning' : regressionModel.rSquared >= 0.9 ? 'Excellent' : regressionModel.rSquared >= 0.7 ? 'Good' : 'Learning'}
+                    </span>
+                    <span className="text-green-600 font-mono text-xs ml-1">({(regressionModel.rSquared || 0).toFixed(3)})</span>
                   </div>
                 </div>
 
@@ -873,8 +870,8 @@ export default function DoughTempTracker() {
                       <div className="mt-4 bg-white rounded-2xl border-2 border-gray-100 shadow-sm overflow-hidden text-gray-800">
                         {/* Header */}
                         <div className="bg-green-50/50 px-4 py-3 border-b-2 border-gray-100 flex items-center justify-between">
-                          <h3 className="font-bold text-sm flex items-center gap-2 text-green-700 font-mono">
-                            <BarChart3 size={16} /> {t.model} Analysis
+                          <h3 className="font-bold text-sm flex items-center gap-2 text-gray-800 font-mono">
+                            <BarChart3 size={16} className="text-green-600" /> {t.model} Analysis
                           </h3>
                           <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Live Engine v1.0</div>
                         </div>
@@ -882,9 +879,15 @@ export default function DoughTempTracker() {
                         <div className="p-4 space-y-5">
                           {/* Equation Block */}
                           <div>
-                            <div className="text-[10px] font-bold text-gray-600 mb-2 uppercase tracking-tight flex items-center gap-1.5">
+                            <div className="text-[10px] font-bold text-green-700 mb-2 uppercase tracking-tight flex items-center gap-1.5">
                               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                               Computed Regression Equation
+                            </div>
+                            <div className="flex items-center gap-2 mb-3 pl-3 pr-1">
+                              <span className="text-[9px] font-bold text-gray-600 uppercase tracking-wider">Analysis Confidence</span>
+                              <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-mono">
+                                n = {regressionModel.nSamples} Sessions
+                              </span>
                             </div>
                             <div className="text-[13px] leading-relaxed p-3 bg-gray-50/50 rounded-xl border border-gray-100 font-mono">
                               <span className="text-green-700 font-black">Actual Water Temp</span> = {(regressionModel.intercept || 0).toFixed(2)}
@@ -898,13 +901,7 @@ export default function DoughTempTracker() {
                           </div>
                         </div>
 
-                        {/* Footer / Sample Count */}
-                        <div className="bg-gray-50 px-4 py-2 border-t border-gray-100 flex justify-between items-center">
-                          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-wider">Analysis Confidence</span>
-                          <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-mono">
-                            n = {regressionModel.nSamples} Sessions
-                          </span>
-                        </div>
+
                       </div>
                     )}
                   </div>
@@ -1062,7 +1059,7 @@ export default function DoughTempTracker() {
             <div className="bg-white rounded-2xl shadow-sm p-5">
               {/* Add Product */}
               <div className="mb-4 mt-4">
-                <label className="text-xs font-semibold text-gray-600 mb-1 block">Add New Product</label>
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1 block">Add New Product</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -1085,7 +1082,7 @@ export default function DoughTempTracker() {
 
               {/* Product List */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600 block">{t.yourProducts}</label>
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block">{t.yourProducts}</label>
                 {products.map((product: Product) => (
                   <div key={product.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
                     <div className="flex items-center gap-2">
