@@ -53,15 +53,16 @@ const TRANSLATIONS = {
   en: {
     appTitle: "Ryan's Bakery",
     appSubtitle: "Water Temperature Tracker",
-    appDescription: "Calculate optimal water temp for consistent dough quality.",
+    appDescription: "\"Perfect Water Temp, Predictable Final Dough.\"",
     modelReady: "Model Ready",
     selectProduct: "Select Product",
     scrollToSelect: "Scroll to select",
     calculatorTitle: "Calculate Water Temp",
     enterData: "Enter variables",
-    targetWaterTemp: "TARGET WATER TEMP",
+    targetWaterTemp: "Suggested Water Temp for Mixing.",
     calculateButton: "Calculate Water Temp",
     historyTitle: "MLR Training History",
+    historyList: "Recorded Sessions",
     entries: "Entries",
     noData: "No training data yet.",
     addBakesHint: "Add previous bakes to train the model.",
@@ -69,14 +70,14 @@ const TRANSLATIONS = {
     friction: "Friction",
     date: "Date",
     // Field Labels
-    room: "Room",
-    flour: "Flour",
-    levain: "Levain",
-    target: "Target Temp",
+    room: "Room Temp",
+    flour: "Flour Temp",
+    levain: "Levain Temp",
+    target: "Target FD Temp",
     mix: "Mix Time", // Expanded for clarity in calc
-    hydration: "Hydration",
-    water: "Water",
-    final: "Final",
+    hydration: "Hydration (water/flour)",
+    water: "Actual Water Temp",
+    final: "FD Temp",
     mixShort: "Mix", // For table headers
     hydrShort: "Hydr %",
     mlrTraining: "MLR Training",
@@ -96,11 +97,21 @@ const TRANSLATIONS = {
     step2Title: "Calculate Temp",
     step2Content: "Enter current conditions (Room, Flour, etc.) to get the Target Water Temp.",
     step3Title: "Record Session",
-    step3Content: "After mixing, use 'Add Session' to log the actual results to train the MLR model.",
+    step3Content: "After mixing, use 'Add Practical session Data' to log the actual results to train the MLR model.",
     step4Title: "Export Data",
     step4Content: "Download your baking history as a CSV file.",
     step5Title: "Manage Products",
     step5Content: "Add, rename, reorder, or delete products below.",
+    // MLR Logic
+    mlrLogicTitle: "MLR Logic",
+    mlrStep1Title: "Data Collection & 'Waiting' State",
+    mlrStep1Content: "The app needs data to start. For a new product, you'll see a 'Waiting...' status until your first bake is recorded.",
+    mlrStep2Title: "Standard Formula (Learning Phase)",
+    mlrStep2Content: "With 1-2 sessions, the status is 'Standard Formula (Learning: X/3)'. The app uses a base formula while calculating your unique average Friction.",
+    mlrStep3Title: "MLR Trained! (Pattern Recognition)",
+    mlrStep3Content: "With 3+ sessions, 'MLR Trained!' activates. Multiple Linear Regression is used to analyze how variables like Mix Time or Hydration subtly impact heat.",
+    mlrStep4Title: "Fit Reliability Score",
+    mlrStep4Content: "Check your R² score: EXCELLENT (≥0.9), GOOD (≥0.7), or LEARNING (<0.7). This tells you how accurately the model matches your specific kitchen's environment.",
   },
   zh: {
     appTitle: "Ryan's Bakery",
@@ -114,20 +125,21 @@ const TRANSLATIONS = {
     targetWaterTemp: "目標水溫",
     calculateButton: "計算水溫",
     historyTitle: "MLR 訓練歷史",
+    historyList: "已紀錄場次",
     entries: "條紀錄",
     noData: "暫無訓練數據",
     addBakesHint: "添加過往烘焙紀錄以訓練模型",
     yourProducts: "您的產品",
     friction: "摩擦升溫",
     date: "日期",
-    room: "室溫",
-    flour: "粉溫",
-    levain: "酵種",
-    target: "目標溫度",
-    mix: "攪拌時間",
-    hydration: "含水量",
-    water: "水溫",
-    final: "最終",
+    room: "室溫 (Room Temp)",
+    flour: "粉溫 (Flour Temp)",
+    levain: "酵種溫 (Levain Temp)",
+    target: "目標 FD Temp (Target FD Temp)",
+    mix: "攪拌時間 (Mix Time)",
+    hydration: "含水量 Hydration (water/flour)",
+    water: "實際水溫 (Actual Water Temp)",
+    final: "麵團終溫 (FD Temp)",
     mixShort: "攪拌",
     hydrShort: "含水%",
     mlrTraining: "MLR 訓練",
@@ -152,6 +164,16 @@ const TRANSLATIONS = {
     step4Content: "將您的烘焙歷史下載為 CSV 文件。",
     step5Title: "管理產品",
     step5Content: "在下方添加、重命名、排序或刪除產品。",
+    // MLR Logic
+    mlrLogicTitle: "MLR 邏輯",
+    mlrStep1Title: "數據收集與「等待」狀態",
+    mlrStep1Content: "模型需要數據才能運作。對於新產品，在紀錄第一場烘焙前，您會看到「Waiting...」狀態。",
+    mlrStep2Title: "標準公式（學習階段）",
+    mlrStep2Content: "累積 1-2 場時，狀態為「Standard Formula (Learning: X/3)」。應用會使用基礎公式，並計算您獨特的平均摩擦係數。",
+    mlrStep3Title: "MLR 訓練完畢（模式識別）",
+    mlrStep3Content: "累積 3 場後，狀態變為「MLR Trained!」。多元線性回歸模型啟動，分析攪拌時間或含水量如何微妙地影響麵團升溫。",
+    mlrStep4Title: "擬合可靠度評價",
+    mlrStep4Content: "檢查您的 R² 分數得分：EXCELLENT (≥0.9)、GOOD (≥0.7) 或 LEARNING (<0.7)。這反映了模型對您廚房環境預測的精準程度。",
   },
   ja: {
     appTitle: "ライアンのベーカリー",
@@ -165,20 +187,21 @@ const TRANSLATIONS = {
     targetWaterTemp: "目標水温",
     calculateButton: "水温を計算",
     historyTitle: "MLR 学習履歴",
+    historyList: "記録されたセッション",
     entries: "件",
     noData: "データがありません",
     addBakesHint: "過去のデータを追加してモデルを学習",
     yourProducts: "製品一覧",
     friction: "摩擦熱",
     date: "日付",
-    room: "室温",
-    flour: "粉温",
-    levain: "種温",
-    target: "目標温度",
-    mix: "ミキシング",
-    hydration: "加水率",
-    water: "水温",
-    final: "捏上",
+    room: "室温 (Room Temp)",
+    flour: "粉温 (Flour Temp)",
+    levain: "種温 (Levain Temp)",
+    target: "目標 FD Temp (Target FD Temp)",
+    mix: "ミキシング (Mix Time)",
+    hydration: "加水率 Hydration (water/flour)",
+    water: "實際水温 (Actual Water Temp)",
+    final: "生地終温 (FD Temp)",
     mixShort: "ミキシング",
     hydrShort: "加水%",
     mlrTraining: "MLR 学習",
@@ -203,6 +226,16 @@ const TRANSLATIONS = {
     step4Content: "履歴をCSVファイルとしてダウンロードできます。",
     step5Title: "製品を管理",
     step5Content: "製品の追加、名前変更、並べ替え、削除が可能です。",
+    // MLR Logic
+    mlrLogicTitle: "MLR ロジック",
+    mlrStep1Title: "データ収集と待機状態",
+    mlrStep1Content: "モデルにはデータが必要です。新しい製品の場合、最初の記録が行われるまで「Waiting...」と表示されます。",
+    mlrStep2Title: "標準式（学習フェーズ）",
+    mlrStep2Content: "1〜2回の記録では「Standard Formula (Learning: X/3)」となります。独自平均摩擦熱を算出しつつ、標準的な計算式を使用します。",
+    mlrStep3Title: "MLR 学習完了（パターン認識）",
+    mlrStep3Content: "3回以上の記録で「MLR Trained!」が起動します。ミキシング時間や加水率などの変数が温度に与える隠れたパターンを重回帰分析で導き出します。",
+    mlrStep4Title: "適合信頼度スコア",
+    mlrStep4Content: "R²スコアを確認してください：EXCELLENT (≥0.9), GOOD (≥0.7), または LEARNING (<0.7)。モデルがあなたのキッチン環境をどれだけ正確に捉えているかを示します。",
   }
 };
 
@@ -325,6 +358,9 @@ export default function DoughTempTracker() {
     localStorage.setItem('selectedProductId-v2', selectedProductId.toString());
   }, [selectedProductId]);
 
+
+
+
   const [targetTemp, setTargetTemp] = useState<number | string>(25);
   const [bakes, setBakes] = useState<Bake[]>(() => {
     // Check for new format first
@@ -357,6 +393,44 @@ export default function DoughTempTracker() {
   useEffect(() => {
     localStorage.setItem('bakes-v2', JSON.stringify(bakes));
   }, [bakes]);
+
+  // Auto-load last session figures
+  useEffect(() => {
+    // Find latest bake for this product
+    const productBakes = bakes.filter(b => b.productId === selectedProductId);
+    // Sort by ID descending (newest first)
+    const lastBake = [...productBakes].sort((a, b) => b.id - a.id)[0];
+
+    if (lastBake) {
+      setCurrentConditions({
+        roomTemp: lastBake.roomTemp,
+        flourTemp: lastBake.flourTemp,
+        levainTemp: lastBake.levainTemp,
+        mixTime: lastBake.mixTime,
+        hydration: lastBake.hydration
+      });
+    } else {
+      // Default fallbacks for new product
+      setCurrentConditions({
+        roomTemp: 22,
+        flourTemp: 20,
+        levainTemp: 24,
+        mixTime: 5,
+        hydration: 70
+      });
+    }
+  }, [selectedProductId, bakes]);
+
+  const [newBakeData, setNewBakeData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    roomTemp: '',
+    flourTemp: '',
+    waterTemp: '',
+    levainTemp: '',
+    finalTemp: '',
+    mixTime: '',
+    hydration: ''
+  });
 
   // Product management
   const [showProductManager, setShowProductManager] = useState(false);
@@ -414,6 +488,12 @@ export default function DoughTempTracker() {
     hydration: 70
   });
 
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showSessionManager, setShowSessionManager] = useState(false);
+  const [showMLRGuide, setShowMLRGuide] = useState(false);
+  const [showHowToUse, setShowHowToUse] = useState(false);
+  const [debugInfo, setDebugInfo] = useState('');
+
   const regressionModel = useMemo(() => {
     const validBakes = bakes.filter(b =>
       b.productId === selectedProductId &&
@@ -421,10 +501,36 @@ export default function DoughTempTracker() {
       b.levainTemp !== '' && b.finalTemp !== '' && b.mixTime !== '' && b.hydration !== ''
     );
 
-    if (validBakes.length < 3) return null;
+    const n = validBakes.length;
+
+    // Calculate average friction as fallback
+    let avgFriction = 30;
+    if (n > 0) {
+      const frictions = validBakes.map(b => {
+        const val = (5 * Number(b.finalTemp)) - (Number(b.roomTemp) + Number(b.flourTemp) + Number(b.waterTemp) + Number(b.levainTemp));
+        return isNaN(val) ? 30 : val;
+      });
+      avgFriction = frictions.reduce((a, b) => a + b, 0) / n;
+    }
+
+    const baseInfo = {
+      ready: true, // Always ready to show equation
+      isSynthetic: true, // Flag for UI to know it's not real MLR yet
+      nSamples: n,
+      avgFriction,
+      rSquared: 0,
+      intercept: -avgFriction, // Simple method: Water = (5*Target) - Room - Flour - Levain - Friction
+      roomCoef: -1,
+      flourCoef: -1,
+      levainCoef: -1,
+      targetCoef: 5,
+      mixTimeCoef: 0,
+      hydrationCoef: 0
+    };
+
+    if (n < 3) return baseInfo;
 
     try {
-      const n = validBakes.length;
       const y = validBakes.map(b => parseFloat(b.waterTemp as string));
       const rawX = validBakes.map(b => [
         1, parseFloat(b.roomTemp as string), parseFloat(b.flourTemp as string), parseFloat(b.levainTemp as string),
@@ -445,7 +551,7 @@ export default function DoughTempTracker() {
       const X = rawX.map((row: number[]) => [row[0], ...row.slice(1).map((val: number, idx: number) => (val - means[idx]) / stds[idx])]);
       const beta = solveRobust(X, y);
 
-      if (!beta) return null;
+      if (!beta) return baseInfo;
 
       const denormBeta = [
         beta[0] - beta.slice(1).reduce((sum, b, i) => sum + b * means[i] / stds[i], 0),
@@ -463,15 +569,27 @@ export default function DoughTempTracker() {
 
       const rSquared = ssTotal > 0 ? Math.max(0, Math.min(1, 1 - (ssResidual / ssTotal))) : 0;
       return {
+        ready: true,
         intercept: denormBeta[0], roomCoef: denormBeta[1], flourCoef: denormBeta[2],
         levainCoef: denormBeta[3], targetCoef: denormBeta[4], mixTimeCoef: denormBeta[5],
-        hydrationCoef: denormBeta[6], rSquared: rSquared, nSamples: n
+        hydrationCoef: denormBeta[6], rSquared: rSquared, nSamples: n, avgFriction,
+        isSynthetic: false
       };
     } catch (error) {
       console.error('Regression failed:', error);
-      return null;
+      return baseInfo;
     }
   }, [bakes, selectedProductId]);
+
+  useEffect(() => {
+    if (regressionModel) {
+      if (regressionModel.isSynthetic) {
+        setDebugInfo(`Standard Formula (Learning: ${regressionModel.nSamples}/3)`);
+      } else {
+        setDebugInfo(`MLR Trained! R²=${regressionModel.rSquared.toFixed(3)}`);
+      }
+    }
+  }, [regressionModel]);
 
   const solveRobust = (X: number[][], y: number[]) => {
     const n = X.length, m = X[0].length, lambda = 0.01;
@@ -520,11 +638,36 @@ export default function DoughTempTracker() {
   // Removed manual regression trigger useEffect
 
   const addBake = () => {
+    // Only add if all fields are completed
+    const isFormComplete =
+      newBakeData.roomTemp &&
+      newBakeData.flourTemp &&
+      newBakeData.levainTemp &&
+      newBakeData.waterTemp &&
+      newBakeData.finalTemp &&
+      newBakeData.mixTime &&
+      newBakeData.hydration;
+
+    if (!isFormComplete) return;
+
     const newId = bakes.length > 0 ? Math.max(...bakes.map(b => b.id)) + 1 : 1;
     setBakes([...bakes, {
-      id: newId, productId: selectedProductId, date: new Date().toISOString().split('T')[0], roomTemp: '', flourTemp: '',
-      waterTemp: '', levainTemp: '', finalTemp: '', mixTime: '', hydration: ''
-    }]);
+      ...newBakeData,
+      id: newId,
+      productId: selectedProductId
+    } as Bake]);
+
+    // Reset fields
+    setNewBakeData({
+      date: new Date().toISOString().split('T')[0],
+      roomTemp: '',
+      flourTemp: '',
+      waterTemp: '',
+      levainTemp: '',
+      finalTemp: '',
+      mixTime: '',
+      hydration: ''
+    });
   };
 
   const deleteBake = (id: number) => setBakes(bakes.filter(b => b.id !== id));
@@ -534,10 +677,17 @@ export default function DoughTempTracker() {
   // Prediciton logic stays near calculator
   const predictWaterTemp = (roomTemp: number | string, flourTemp: number | string, levainTemp: number | string, targetFinal: number | string, mixTime: number | string, hydration: number | string) => {
     if (!regressionModel) return null;
-    return regressionModel.intercept + regressionModel.roomCoef * Number(roomTemp) +
-      regressionModel.flourCoef * Number(flourTemp) + regressionModel.levainCoef * Number(levainTemp) +
-      regressionModel.targetCoef * Number(targetFinal) + regressionModel.mixTimeCoef * Number(mixTime) +
-      regressionModel.hydrationCoef * Number(hydration);
+
+    // Unified Prediction Logic: Always use coefficients
+    // If n < 3, these will be the Synthetic "Simple Method" coeffs (-1, -1, -1, 5, -avgFriction)
+    // If n >= 3, these will be the MLR Learned coeffs
+    return (regressionModel.intercept || 0) +
+      (regressionModel.roomCoef || 0) * Number(roomTemp) +
+      (regressionModel.flourCoef || 0) * Number(flourTemp) +
+      (regressionModel.levainCoef || 0) * Number(levainTemp) +
+      (regressionModel.targetCoef || 0) * Number(targetFinal) +
+      (regressionModel.mixTimeCoef || 0) * Number(mixTime) +
+      (regressionModel.hydrationCoef || 0) * Number(hydration);
   };
 
   const currentPredictedWater = useMemo(() => predictWaterTemp(
@@ -552,7 +702,7 @@ export default function DoughTempTracker() {
   const exportCSV = () => {
     const product = products.find(p => p.id === selectedProductId);
     const productBakes = bakes.filter(b => b.productId === selectedProductId);
-    const headers = ['Date', 'Product', 'Room', 'Flour', 'Water', 'Levain', 'Final', 'Mix', 'Hydration', 'Friction'];
+    const headers = ['Date', 'Product', 'Room', 'Flour', 'Actual Water Temp', 'Levain', 'FD Temp', 'Mix', 'Hydration', 'Friction'];
     const rows = productBakes.map(b => [b.date, product?.name, b.roomTemp, b.flourTemp, b.waterTemp, b.levainTemp, b.finalTemp, b.mixTime, b.hydration, calculateSimpleFriction(b)]);
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -597,7 +747,7 @@ export default function DoughTempTracker() {
         </div>
 
         {/* App Description - One Liner */}
-        <p className="text-xs text-gray-500 mb-6 -mt-2 px-1 italic leading-relaxed max-w-[390px]">
+        <p className="text-[14.5px] font-bold italic text-apple-red mb-6 -mt-2 px-1 leading-relaxed max-w-[390px]">
           {t.appDescription}
         </p>
 
@@ -634,21 +784,21 @@ export default function DoughTempTracker() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
               {/* Target Display */}
-              <div className={`py-0.5 px-3 md:p-3 rounded-2xl mb-1.5 md:mb-4 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
-                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider text-left">{t.targetWaterTemp}</div>
-                <div className={`text-2xl md:text-5xl font-black tracking-tighter leading-none text-center ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+              <div className={`py-2 px-3 md:py-4 md:px-6 rounded-2xl mb-6 md:mb-10 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
+                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider text-left mb-4 animate-pulse">{t.targetWaterTemp}</div>
+                <div className={`text-4xl md:text-7xl font-black tracking-tighter leading-none text-center animate-pulse ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
                   {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                  <span className="text-lg md:text-2xl ml-1 font-medium text-gray-400">°C</span>
+                  <span className="text-xl md:text-3xl ml-1 font-medium text-gray-400">°C</span>
                 </div>
               </div>
 
               {/* Input Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
                 {[
+                  { label: t.target, key: 'target', unit: '°C' },
                   { label: t.room, key: 'roomTemp', unit: '°C' },
                   { label: t.flour, key: 'flourTemp', unit: '°C' },
                   { label: t.levain, key: 'levainTemp', unit: '°C' },
-                  { label: t.target, key: 'target', unit: '°C' },
                   { label: t.mix, key: 'mixTime', unit: 'min' },
                   { label: t.hydration, key: 'hydration', unit: '%' }
                 ].map((field) => (
@@ -658,6 +808,7 @@ export default function DoughTempTracker() {
                     unit={field.unit}
                     value={field.key === 'target' ? targetTemp : currentConditions[field.key]}
                     onChange={(val) => field.key === 'target' ? setTargetTemp(val) : updateCurrentCondition(field.key, val)}
+                    highlight={field.key === 'target'}
                   />
                 ))}
               </div>
@@ -667,7 +818,7 @@ export default function DoughTempTracker() {
               {/*
             <div className={`p-2 rounded-xl text-center transition-all ${regressionModel ? 'bg-red-100 border border-red-200' : 'bg-gray-50'}`}>
               <div className="flex items-center justify-center gap-2 mb-0.5">
-                <div className="text-[10px] font-bold text-apple-gray uppercase tracking-wider">TARGET WATER TEMP</div>
+                <div className="text-[10px] font-bold text-apple-gray tracking-wider">Suggested Water Temp for Mixing.</div>
                 {regressionModel && (
                   <span className="text-[9px] font-bold px-1.5 py-px bg-green-50 text-green-700 border border-green-200 rounded-full flex items-center gap-0.5">
                     <Activity size={8} /> Model Ready
@@ -681,126 +832,215 @@ export default function DoughTempTracker() {
             </div>
             */}
 
-              {/* Model Training Status - Detailed View */}
-              {regressionModel && (
-                <div className="mt-2 p-3 bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-xl">
-                  <div className="flex flex-col items-start mb-2 gap-1">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 size={16} className="text-gray-500" />
-                      <span className="text-sm font-bold text-gray-700 border-b border-gray-400 pb-0.5">{t.mlrTraining}: {currentProduct?.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-6">
-                      <span className="text-[10px] font-medium text-apple-gray bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">
-                        {t.sessions}: {regressionModel.nSamples}
+              {/* MLR Training Result - Claude AI Style Integration */}
+              <div className="bg-white rounded-lg border border-gray-100 p-4 mt-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <Activity size={18} className="text-green-600" />
+                  Training Status: {currentProduct?.name}
+                </h3>
+
+                <div className={`mb-4 p-3 rounded-lg border ${regressionModel?.ready ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className={`mt-0.5 ${regressionModel?.ready ? 'text-green-600' : 'text-gray-600'}`} size={18} />
+                    <div className="text-sm">
+                      <strong className="text-gray-900">Status:</strong> <span className="text-gray-700">
+                        {regressionModel?.isSynthetic ? 'Standard Formula' : 'MLR Trained!'}
+                        <span className="text-green-600 font-mono text-xs ml-1">
+                          {regressionModel?.isSynthetic
+                            ? `(Learning: ${regressionModel.nSamples}/3)`
+                            : `(R²=${regressionModel.rSquared.toFixed(3)})`}
+                        </span>
+                      </span><br />
+                      <strong className="text-gray-900">Fit Reliability:</strong> <span className={`font-bold uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
+                        {!regressionModel?.ready ? 'Learning' : regressionModel.rSquared >= 0.9 ? 'Excellent' : regressionModel.rSquared >= 0.7 ? 'Good' : 'Learning'}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-                        <Activity size={10} /> {t.modelReady}
-                      </span>
+                      <span className="text-gray-400 font-mono text-xs ml-1">({(regressionModel.rSquared || 0).toFixed(3)})</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Regression Formula */}
-                  <div className="mb-2 p-2 bg-white rounded-lg border border-purple-100">
-                    <div className="flex items-end gap-1.5 mb-2">
-                      <BarChart3 size={12} className="text-purple-600" />
-                      <span className="text-[14px] underline font-bold text-purple-900">{t.model}</span>
-                      <span className="text-[10px] text-gray-400 font-normal ml-2">Auto-saved • Updates with each new session</span>
-                    </div>
-                    <div className="font-mono text-[11px] text-gray-700 leading-relaxed overflow-x-auto">
-                      Water = {regressionModel.intercept.toFixed(2)}
-                      {regressionModel.roomCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.roomCoef).toFixed(2)}×{t.room}
-                      {regressionModel.flourCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.flourCoef).toFixed(2)}×{t.flour}
-                      {regressionModel.levainCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.levainCoef).toFixed(2)}×{t.levain}
-                      {regressionModel.targetCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.targetCoef).toFixed(2)}×{t.target}
-                      {regressionModel.mixTimeCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.mixTimeCoef).toFixed(2)}×{t.mix}
-                      {regressionModel.hydrationCoef >= 0 ? ' + ' : ' - '}{Math.abs(regressionModel.hydrationCoef).toFixed(2)}×{t.hydration}
-                    </div>
-                  </div>
+                {regressionModel && (
+                  <div>
+                    <button
+                      onClick={() => setShowAnalysis(!showAnalysis)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      {showAnalysis ? 'Hide' : 'Show'} Details
+                      <ChevronDown className={`ml-1 transform transition-transform ${showAnalysis ? 'rotate-180' : ''}`} size={14} />
+                    </button>
 
-                  {/* Coefficients and Quality Grid */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Coefficients */}
-                    <div className="bg-white rounded-lg p-2.5 border border-orange-100">
-                      <div className="flex items-center gap-1 mb-2">
-                        <Activity size={11} className="text-orange-600" />
-                        <span className="text-[14px] underline font-bold text-orange-900">{t.coefficients}</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">🔥 {t.frictionPerMin}:</span>
-                          <span className="text-[10px] font-bold text-orange-600">{regressionModel.mixTimeCoef.toFixed(3)}</span>
+                    {showAnalysis && (
+                      <div className="mt-4 bg-white rounded-2xl border-2 border-gray-100 shadow-sm overflow-hidden text-gray-800">
+                        {/* Header */}
+                        <div className="bg-green-50/50 px-4 py-3 border-b-2 border-gray-100 flex items-center justify-between">
+                          <h3 className="font-bold text-sm flex items-center gap-2 text-green-700 font-mono">
+                            <BarChart3 size={16} /> {t.model} Analysis
+                          </h3>
+                          <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Live Engine v1.0</div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">💧 {t.hydrationPercent}:</span>
-                          <span className="text-[10px] font-bold text-blue-600">{regressionModel.hydrationCoef.toFixed(3)}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Quality */}
-                    <div className="bg-white rounded-lg p-2.5 border border-pink-100">
-                      <div className="flex items-center gap-1 mb-2">
-                        <TrendingUp size={11} className="text-pink-600" />
-                        <span className="text-[14px] underline font-bold text-pink-900">{t.quality}</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">R²:</span>
-                          <span className="text-[10px] font-bold text-pink-600">{regressionModel.rSquared.toFixed(3)}</span>
+                        <div className="p-4 space-y-5">
+                          {/* Equation Block */}
+                          <div>
+                            <div className="text-[10px] font-bold text-gray-600 mb-2 uppercase tracking-tight flex items-center gap-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                              Computed Regression Equation
+                            </div>
+                            <div className="text-[13px] leading-relaxed p-3 bg-gray-50/50 rounded-xl border border-gray-100 font-mono">
+                              <span className="text-green-700 font-black">Actual Water Temp</span> = {(regressionModel.intercept || 0).toFixed(2)}
+                              {(regressionModel.roomCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.roomCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.room}</span>
+                              {(regressionModel.flourCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.flourCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.flour}</span>
+                              {(regressionModel.levainCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.levainCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.levain}</span>
+                              {(regressionModel.targetCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.targetCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.target}</span>
+                              {(regressionModel.mixTimeCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.mixTimeCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.mix}</span>
+                              {(regressionModel.hydrationCoef || 0) >= 0 ? ' + ' : ' - '}<span className="font-bold text-gray-900">{Math.abs(regressionModel.hydrationCoef || 0).toFixed(2)}</span> × <span className="text-green-700">{t.hydration}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">{t.fit}:</span>
-                          <span className="text-[9px] font-medium text-green-600">
-                            {regressionModel.rSquared >= 0.9 ? '✅ Excellent' : regressionModel.rSquared >= 0.7 ? '⚠️ Good' : '❌ Need More Data'}
+
+                        {/* Footer / Sample Count */}
+                        <div className="bg-gray-50 px-4 py-2 border-t border-gray-100 flex justify-between items-center">
+                          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-wider">Analysis Confidence</span>
+                          <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-mono">
+                            n = {regressionModel.nSamples} Sessions
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[9px] text-gray-600">Samples:</span>
-                          <span className="text-[10px] font-bold text-gray-700">{regressionModel.nSamples}</span>
-                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
-
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* History List */}
         <div className="px-1">
-          <div className="mb-3">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-2">
+          <div className="mb-3 flex flex-col items-start gap-2">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
               <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
             </h2>
-            <div className="flex gap-2">
-              <button onClick={addBake} className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm">
-                <Plus size={14} /> Add Session
-              </button>
-              <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-full transition-colors">
-                <Download size={12} /> Export CSV
-              </button>
-            </div>
+            <button
+              onClick={() => setShowSessionManager(!showSessionManager)}
+              className={`${showSessionManager ? 'bg-green-600 hover:bg-green-700' : 'bg-apple-red hover:bg-red-600'} text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm`}
+            >
+              {showSessionManager ? 'Hide Manager' : 'Show Manager'}
+              <ChevronDown className={`ml-1 transform transition-transform ${showSessionManager ? 'rotate-180' : ''}`} size={14} />
+            </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-gray-100">
-            {currentBakes.length === 0 ? (
-              <div className="p-8 text-center text-apple-gray">
-                <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
+          {showSessionManager && (
+            <div className="bg-white rounded-2xl shadow-sm p-5">
+              {/* Add Session Header */}
+              <div className="mb-4 mt-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block">Add New Session</label>
+                  {!(newBakeData.roomTemp && newBakeData.flourTemp && newBakeData.levainTemp && newBakeData.waterTemp && newBakeData.finalTemp && newBakeData.mixTime && newBakeData.hydration) && (
+                    <span className="text-[10px] font-bold text-red-500 animate-pulse flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                      <AlertCircle size={10} /> Fill all fields to save
+                    </span>
+                  )}
+                </div>
+
+                <div className="bg-gray-50/50 border-2 border-gray-300 rounded-2xl p-3 shadow-sm">
+                  <div className="grid grid-cols-4 gap-x-2 gap-y-4 items-end">
+                    {/* Row 1: Date (Aligned to span 2 columns) */}
+                    <div className="col-span-2">
+                      <label className="text-[9px] text-gray-400 block mb-1 font-bold uppercase tracking-tight">Date</label>
+                      <div className="relative h-[40px]">
+                        <input
+                          type="date"
+                          aria-label="New Session Date"
+                          value={newBakeData.date}
+                          onChange={(e) => setNewBakeData({ ...newBakeData, date: e.target.value })}
+                          className="w-full h-full text-xs font-bold bg-white border border-gray-200 rounded-xl px-3 outline-none focus:ring-2 focus:ring-apple-red/20 transition-all text-center"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2" /> {/* Empty spacing for Row 1 */}
+
+                    {/* Row 2: Room, Flour, Levain, Water */}
+                    {[
+                      { label: t.room, key: 'roomTemp' },
+                      { label: t.flour, key: 'flourTemp' },
+                      { label: t.levain, key: 'levainTemp' },
+                      { label: t.water, key: 'waterTemp' },
+                    ].map((field) => (
+                      <div key={field.key} className="col-span-1 text-center">
+                        <label className={`${field.key === 'waterTemp' ? 'text-[5px]' : 'text-[8px]'} text-gray-400 block mb-0.5 font-bold uppercase tracking-tight truncate`}>{field.label}</label>
+                        <input
+                          type="number"
+                          placeholder="--"
+                          className="w-full text-center text-sm font-bold bg-white border border-gray-200 rounded-xl py-2.5 outline-none focus:ring-2 focus:ring-apple-red/20"
+                          value={newBakeData[field.key as keyof typeof newBakeData]}
+                          onChange={(e) => setNewBakeData({ ...newBakeData, [field.key]: e.target.value })}
+                        />
+                      </div>
+                    ))}
+
+                    {/* Row 3: Final, Mix, Hydr%, Add Button */}
+                    {[
+                      { label: t.final, key: 'finalTemp' },
+                      { label: t.mixShort, key: 'mixTime' },
+                      { label: t.hydrShort, key: 'hydration' },
+                    ].map((field) => (
+                      <div key={field.key} className="col-span-1 text-center">
+                        <label className={`${field.key === 'waterTemp' ? 'text-[5px]' : 'text-[8px]'} text-gray-400 block mb-0.5 font-bold uppercase tracking-tight truncate`}>{field.label}</label>
+                        <input
+                          type="number"
+                          placeholder="--"
+                          className="w-full text-center text-sm font-bold bg-white border border-gray-200 rounded-xl py-2.5 outline-none focus:ring-2 focus:ring-apple-red/20"
+                          value={newBakeData[field.key as keyof typeof newBakeData]}
+                          onChange={(e) => setNewBakeData({ ...newBakeData, [field.key]: e.target.value })}
+                        />
+                      </div>
+                    ))}
+
+                    <div className="col-span-1 flex justify-center">
+                      <button
+                        onClick={addBake}
+                        disabled={!(newBakeData.roomTemp && newBakeData.flourTemp && newBakeData.levainTemp && newBakeData.waterTemp && newBakeData.finalTemp && newBakeData.mixTime && newBakeData.hydration)}
+                        className={`w-full h-[41px] text-white rounded-xl transition-all shadow-md active:scale-90 flex items-center justify-center p-0 ${!(newBakeData.roomTemp && newBakeData.flourTemp && newBakeData.levainTemp && newBakeData.waterTemp && newBakeData.finalTemp && newBakeData.mixTime && newBakeData.hydration)
+                          ? 'bg-gray-300 cursor-not-allowed opacity-50'
+                          : 'bg-apple-red hover:bg-red-600'
+                          }`}
+                        title={!(newBakeData.roomTemp && newBakeData.flourTemp && newBakeData.levainTemp && newBakeData.waterTemp && newBakeData.finalTemp && newBakeData.mixTime && newBakeData.hydration) ? "Please fill all fields" : "Add Session to History"}
+                      >
+                        <Plus size={24} strokeWidth={3.5} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              currentBakes.slice().reverse().map((bake: Bake) => (
-                <HistoryRow
-                  key={bake.id}
-                  bake={bake}
-                  t={t}
-                  updateBake={updateBake}
-                  deleteBake={deleteBake}
-                />
-              ))
-            )}
-          </div>
+
+              {/* Session List */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">{t.historyList}</label>
+                  <button onClick={exportCSV} className="text-xs font-medium text-apple-gray hover:text-black flex items-center gap-1 transition-colors pr-1">
+                    <Download size={12} /> Export CSV
+                  </button>
+                </div>
+                <div className="bg-white rounded-xl overflow-hidden divide-y divide-gray-100 border border-gray-100">
+                  {currentBakes.length === 0 ? (
+                    <div className="p-8 text-center text-apple-gray">
+                      <p className="text-sm">No sessions recorded for {currentProduct?.name}</p>
+                    </div>
+                  ) : (
+                    currentBakes.slice().reverse().map((bake: Bake) => (
+                      <HistoryRow
+                        key={bake.id}
+                        bake={bake}
+                        t={t}
+                        updateBake={updateBake}
+                        deleteBake={deleteBake}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Product Manager Section */}
@@ -813,7 +1053,6 @@ export default function DoughTempTracker() {
               onClick={() => setShowProductManager(!showProductManager)}
               className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
             >
-              <Package size={14} />
               {showProductManager ? 'Hide Manager' : 'Show Manager'}
               <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
             </button>
@@ -955,30 +1194,71 @@ export default function DoughTempTracker() {
             </p>
 
             <div>
-              <h3 className="bg-apple-red text-white px-4 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1 shadow-sm mb-3">
+              <button
+                onClick={() => setShowHowToUse(!showHowToUse)}
+                className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
+              >
                 {t.howToUseTitle}
-              </h3>
-              <div className="space-y-3 text-sm text-gray-600">
-                {[
-                  { title: t.step1Title, content: t.step1Content },
-                  { title: t.step2Title, content: t.step2Content },
-                  { title: t.step3Title, content: t.step3Content },
-                  { title: t.step4Title, content: t.step4Content },
-                  { title: t.step5Title, content: t.step5Content },
-                ].map((step, index) => (
-                  <div key={index} className="flex gap-2">
-                    <span className="font-semibold text-apple-red min-w-[20px]">{index + 1}.</span>
-                    <div>
-                      <strong>{step.title}:</strong> {step.content}
+                <ChevronDown className={`ml-1 transform transition-transform ${showHowToUse ? 'rotate-180' : ''}`} size={14} />
+              </button>
+
+              {showHowToUse && (
+                <div className="space-y-3 text-sm text-gray-600">
+                  {[
+                    { title: t.step1Title, content: t.step1Content },
+                    { title: t.step2Title, content: t.step2Content },
+                    { title: t.step3Title, content: t.step3Content },
+                    { title: t.step4Title, content: t.step4Content },
+                    { title: t.step5Title, content: t.step5Content },
+                  ].map((step, index) => (
+                    <div key={index} className="flex gap-2">
+                      <span className="font-semibold text-apple-red min-w-[20px]">{index + 1}.</span>
+                      <div>
+                        <strong>{step.title}:</strong> {step.content}
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* MLR Logic Section */}
+            <div className="mt-6 border-t border-gray-100 pt-5">
+              <button
+                onClick={() => setShowMLRGuide(!showMLRGuide)}
+                className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
+              >
+                {t.mlrLogicTitle}
+                <ChevronDown className={`ml-1 transform transition-transform ${showMLRGuide ? 'rotate-180' : ''}`} size={14} />
+              </button>
+
+              {showMLRGuide && (
+                <div className="bg-white rounded-xl p-4 border border-red-50 shadow-sm animate-fadeIn">
+                  <div className="space-y-4">
+                    {[
+                      { title: t.mlrStep1Title, content: t.mlrStep1Content },
+                      { title: t.mlrStep2Title, content: t.mlrStep2Content },
+                      { title: t.mlrStep3Title, content: t.mlrStep3Content },
+                      { title: t.mlrStep4Title, content: t.mlrStep4Content },
+                    ].map((step, index) => (
+                      <div key={index} className="flex gap-3">
+                        <div className="flex-none w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold text-apple-red mt-0.5 shadow-sm">
+                          {index + 1}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <strong className="block text-gray-900 mb-0.5">{step.title}</strong>
+                          {step.content}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-      </div>
+      </div >
     </div >
   );
 }
@@ -1183,6 +1463,8 @@ function ProductWheelSelector({ products, selectedProductId, setSelectedProductI
             return (
               <div
                 key={product.id}
+                role="option"
+                aria-selected={isSelected ? "true" : "false"}
                 className="h-[54px] flex items-center justify-center snap-center w-full"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation(); // Prevent container onClick from interfering
@@ -1263,22 +1545,23 @@ interface CalculatorInputProps {
   unit: string;
   value: string | number;
   onChange: (val: string) => void;
+  highlight?: boolean;
 }
 
-function CalculatorInput({ label, unit, value, onChange }: CalculatorInputProps) {
+function CalculatorInput({ label, unit, value, onChange, highlight }: CalculatorInputProps) {
   return (
-    <div className="bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all">
-      <label className="text-[9px] font-semibold text-apple-gray absolute top-1 left-3">{label}</label>
-      <div className="flex items-baseline mt-2">
+    <div className={`bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all ${highlight ? 'border-2 border-black' : ''}`}>
+      <label className={`text-[9px] font-semibold absolute top-1 left-3 ${highlight ? 'text-black font-extrabold' : 'text-apple-gray'}`}>{label}</label>
+      <div className="flex items-baseline justify-center mt-3 mb-1 w-full gap-0.5">
         <input
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300"
+          className="bg-transparent text-lg font-bold text-black outline-none p-0 placeholder-gray-300 text-right min-w-[30px] w-fit max-w-[60%]"
           placeholder="--"
           aria-label={label}
         />
-        <span className="text-xs font-medium text-gray-400 ml-1">{unit}</span>
+        <span className="text-xs font-medium text-gray-400 flex-none">{unit}</span>
       </div>
     </div>
   );
@@ -1323,7 +1606,7 @@ function HistoryRow({ bake, t, updateBake, deleteBake }: HistoryRowProps) {
           { label: t.hydrShort, key: 'hydration' }
         ].map((field) => (
           <div key={field.key} className="flex-none w-14 text-center">
-            <label className="text-[9px] text-gray-400 block mb-0.5 whitespace-nowrap">{field.label}</label>
+            <label className={`${field.key === 'waterTemp' ? 'text-[5px]' : 'text-[8px]'} text-gray-400 block mb-0.5 whitespace-nowrap`}>{field.label}</label>
             <input
               type="number"
               placeholder="--"

@@ -6,6 +6,7 @@ export default defineConfig({
   base: '/dough-temp-tracker/',
   server: {
     port: 3000,
+    host: true,
     open: true
   }
 });
