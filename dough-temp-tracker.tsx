@@ -90,7 +90,7 @@ const TRANSLATIONS = {
     fit: "Fit",
     // Documentation
     aboutTitle: "User Guide",
-    aboutContent: "Ryan's Bakery Water Temperature Tracker ensures consistent dough by calculating the precise water temperature needed. It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
+    aboutContent: "Ryan's Bakery Water Temperature Tracker **ensures consistent dough by calculating the precise water temperature needed.** It uses Multiple Linear Regression (MLR) to learn from your past baking sessions, adapting to your specific environment and ingredients.",
     howToUseTitle: "How to Use",
     step1Title: "Select Product",
     step1Content: "Scroll the wheel to select a dough type.",
@@ -833,7 +833,7 @@ export default function DoughTempTracker() {
             */}
 
               {/* MLR Training Result - Claude AI Style Integration */}
-              <div className="bg-white rounded-lg border border-gray-100 p-4 mt-4">
+              <div className="bg-white rounded-lg border border-gray-600 p-4 mt-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                   <Activity size={18} className="text-green-600" />
                   Training Status: {currentProduct?.name}
@@ -852,7 +852,7 @@ export default function DoughTempTracker() {
                     <strong className="text-gray-900">Fit Reliability:</strong> <span className={`uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
                       {!regressionModel?.ready ? 'Learning' : regressionModel.rSquared >= 0.9 ? 'Excellent' : regressionModel.rSquared >= 0.7 ? 'Good' : 'Learning'}
                     </span>
-                    <span className="text-green-600 font-mono text-xs ml-1">({(regressionModel.rSquared || 0).toFixed(3)})</span>
+                    <span className="text-green-600 font-mono text-xs ml-1">(R²: {(regressionModel.rSquared || 0).toFixed(3)})</span>
                   </div>
                 </div>
 
@@ -885,7 +885,7 @@ export default function DoughTempTracker() {
                             </div>
                             <div className="flex items-center gap-2 mb-3 pl-3 pr-1">
                               <span className="text-[9px] font-bold text-gray-600 uppercase tracking-wider">Analysis Confidence</span>
-                              <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-mono">
+                              <span className="text-[10px] font-black text-gray-800 bg-gray-800/20 px-2 py-0.5 rounded-full font-mono">
                                 n = {regressionModel.nSamples} Sessions
                               </span>
                             </div>
@@ -1187,7 +1187,11 @@ export default function DoughTempTracker() {
 
           <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <p className="text-sm text-gray-600 leading-relaxed mb-6">
-              {t.aboutContent}
+              {t.aboutContent.split(/(\*\*.*?\*\*)/g).map((part, i) =>
+                part.startsWith('**') && part.endsWith('**')
+                  ? <strong key={i} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>
+                  : part
+              )}
             </p>
 
             <div>
