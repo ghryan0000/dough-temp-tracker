@@ -2,6 +2,7 @@
   "name": "dough-temp-tracker",
   "version": "1.0.0",
   "description": "Dough Temperature Tracking & Prediction App",
+  "homepage": "https://ghryan0000.github.io/dough-temp-tracker",
   "main": "index.js",
   "scripts": {
     "dev": "vite",

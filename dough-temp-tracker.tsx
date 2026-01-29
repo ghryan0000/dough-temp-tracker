@@ -59,6 +59,7 @@ const TRANSLATIONS = {
     scrollToSelect: "Scroll to select",
     calculatorTitle: "Calculate Water Temp",
     enterData: "Enter variables",
+    calcInstruction: "Fill Out Boxes, Generate the Water Temp for Mixing",
     targetWaterTemp: "Suggested Water Temp for Mixing.",
     calculateButton: "Calculate Water Temp",
     historyTitle: "MLR Training History",
@@ -102,6 +103,12 @@ const TRANSLATIONS = {
     step4Content: "Download your baking history as a CSV file.",
     step5Title: "Manage Products",
     step5Content: "Add, rename, reorder, or delete products below.",
+    // Field Labels
+    trainingStatus: "Training Status",
+    statusLabel: "Status",
+    reliabilityLabel: "Fit Reliability",
+    standardFormula: "Standard Formula",
+    mlrTrained: "MLR Trained!",
     // MLR Logic
     mlrLogicTitle: "MLR Logic",
     mlrStep1Title: "Data Collection & 'Waiting' State",
@@ -112,6 +119,12 @@ const TRANSLATIONS = {
     mlrStep3Content: "With 3+ sessions, 'MLR Trained!' activates. Multiple Linear Regression is used to analyze how variables like Mix Time or Hydration subtly impact heat.",
     mlrStep4Title: "Fit Reliability Score",
     mlrStep4Content: "Check your R² score: EXCELLENT (≥0.9), GOOD (≥0.7), or LEARNING (<0.7). This tells you how accurately the model matches your specific kitchen's environment.",
+    showHistory: "Show History",
+    hideHistory: "Hide History",
+    showProduct: "Show Product",
+    hideProduct: "Hide Product",
+    showDetails: "Show Details",
+    hideDetails: "Hide Details",
   },
   zh: {
     appTitle: "Ryan's Bakery",
@@ -122,6 +135,7 @@ const TRANSLATIONS = {
     scrollToSelect: "滾動選擇",
     calculatorTitle: "計算水溫",
     enterData: "輸入變數",
+    calcInstruction: "填寫各欄位以生成理想水溫",
     targetWaterTemp: "目標水溫",
     calculateButton: "計算水溫",
     historyTitle: "MLR 訓練歷史",
@@ -164,6 +178,12 @@ const TRANSLATIONS = {
     step4Content: "將您的烘焙歷史下載為 CSV 文件。",
     step5Title: "管理產品",
     step5Content: "在下方添加、重命名、排序或刪除產品。",
+    // Field Labels
+    trainingStatus: "訓練狀態",
+    statusLabel: "狀態",
+    reliabilityLabel: "擬合可靠度",
+    standardFormula: "標準公式",
+    mlrTrained: "MLR 訓練完畢!",
     // MLR Logic
     mlrLogicTitle: "MLR 邏輯",
     mlrStep1Title: "數據收集與「等待」狀態",
@@ -174,6 +194,12 @@ const TRANSLATIONS = {
     mlrStep3Content: "累積 3 場後，狀態變為「MLR Trained!」。多元線性回歸模型啟動，分析攪拌時間或含水量如何微妙地影響麵團升溫。",
     mlrStep4Title: "擬合可靠度評價",
     mlrStep4Content: "檢查您的 R² 分數得分：EXCELLENT (≥0.9)、GOOD (≥0.7) 或 LEARNING (<0.7)。這反映了模型對您廚房環境預測的精準程度。",
+    showHistory: "顯示歷史",
+    hideHistory: "隱藏歷史",
+    showProduct: "顯示產品",
+    hideProduct: "隱藏產品",
+    showDetails: "顯示詳情",
+    hideDetails: "隱藏詳情",
   },
   ja: {
     appTitle: "ライアンのベーカリー",
@@ -184,6 +210,7 @@ const TRANSLATIONS = {
     scrollToSelect: "スクロールして選択",
     calculatorTitle: "水温を計算",
     enterData: "変数を入力",
+    calcInstruction: "各項目を入力して理想的な水温を算出",
     targetWaterTemp: "目標水温",
     calculateButton: "水温を計算",
     historyTitle: "MLR 学習履歴",
@@ -226,6 +253,12 @@ const TRANSLATIONS = {
     step4Content: "履歴をCSVファイルとしてダウンロードできます。",
     step5Title: "製品を管理",
     step5Content: "製品の追加、名前変更、並べ替え、削除が可能です。",
+    // Field Labels
+    trainingStatus: "トレーニングステータス",
+    statusLabel: "ステータス",
+    reliabilityLabel: "適合信頼度",
+    standardFormula: "標準式",
+    mlrTrained: "MLR 学習完了!",
     // MLR Logic
     mlrLogicTitle: "MLR ロジック",
     mlrStep1Title: "データ収集と待機状態",
@@ -236,6 +269,12 @@ const TRANSLATIONS = {
     mlrStep3Content: "3回以上の記録で「MLR Trained!」が起動します。ミキシング時間や加水率などの変数が温度に与える隠れたパターンを重回帰分析で導き出します。",
     mlrStep4Title: "適合信頼度スコア",
     mlrStep4Content: "R²スコアを確認してください：EXCELLENT (≥0.9), GOOD (≥0.7), または LEARNING (<0.7)。モデルがあなたのキッチン環境をどれだけ正確に捉えているかを示します。",
+    showHistory: "履歴を表示",
+    hideHistory: "履歴を隠す",
+    showProduct: "製品を表示",
+    hideProduct: "製品を隠す",
+    showDetails: "詳細を表示",
+    hideDetails: "詳細を隠す",
   }
 };
 
@@ -306,35 +345,56 @@ export default function DoughTempTracker() {
   const t = TRANSLATIONS[language];
 
   // Data migration and initialization
+  const DEFAULT_PRODUCTS: Product[] = [
+    { id: 1, name: 'Sourdough', color: 'bg-amber-500' },
+    { id: 2, name: 'Baguette', color: 'bg-orange-500' },
+    { id: 3, name: 'Croissant', color: 'bg-red-500' },
+    { id: 4, name: 'Pizza Dough', color: 'bg-pink-500' },
+    { id: 5, name: 'Challah', color: 'bg-purple-500' },
+    { id: 6, name: 'Focaccia', color: 'bg-indigo-500' },
+    { id: 7, name: 'Toast', color: 'bg-blue-500' },
+    { id: 8, name: 'Steamed Bun', color: 'bg-cyan-500' },
+    { id: 9, name: 'Bagel', color: 'bg-teal-500' }
+  ];
+
+  // Data migration and initialization
   const [products, setProducts] = useState<Product[]>(() => {
     // Check for new format first
     const newFormat = localStorage.getItem('products-v2');
+    let currentProducts: Product[] = [];
+
     if (newFormat) {
-      return JSON.parse(newFormat);
+      currentProducts = JSON.parse(newFormat);
+    } else {
+      // Migrate from old format
+      const oldFormat = localStorage.getItem('productNames');
+      if (oldFormat) {
+        const productNames = JSON.parse(oldFormat) as string[];
+        currentProducts = productNames.map((name, index) => ({
+          id: index + 1,
+          name: name,
+          color: PRODUCT_COLORS[index % PRODUCT_COLORS.length]
+        }));
+      } else {
+        return DEFAULT_PRODUCTS;
+      }
     }
 
-    // Migrate from old format
-    const oldFormat = localStorage.getItem('productNames');
-    if (oldFormat) {
-      const productNames = JSON.parse(oldFormat) as string[];
-      const migratedProducts = productNames.map((name, index) => ({
-        id: index + 1,
-        name: name,
-        color: PRODUCT_COLORS[index % PRODUCT_COLORS.length]
-      }));
-      localStorage.setItem('products-v2', JSON.stringify(migratedProducts));
-      return migratedProducts;
+    // Migration/Merge logic: ensure all default products exist by name
+    const existingNames = new Set(currentProducts.map(p => p.name));
+    const missingDefaults = DEFAULT_PRODUCTS.filter(p => !existingNames.has(p.name));
+
+    if (missingDefaults.length > 0) {
+      const maxId = Math.max(0, ...currentProducts.map(p => p.id));
+      const mergedProducts = [
+        ...currentProducts,
+        ...missingDefaults.map((p, i) => ({ ...p, id: maxId + i + 1 }))
+      ];
+      localStorage.setItem('products-v2', JSON.stringify(mergedProducts));
+      return mergedProducts;
     }
 
-    // Default products
-    return [
-      { id: 1, name: 'Sourdough', color: 'bg-amber-500' },
-      { id: 2, name: 'Baguette', color: 'bg-orange-500' },
-      { id: 3, name: 'Croissant', color: 'bg-red-500' },
-      { id: 4, name: 'Pizza Dough', color: 'bg-pink-500' },
-      { id: 5, name: 'Challah', color: 'bg-purple-500' },
-      { id: 6, name: 'Focaccia', color: 'bg-indigo-500' }
-    ];
+    return currentProducts;
   });
 
   useEffect(() => {
@@ -492,6 +552,7 @@ export default function DoughTempTracker() {
   const [showSessionManager, setShowSessionManager] = useState(false);
   const [showMLRGuide, setShowMLRGuide] = useState(false);
   const [showHowToUse, setShowHowToUse] = useState(false);
+  const [showUserGuide, setShowUserGuide] = useState(false);
   const [debugInfo, setDebugInfo] = useState('');
 
   const regressionModel = useMemo(() => {
@@ -751,17 +812,14 @@ export default function DoughTempTracker() {
           {t.appDescription}
         </p>
 
-        {/* Main Content Grid: Product Selector (Jukebox) | Calculator */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-8 items-start">
+        {/* Main Content: Product Selector (Jukebox) & Calculator (Stacked) */}
+        <div className="flex flex-col gap-8 mb-8">
 
-          {/* Left Column: Product Selector (Card Grid) */}
-          <div className="md:col-span-4 flex flex-col w-full">
+          {/* Product Selector Section */}
+          <div className="flex flex-col w-full">
             <div className="flex items-start gap-2 mb-4 px-1">
               <Package size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-row items-baseline gap-2">
-                <h2 className="text-lg font-bold text-black leading-tight">{t.selectProduct}</h2>
-                <p className="text-xs text-apple-gray font-medium">{t.scrollToSelect}</p>
-              </div>
+              <h2 className="text-lg font-bold text-gray-800 leading-tight">{t.selectProduct}</h2>
             </div>
             <ProductWheelSelector
               products={memoizedSortedProducts}
@@ -770,26 +828,19 @@ export default function DoughTempTracker() {
             />
           </div>
 
-          {/* Right Column: Calculator */}
-          <div className="md:col-span-8 flex flex-col">
+          {/* Calculator Section */}
+          <div className="flex flex-col w-full">
             <div className="flex items-start gap-2 mb-4 px-1">
               <Calculator size={18} className="text-apple-red mt-1" />
-              <div className="flex flex-row items-baseline gap-2">
-                <h2 className="text-lg font-bold text-black leading-tight">{t.calculatorTitle}</h2>
-                <p className="text-xs text-apple-gray font-medium">{t.enterData}</p>
-              </div>
+              <h2 className="text-lg font-bold text-gray-800 leading-tight">{t.calculatorTitle}</h2>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-lg border border-red-50 p-2.5 md:p-5 relative overflow-hidden w-full">
+            <div className="bg-white rounded-3xl shadow-lg border border-black p-2.5 md:p-5 relative overflow-hidden w-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-apple-red/5 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none" />
 
-              {/* Target Display */}
-              <div className={`py-2 px-3 md:py-4 md:px-6 rounded-2xl mb-6 md:mb-10 border transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 border-apple-red/20 shadow-inner' : 'bg-gray-100 border-transparent'}`}>
-                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider text-left mb-4 animate-pulse">{t.targetWaterTemp}</div>
-                <div className={`text-4xl md:text-7xl font-black tracking-tighter leading-none text-center animate-pulse ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
-                  {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
-                  <span className="text-xl md:text-3xl ml-1 font-medium text-gray-400">°C</span>
-                </div>
+              {/* Instruction */}
+              <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-2.5 px-1">
+                {t.calcInstruction}
               </div>
 
               {/* Input Grid */}
@@ -813,6 +864,15 @@ export default function DoughTempTracker() {
                 ))}
               </div>
 
+              {/* Target Display - Moved Below Inputs */}
+              <div className={`py-4 px-6 rounded-2xl mt-6 border border-apple-red transition-all duration-500 relative overflow-hidden ${regressionModel ? 'bg-gradient-to-br from-red-100 to-red-50 shadow-inner' : 'bg-gray-100'}`}>
+                <div className="text-[10px] font-extrabold text-apple-gray uppercase tracking-wider text-left mb-4 animate-pulse">{t.targetWaterTemp}</div>
+                <div className={`text-4xl md:text-7xl font-black tracking-tighter leading-none text-center animate-pulse ${currentPredictedWater ? 'text-apple-red' : 'text-gray-300'}`}>
+                  {currentPredictedWater !== null ? currentPredictedWater.toFixed(1) : '--'}
+                  <span className="text-xl md:text-3xl ml-1 font-medium text-gray-400">°C</span>
+                </div>
+              </div>
+
               {/* Result Display */}
               {/* This section was replaced by the new Target Display and Input Grid above */}
               {/*
@@ -833,23 +893,23 @@ export default function DoughTempTracker() {
             */}
 
               {/* MLR Training Result - Claude AI Style Integration */}
-              <div className="bg-white rounded-lg border border-gray-600 p-4 mt-4">
+              <div className="bg-white rounded-lg p-4 mt-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                   <Activity size={18} className="text-green-600" />
-                  Training Status: {currentProduct?.name}
+                  {t.trainingStatus}: {currentProduct?.name}
                 </h3>
 
-                <div className={`mb-4 p-3 rounded-lg border ${regressionModel?.ready ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                <div className={`mb-4 p-3 rounded-lg border ${regressionModel?.ready ? 'bg-green-50/50 border-gray-100' : 'bg-gray-50 border-gray-100'}`}>
                   <div className="text-sm">
-                    <strong className="text-gray-900">Status:</strong> <span className={regressionModel?.isSynthetic ? 'text-green-600' : 'text-gray-700'}>
-                      {regressionModel?.isSynthetic ? 'Standard Formula' : 'MLR Trained!'}
+                    <strong className="text-gray-900">{t.statusLabel}:</strong> <span className={regressionModel?.isSynthetic ? 'text-green-600' : 'text-gray-700'}>
+                      {regressionModel?.isSynthetic ? t.standardFormula : t.mlrTrained}
                       <span className="text-green-600 font-mono text-xs ml-1">
                         {regressionModel?.isSynthetic
                           ? `(Learning: ${regressionModel.nSamples}/3)`
                           : `(R²=${regressionModel.rSquared.toFixed(3)})`}
                       </span>
                     </span><br />
-                    <strong className="text-gray-900">Fit Reliability:</strong> <span className={`uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
+                    <strong className="text-gray-900">{t.reliabilityLabel}:</strong> <span className={`uppercase ml-1 ${!regressionModel?.ready || regressionModel.rSquared < 0.7 ? 'text-green-600' : regressionModel.rSquared >= 0.9 ? 'text-green-600' : 'text-amber-500'}`}>
                       {!regressionModel?.ready ? 'Learning' : regressionModel.rSquared >= 0.9 ? 'Excellent' : regressionModel.rSquared >= 0.7 ? 'Good' : 'Learning'}
                     </span>
                     <span className="text-green-600 font-mono text-xs ml-1">(R²: {(regressionModel.rSquared || 0).toFixed(3)})</span>
@@ -914,20 +974,20 @@ export default function DoughTempTracker() {
         {/* History List */}
         <div className="px-1">
           <div className="mb-3 flex flex-col items-start gap-2">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
               <BarChart3 size={18} className="text-apple-red" /> MLR Training History ({currentProduct?.name})
             </h2>
             <button
               onClick={() => setShowSessionManager(!showSessionManager)}
-              className={`${showSessionManager ? 'bg-green-600 hover:bg-green-700' : 'bg-apple-red hover:bg-red-600'} text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm`}
+              className={`${showSessionManager ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-apple-red text-white hover:bg-red-600'} px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm`}
             >
-              {showSessionManager ? 'Hide Manager' : 'Show Manager'}
+              {showSessionManager ? t.hideHistory : t.showHistory}
               <ChevronDown className={`ml-1 transform transition-transform ${showSessionManager ? 'rotate-180' : ''}`} size={14} />
             </button>
           </div>
 
           {showSessionManager && (
-            <div className="bg-white rounded-2xl shadow-sm p-5">
+            <div className="bg-white rounded-2xl shadow-sm border border-black p-5">
               {/* Add Session Header */}
               <div className="mb-4 mt-4">
                 <div className="flex justify-between items-baseline mb-1">
@@ -1043,20 +1103,20 @@ export default function DoughTempTracker() {
         {/* Product Manager Section */}
         <div className="mt-8 px-1">
           <div className="mb-3 flex flex-col items-start gap-2">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
               <Package size={18} className="text-purple-600" /> Manage Products
             </h2>
             <button
               onClick={() => setShowProductManager(!showProductManager)}
-              className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+              className={`${showProductManager ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-apple-red text-white hover:bg-red-600'} px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm`}
             >
-              {showProductManager ? 'Hide Manager' : 'Show Manager'}
+              {showProductManager ? t.hideProduct : t.showProduct}
               <ChevronDown className={`ml-1 transform transition-transform ${showProductManager ? 'rotate-180' : ''}`} size={14} />
             </button>
           </div>
 
           {showProductManager && (
-            <div className="bg-white rounded-2xl shadow-sm p-5">
+            <div className="bg-white rounded-2xl shadow-sm border border-black p-5">
               {/* Add Product */}
               <div className="mb-4 mt-4">
                 <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1 block">Add New Product</label>
@@ -1181,82 +1241,93 @@ export default function DoughTempTracker() {
 
         {/* App Information Footer */}
         <div className="mt-8 px-1">
-          <h2 className="text-lg font-bold text-black flex items-center gap-2 mb-3">
-            <Activity size={18} className="text-apple-red" /> {t.aboutTitle}
-          </h2>
+          <div className="mb-3 flex flex-col items-start gap-2">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <Activity size={18} className="text-apple-red" /> {t.aboutTitle}
+            </h2>
+            <button
+              onClick={() => setShowUserGuide(!showUserGuide)}
+              className={`${showUserGuide ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-apple-red text-white hover:bg-red-600'} px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm`}
+            >
+              {showUserGuide ? t.hideDetails : t.showDetails}
+              <ChevronDown className={`ml-1 transform transition-transform ${showUserGuide ? 'rotate-180' : ''}`} size={14} />
+            </button>
+          </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">
-              {t.aboutContent.split(/(\*\*.*?\*\*)/g).map((part, i) =>
-                part.startsWith('**') && part.endsWith('**')
-                  ? <strong key={i} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>
-                  : part
-              )}
-            </p>
+          {showUserGuide && (
+            <div className="bg-gradient-to-br from-gray-50 to-white border border-black rounded-2xl p-6 shadow-sm animate-fadeIn">
+              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                {t.aboutContent.split(/(\*\*.*?\*\*)/g).map((part, i) =>
+                  part.startsWith('**') && part.endsWith('**')
+                    ? <strong key={i} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>
+                    : part
+                )}
+              </p>
 
-            <div>
-              <button
-                onClick={() => setShowHowToUse(!showHowToUse)}
-                className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
-              >
-                {t.howToUseTitle}
-                <ChevronDown className={`ml-1 transform transition-transform ${showHowToUse ? 'rotate-180' : ''}`} size={14} />
-              </button>
+              <div>
+                <button
+                  onClick={() => setShowHowToUse(!showHowToUse)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
+                >
+                  {t.howToUseTitle}
+                  <ChevronDown className={`ml-1 transform transition-transform ${showHowToUse ? 'rotate-180' : ''}`} size={14} />
+                </button>
 
-              {showHowToUse && (
-                <div className="space-y-3 text-sm text-gray-600">
-                  {[
-                    { title: t.step1Title, content: t.step1Content },
-                    { title: t.step2Title, content: t.step2Content },
-                    { title: t.step3Title, content: t.step3Content },
-                    { title: t.step4Title, content: t.step4Content },
-                    { title: t.step5Title, content: t.step5Content },
-                  ].map((step, index) => (
-                    <div key={index} className="flex gap-2">
-                      <span className="font-semibold text-apple-red min-w-[20px]">{index + 1}.</span>
-                      <div>
-                        <strong>{step.title}:</strong> {step.content}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* MLR Logic Section */}
-            <div className="mt-6 border-t border-gray-100 pt-5">
-              <button
-                onClick={() => setShowMLRGuide(!showMLRGuide)}
-                className="bg-apple-red hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
-              >
-                {t.mlrLogicTitle}
-                <ChevronDown className={`ml-1 transform transition-transform ${showMLRGuide ? 'rotate-180' : ''}`} size={14} />
-              </button>
-
-              {showMLRGuide && (
-                <div className="bg-white rounded-xl p-4 border border-red-50 shadow-sm animate-fadeIn">
-                  <div className="space-y-4">
+                {showHowToUse && (
+                  <div className="space-y-3 text-sm text-gray-600">
                     {[
-                      { title: t.mlrStep1Title, content: t.mlrStep1Content },
-                      { title: t.mlrStep2Title, content: t.mlrStep2Content },
-                      { title: t.mlrStep3Title, content: t.mlrStep3Content },
-                      { title: t.mlrStep4Title, content: t.mlrStep4Content },
+                      { title: t.step1Title, content: t.step1Content },
+                      { title: t.step2Title, content: t.step2Content },
+                      { title: t.step3Title, content: t.step3Content },
+                      { title: t.step4Title, content: t.step4Content },
+                      { title: t.step5Title, content: t.step5Content },
                     ].map((step, index) => (
-                      <div key={index} className="flex gap-3">
-                        <div className="flex-none w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold text-apple-red mt-0.5 shadow-sm">
-                          {index + 1}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          <strong className="block text-gray-900 mb-0.5">{step.title}</strong>
-                          {step.content}
+                      <div key={index} className="flex gap-2">
+                        <span className="font-semibold text-apple-red min-w-[20px]">{index + 1}.</span>
+                        <div>
+                          <strong>{step.title}:</strong> {step.content}
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* MLR Logic Section */}
+              <div className="mt-6 border-t border-gray-100 pt-5">
+                <button
+                  onClick={() => setShowMLRGuide(!showMLRGuide)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1 shadow-sm mb-3"
+                >
+                  {t.mlrLogicTitle}
+                  <ChevronDown className={`ml-1 transform transition-transform ${showMLRGuide ? 'rotate-180' : ''}`} size={14} />
+                </button>
+
+                {showMLRGuide && (
+                  <div className="bg-white rounded-xl p-4 border border-red-50 shadow-sm animate-fadeIn">
+                    <div className="space-y-4">
+                      {[
+                        { title: t.mlrStep1Title, content: t.mlrStep1Content },
+                        { title: t.mlrStep2Title, content: t.mlrStep2Content },
+                        { title: t.mlrStep3Title, content: t.mlrStep3Content },
+                        { title: t.mlrStep4Title, content: t.mlrStep4Content },
+                      ].map((step, index) => (
+                        <div key={index} className="flex gap-3">
+                          <div className="flex-none w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold text-apple-red mt-0.5 shadow-sm">
+                            {index + 1}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <strong className="block text-gray-900 mb-0.5">{step.title}</strong>
+                            {step.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
       </div >
@@ -1551,8 +1622,8 @@ interface CalculatorInputProps {
 
 function CalculatorInput({ label, unit, value, onChange, highlight }: CalculatorInputProps) {
   return (
-    <div className={`bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all ${highlight ? 'border-2 border-black' : ''}`}>
-      <label className={`text-[9px] font-semibold absolute top-1 left-3 ${highlight ? 'text-black font-extrabold' : 'text-apple-gray'}`}>{label}</label>
+    <div className={`bg-apple-bg rounded-lg px-2 py-1 relative group focus-within:ring-1 focus-within:ring-apple-red/50 transition-all border ${highlight ? 'border-apple-red' : 'border-gray-500'}`}>
+      <label className={`text-[9px] font-semibold absolute top-1 left-3 text-black ${highlight ? 'font-extrabold' : ''}`}>{label}</label>
       <div className="flex items-baseline justify-center mt-3 mb-1 w-full gap-0.5">
         <input
           type="number"
