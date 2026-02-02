@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
-import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X, Calendar } from 'lucide-react';
+import { Plus, Trash2, Download, TrendingUp, AlertCircle, Calculator, ChefHat, Package, Search, ChevronRight, BarChart3, Wind, Activity, Pencil, Check, ChevronDown, ChevronUp, ArrowUp, ArrowDown, X, Calendar, Mic, MicOff } from 'lucide-react';
 import { Product, Bake, Language, WindowWithWebkit, RegressionModel } from './src/types';
 import { TRANSLATIONS, PRODUCT_COLORS } from './src/constants';
 import { calculateSimpleFriction, predictWaterTemp as predictWaterTempUtil } from './src/utils/baking';
 import { useRegressionModel } from './src/hooks/useRegression';
+import { useVoiceInput } from './src/hooks/useVoiceInput';
+import { useCommandParser } from './src/hooks/useCommandParser';
 
 type Translation = typeof TRANSLATIONS.en;
 
@@ -242,6 +244,34 @@ export default function DoughTempTracker() {
     }
   }, [regressionModel]);
 
+  // Voice Activation Logic
+  const { isListening, transcript, startListening, stopListening, isSupported: isVoiceSupported } = useVoiceInput();
+  const { parseCommand, lastCommand } = useCommandParser();
+  const [showVoiceFeedback, setShowVoiceFeedback] = useState(false);
+
+  useEffect(() => {
+    if (transcript) {
+      setShowVoiceFeedback(true);
+      const command = parseCommand(transcript);
+      if (command) {
+        // Haptic/Visual feedback could go here
+
+        const numericValue = parseFloat(command.value || '0');
+
+        if (command.field === 'target') {
+          setTargetTemp(numericValue);
+        } else if (command.field && !isNaN(numericValue)) {
+          updateCurrentCondition(command.field, numericValue);
+        }
+
+        // Auto-hide feedback after success
+        const timer = setTimeout(() => setShowVoiceFeedback(false), 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [transcript, parseCommand]);
+
+
 
 
   // Removed manual regression trigger useEffect
@@ -341,6 +371,18 @@ export default function DoughTempTracker() {
                 {langOption.label}
               </button>
             ))}
+            {isVoiceSupported && (
+              <button
+                onClick={isListening ? stopListening : startListening}
+                className={`ml-2 p-1.5 rounded-full transition-all ${isListening
+                  ? 'bg-white text-red-600 animate-pulse shadow-md ring-2 ring-red-400'
+                  : 'text-red-100 hover:text-white hover:bg-white/20'
+                  }`}
+                aria-label="Toggle Voice Control"
+              >
+                {isListening ? <Mic size={16} /> : <MicOff size={16} />}
+              </button>
+            )}
           </div>
         </div>
 
@@ -348,6 +390,17 @@ export default function DoughTempTracker() {
         <p className="text-[13px] font-bold italic text-apple-red mb-6 -mt-2 px-1 leading-relaxed max-w-[390px]">
           {t.appDescription}
         </p>
+
+        {/* Voice Feedback Overlay */}
+        {showVoiceFeedback && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-black/80 backdrop-blur-md text-white px-6 py-2 rounded-full shadow-xl flex items-center gap-3 animate-bounce-in">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            <span className="text-sm font-medium font-mono">{transcript || "Listening..."}</span>
+            {lastCommand && transcript.includes(lastCommand.original) && (
+              <Check size={14} className="text-green-400 ml-1" />
+            )}
+          </div>
+        )}
 
         {/* Main Content: Product Selector (Jukebox) & Calculator (Stacked) */}
         <div className="flex flex-col gap-8 mb-8">

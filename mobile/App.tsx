@@ -89,8 +89,12 @@ export default function App() {
 
             {/* Header Content */}
             <View style={styles.header}>
-              <Text style={styles.headerTitle}>Ryan's Bakery</Text>
-              <Text style={styles.headerSubtitle}>Pro Water Temp Tracker</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View>
+                  <Text style={styles.headerTitle}>Ryan's Pro Bakery</Text>
+                  <Text style={styles.headerSubtitle}>Professional Water Temp Tracker</Text>
+                </View>
+              </View>
             </View>
 
             {/* Main Card */}
